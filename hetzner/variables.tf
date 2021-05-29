@@ -38,7 +38,7 @@ variable "controlplane" {
   description = "Count of controlplanes"
   type        = map(any)
   default = {
-    count = 1,
+    count = 0,
     type  = "cx11"
   }
 }

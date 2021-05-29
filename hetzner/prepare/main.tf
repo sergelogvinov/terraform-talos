@@ -10,7 +10,7 @@ resource "hcloud_server" "talos" {
   name         = "talos-os"
   image        = "debian-10"
   rescue       = "linux64"
-  server_type  = "cpx11"
+  server_type  = "cx11"
   keep_disk    = true
   backups      = false
   ssh_keys     = [hcloud_ssh_key.snapshot.id]
