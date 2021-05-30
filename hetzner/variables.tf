@@ -11,14 +11,16 @@ variable "regions" {
   default     = ["nbg1", "fsn1", "hel1"]
 }
 
-variable "vm_params" {
+variable "kubernetes" {
   type = map(string)
   default = {
     podSubnets     = "10.32.0.0/12"
     serviceSubnets = "10.200.0.0/22"
-    token          = "wq93rz.dsvn0aw5erdwp78f"
     domain         = "cluster.local"
     cluster_name   = "talos-k8s-hezner"
+    tokenmachine   = "4g8t1y.u3xw5r11fzyfuj8y"
+    token          = "wq93rz.dsvn0aw5erdwp78f"
+    ca             = ""
   }
 }
 
@@ -38,7 +40,7 @@ variable "controlplane" {
   description = "Count of controlplanes"
   type        = map(any)
   default = {
-    count = 0,
+    count = 1,
     type  = "cx11"
   }
 }
@@ -49,21 +51,21 @@ variable "instances" {
   default = {
     "nbg1" = {
       web_count            = 0,
-      web_instance_type    = "",
+      web_instance_type    = "cx11",
       worker_count         = 0,
-      worker_instance_type = "",
+      worker_instance_type = "cx11",
     },
     "fsn1" = {
       web_count            = 0,
-      web_instance_type    = "",
+      web_instance_type    = "cx11",
       worker_count         = 0,
-      worker_instance_type = "",
+      worker_instance_type = "cx11",
     }
     "hel1" = {
-      web_count            = 0,
-      web_instance_type    = "",
-      worker_count         = 0,
-      worker_instance_type = "",
+      web_count            = 1,
+      web_instance_type    = "cx11",
+      worker_count         = 1,
+      worker_instance_type = "cx11",
     }
   }
 }

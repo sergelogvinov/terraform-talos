@@ -24,22 +24,28 @@ resource "hcloud_firewall" "controlplane" {
   rule {
     direction  = "in"
     protocol   = "tcp"
-    port       = 50000
+    port       = "50000"
     source_ips = ["0.0.0.0/0", "::/0"]
     # source_ips = var.whitelist_admins
   }
   rule {
     direction  = "in"
     protocol   = "tcp"
-    port       = 6443
+    port       = "50001"
+    source_ips = [var.vpc_main_cidr]
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "6443"
     source_ips = ["0.0.0.0/0", "::/0"]
     # source_ips = var.whitelist_admins
   }
 }
 
-resource "hcloud_firewall" "ingress" {
+resource "hcloud_firewall" "web" {
   name   = "web"
-  labels = merge(var.tags, { type = "infra", label = "ingress" })
+  labels = merge(var.tags, { type = "infra", label = "web" })
 
   rule {
     direction  = "in"
