@@ -17,6 +17,7 @@ resource "hcloud_server" "controlplane" {
 
   lifecycle {
     ignore_changes = [
+      server_type,
       user_data,
       ssh_keys,
     ]
@@ -32,9 +33,10 @@ resource "hcloud_load_balancer_target" "api" {
 
 resource "local_file" "controlplane" {
   count = lookup(var.controlplane, "count", 0)
-  content = templatefile("${path.module}/templates/api.yaml.tpl",
+  content = templatefile("${path.module}/templates/controlplane.yaml",
     merge(var.kubernetes, {
       name       = "kube-api-${count.index + 1}"
+      type       = count.index == 0 ? "init" : "controlplane"
       ipv4_local = cidrhost(hcloud_network_subnet.core.ip_range, 11 + count.index)
       ipv4       = hcloud_server.controlplane[count.index].ipv4_address
       ipv6       = hcloud_server.controlplane[count.index].ipv6_address

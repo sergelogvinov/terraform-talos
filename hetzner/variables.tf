@@ -40,8 +40,8 @@ variable "controlplane" {
   description = "Count of controlplanes"
   type        = map(any)
   default = {
-    count = 1,
-    type  = "cx11"
+    count = 0,
+    type  = "cpx11"
   }
 }
 
@@ -62,9 +62,9 @@ variable "instances" {
       worker_instance_type = "cx11",
     }
     "hel1" = {
-      web_count            = 1,
+      web_count            = 0,
       web_instance_type    = "cx11",
-      worker_count         = 1,
+      worker_count         = 0,
       worker_instance_type = "cx11",
     }
   }

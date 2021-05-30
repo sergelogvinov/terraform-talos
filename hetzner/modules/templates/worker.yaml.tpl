@@ -8,6 +8,8 @@ machine:
   kubelet:
     extraArgs:
       node-ip: "${ipv4}"
+      cloud-provider: external
+      rotate-server-certificates: true
   network:
     hostname: "${name}"
     interfaces:

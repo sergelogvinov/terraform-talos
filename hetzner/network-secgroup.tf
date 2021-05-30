@@ -37,6 +37,13 @@ resource "hcloud_firewall" "controlplane" {
   rule {
     direction  = "in"
     protocol   = "tcp"
+    port       = "2380"
+    source_ips = ["0.0.0.0/0"]
+    # source_ips = var.whitelist_admins
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
     port       = "6443"
     source_ips = ["0.0.0.0/0", "::/0"]
     # source_ips = var.whitelist_admins
