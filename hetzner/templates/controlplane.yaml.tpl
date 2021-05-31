@@ -61,6 +61,18 @@ cluster:
   controllerManager: {}
   scheduler: {}
   etcd: {}
+  inlineManifests:
+    - name: hcloud-secret
+      contents: |-
+        apiVersion: v1
+        kind: Secret
+        type: Opaque
+        metadata:
+          name: hcloud
+          namespace: kube-system
+        data:
+          network: ${base64encode(hcloud_network)}
+          token: ${base64encode(hcloud_token)}
   externalCloudProvider:
     enabled: true
     manifests:
