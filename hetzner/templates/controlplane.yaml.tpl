@@ -76,6 +76,6 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
-      - https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/latest/download/ccm.yaml
-      - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
-      - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-cloud-controller-manager.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/kubelet-serving-cert-approver.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/metrics-server.yaml
