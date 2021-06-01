@@ -49,12 +49,17 @@ cluster:
   controlPlane:
     endpoint: https://${lbv4}:6443
   network:
+    cni:
+      name: custom
+      urls:
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/cilium_result.yaml
     dnsDomain: ${domain}
     podSubnets:
     - ${podSubnets}
     serviceSubnets:
     - ${serviceSubnets}
   proxy:
+    disabled: true
     mode: ipvs
   apiServer:
     certSANs:
