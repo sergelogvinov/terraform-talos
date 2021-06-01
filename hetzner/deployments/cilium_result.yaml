@@ -57,7 +57,7 @@ data:
 
   # Enable IPv6 addressing. If enabled, all endpoints are allocated an IPv6
   # address.
-  enable-ipv6: "false"
+  enable-ipv6: "true"
   # Users who wish to specify their own custom CNI configuration file must set
   # custom-cni-conf to "true", otherwise Cilium may overwrite the configuration.
   custom-cni-conf: "false"
@@ -130,7 +130,7 @@ data:
 
   enable-ipv4-masquerade: "true"
   enable-ipv6-masquerade: "true"
-  enable-bpf-masquerade: "true"
+  enable-bpf-masquerade: "false"
 
   enable-xt-socket-fallback: "true"
   install-iptables-rules: "true"
@@ -148,6 +148,7 @@ data:
   enable-auto-protect-node-port-range: "true"
   enable-session-affinity: "true"
   k8s-require-ipv4-pod-cidr: "true"
+  k8s-require-ipv6-pod-cidr: "true"
   enable-endpoint-health-checking: "true"
   enable-health-checking: "true"
   enable-well-known-identities: "false"

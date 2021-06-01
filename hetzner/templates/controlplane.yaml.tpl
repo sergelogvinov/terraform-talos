@@ -67,7 +67,13 @@ cluster:
       - "${lbv4}"
       - "${lbv6}"
       - "${ipv4}"
-  controllerManager: {}
+    extraArgs:
+        feature-gates: IPv6DualStack=true
+  controllerManager:
+    extraArgs:
+        feature-gates: IPv6DualStack=true
+        node-cidr-mask-size-ipv4: 24
+        node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd: {}
   inlineManifests:
