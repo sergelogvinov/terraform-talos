@@ -23,7 +23,7 @@ machine:
         routes:
           - network: "::/0"
             gateway: "fe80::1"
-            metric: "1024"
+            metric: 1024
       - interface: eth1
         dhcp: true
       - interface: dummy0
