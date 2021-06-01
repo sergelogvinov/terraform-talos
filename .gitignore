@@ -1,4 +1,6 @@
 /.vscode/
+.DS_Store
+
 # Local .terraform directories
 **/.terraform/*
 .terraform.lock.hcl

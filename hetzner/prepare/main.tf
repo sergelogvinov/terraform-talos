@@ -34,7 +34,7 @@ resource "hcloud_server" "talos" {
   provisioner "remote-exec" {
     inline = [
       "apt-get install -y wget",
-      "wget -O /tmp/openstack.tar.gz https://github.com/talos-systems/talos/releases/download/v0.10.3/openstack-amd64.tar.gz",
+      "wget -O /tmp/openstack.tar.gz https://github.com/talos-systems/talos/releases/download/v0.11.0-alpha.0/openstack-amd64.tar.gz",
       "cd /tmp && tar xzf /tmp/openstack.tar.gz && dd if=/tmp/disk.raw of=/dev/sda && sync",
       "shutdown -h now"
     ]

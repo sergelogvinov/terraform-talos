@@ -20,6 +20,10 @@ machine:
         dhcp: true
       - interface: eth0
         cidr: "${ipv6}/64"
+        routes:
+          - network: "::/0"
+            gateway: "fe80::1"
+            metric: "1024"
       - interface: eth1
         dhcp: true
       - interface: dummy0
@@ -79,3 +83,4 @@ cluster:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/metrics-server.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/local-path-storage.yaml
