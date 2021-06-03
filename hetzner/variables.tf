@@ -18,8 +18,8 @@ variable "kubernetes" {
     serviceSubnets = "10.200.0.0/22"
     domain         = "cluster.local"
     cluster_name   = "talos-k8s-hezner"
-    tokenmachine   = "4g8t1y.u3xw5r11fzyfuj8y"
-    token          = "wq93rz.dsvn0aw5erdwp78f"
+    tokenmachine   = ""
+    token          = ""
     ca             = ""
   }
 }

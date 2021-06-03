@@ -38,7 +38,7 @@ make prepare-image
 Generate the default talos config
 
 ```shell
-make create-config
+make create-config create-templates
 ```
 
 open config file **terraform.tfvars** and add params
