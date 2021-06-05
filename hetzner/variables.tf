@@ -14,8 +14,8 @@ variable "regions" {
 variable "kubernetes" {
   type = map(string)
   default = {
-    podSubnets     = "10.32.0.0/12"
-    serviceSubnets = "10.200.0.0/22"
+    podSubnets     = "10.32.0.0/12,f00d:10:32::/64"
+    serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
     domain         = "cluster.local"
     cluster_name   = "talos-k8s-hezner"
     tokenmachine   = ""

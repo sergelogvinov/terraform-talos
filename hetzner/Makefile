@@ -11,8 +11,8 @@ create-config:
 
 create-templates:
 	@yq ea -P '. as $$item ireduce ({}; . * $$item )' _cfgs/controlplane.yaml templates/controlplane.yaml.tpl > templates/controlplane.yaml
-	@echo 'podSubnets: "10.32.0.0/12"'       >  _cfgs/tfstate.vars
-	@echo 'serviceSubnets: "10.200.0.0/22"'  >> _cfgs/tfstate.vars
+	@echo 'podSubnets: "10.32.0.0/12,fd00:10:32::/102"'        >  _cfgs/tfstate.vars
+	@echo 'serviceSubnets: "10.200.0.0/22,fd40:10:200::/112"'  >> _cfgs/tfstate.vars
 	@yq eval '.cluster.network.dnsDomain' _cfgs/init.yaml | awk '{ print "domain: "$$1}'       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.clusterName' _cfgs/init.yaml       | awk '{ print "cluster_name: "$$1}' >> _cfgs/tfstate.vars
 	@yq eval '.machine.token'  _cfgs/init.yaml            | awk '{ print "tokenmachine: "$$1}' >> _cfgs/tfstate.vars
@@ -22,9 +22,9 @@ create-templates:
 	@yq eval -j '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
 create-controlplane:
-	cd modules/worker && terraform init
 	terraform init
-	terraform apply -target=null_resource.controlplane_apply
+	terraform apply -target=null_resource.controlplane
 
 create-infrastructure:
+	cd modules/worker && terraform init
 	terraform apply

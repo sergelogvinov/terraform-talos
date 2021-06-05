@@ -30,15 +30,15 @@ machine:
         cidr: "169.254.2.53/32"
       - interface: dummy0
         cidr: "fd00::169:254:2:53/128"
+  install:
+    disk: /dev/sda
+    bootloader: true
+    wipe: false
+    extraKernelArgs:
+      - elevator=noop
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
-  install:
-    disk: /dev/sda
-    extraKernelArgs:
-      - elevator=noop
-    bootloader: true
-    wipe: false
   systemDiskEncryption:
     ephemeral:
       provider: luks2
@@ -49,15 +49,13 @@ cluster:
   controlPlane:
     endpoint: https://${lbv4}:6443
   network:
+    dnsDomain: ${domain}
+    podSubnets: ${format("[%s]",podSubnets)}
+    serviceSubnets: ${format("[%s]",serviceSubnets)}
     cni:
       name: custom
       urls:
         - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/cilium_result.yaml
-    dnsDomain: ${domain}
-    podSubnets:
-    - ${podSubnets}
-    serviceSubnets:
-    - ${serviceSubnets}
   proxy:
     disabled: true
     mode: ipvs

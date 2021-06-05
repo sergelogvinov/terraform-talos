@@ -18,3 +18,9 @@ variable "tags" {
     environment = "Develop"
   }
 }
+
+variable "talos_version" {
+  description = "Talos image version"
+  type        = string
+  default     = "v0.10.0"
+}

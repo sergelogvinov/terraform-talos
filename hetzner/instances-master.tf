@@ -17,6 +17,7 @@ resource "hcloud_server" "controlplane" {
 
   lifecycle {
     ignore_changes = [
+      image,
       server_type,
       user_data,
       ssh_keys,
@@ -53,10 +54,10 @@ resource "local_file" "controlplane" {
   depends_on = [hcloud_server.controlplane]
 }
 
-resource "null_resource" "controlplane_apply" {
+resource "null_resource" "controlplane" {
   count = lookup(var.controlplane, "count", 0)
   provisioner "local-exec" {
-    command = "sleep 60 && ./talosctl apply-config --insecure --nodes ${hcloud_server.controlplane[count.index].ipv4_address} --file controlplane-${count.index + 1}.yaml"
+    command = "sleep 60 && talosctl apply-config --insecure --nodes ${hcloud_server.controlplane[count.index].ipv4_address} --file controlplane-${count.index + 1}.yaml"
   }
-  depends_on = [local_file.controlplane]
+  depends_on = [hcloud_load_balancer_target.api, local_file.controlplane]
 }
