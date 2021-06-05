@@ -11,6 +11,8 @@ Local utilities
 
 This terraform example install Talos on [HCloud](https://www.hetzner.com/cloud) with IPv4/IPv6 support.
 
+<img src="/img/hetzner.png" width="500px">
+
 ## Kubernetes addons
 
 * [cilium](https://github.com/cilium/cilium) 1.10.0
