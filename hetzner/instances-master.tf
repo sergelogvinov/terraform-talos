@@ -2,7 +2,7 @@
 resource "hcloud_server" "controlplane" {
   count       = lookup(var.controlplane, "count", 0)
   location    = element(var.regions, count.index)
-  name        = "kube-api-${count.index + 1}"
+  name        = "master-${count.index + 1}"
   image       = data.hcloud_image.talos.id
   server_type = lookup(var.controlplane, "type", "cpx11")
   ssh_keys    = [data.hcloud_ssh_key.infra.id]
