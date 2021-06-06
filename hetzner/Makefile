@@ -6,6 +6,10 @@ prepare-image:
 	terraform init
 	terraform apply -auto-approve
 
+create-lb:
+	terraform init
+	terraform apply -auto-approve -target=hcloud_load_balancer.api
+
 create-config:
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-hezner https://127.0.0.1:6443
 
@@ -22,7 +26,6 @@ create-templates:
 	@yq eval -j '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
 create-controlplane:
-	terraform init
 	terraform apply -target=null_resource.controlplane
 
 create-infrastructure:

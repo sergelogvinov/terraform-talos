@@ -36,7 +36,7 @@ resource "local_file" "controlplane" {
   count = lookup(var.controlplane, "count", 0)
   content = templatefile("${path.module}/templates/controlplane.yaml",
     merge(var.kubernetes, {
-      name           = "kube-api-${count.index + 1}"
+      name           = "master-${count.index + 1}"
       type           = count.index == 0 ? "init" : "controlplane"
       ipv4_local     = cidrhost(hcloud_network_subnet.core.ip_range, 11 + count.index)
       ipv4           = hcloud_server.controlplane[count.index].ipv4_address
@@ -48,7 +48,7 @@ resource "local_file" "controlplane" {
       hcloud_token   = var.hcloud_token
     })
   )
-  filename        = "controlplane-${count.index + 1}.yaml"
+  filename        = "_cfgs/controlplane-${count.index + 1}.yaml"
   file_permission = "0640"
 
   depends_on = [hcloud_server.controlplane]
@@ -57,7 +57,7 @@ resource "local_file" "controlplane" {
 resource "null_resource" "controlplane" {
   count = lookup(var.controlplane, "count", 0)
   provisioner "local-exec" {
-    command = "sleep 60 && talosctl apply-config --insecure --nodes ${hcloud_server.controlplane[count.index].ipv4_address} --file controlplane-${count.index + 1}.yaml"
+    command = "sleep 60 && talosctl apply-config --insecure --nodes ${hcloud_server.controlplane[count.index].ipv4_address} --file _cfgs/controlplane-${count.index + 1}.yaml"
   }
   depends_on = [hcloud_load_balancer_target.api, local_file.controlplane]
 }

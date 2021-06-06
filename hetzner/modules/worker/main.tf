@@ -30,6 +30,14 @@ resource "hcloud_server" "worker" {
       ssh_keys,
     ]
   }
+
+  # IPv6 hack
+  provisioner "local-exec" {
+    command = "echo '${templatefile("${path.module}/../templates/worker-patch.json.tpl", { ipv6_address = self.ipv6_address })}' > _cfgs/${var.vm_name}${count.index + 1}.patch"
+  }
+  provisioner "local-exec" {
+    command = "sleep 120 && talosctl --talosconfig _cfgs/talosconfig patch --nodes ${cidrhost(var.subnet, var.vm_ip_start + count.index)} machineconfig --patch-file _cfgs/${var.vm_name}${count.index + 1}.patch"
+  }
 }
 
 # resource "local_file" "worker" {
