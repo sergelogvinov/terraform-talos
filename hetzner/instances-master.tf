@@ -5,7 +5,7 @@ resource "hcloud_server" "controlplane" {
   name        = "master-${count.index + 1}"
   image       = data.hcloud_image.talos.id
   server_type = lookup(var.controlplane, "type", "cpx11")
-  ssh_keys    = [data.hcloud_ssh_key.infra.id]
+  ssh_keys    = [hcloud_ssh_key.infra.id]
   keep_disk   = true
   labels      = merge(var.tags, { type = "infra", label = "master" })
 

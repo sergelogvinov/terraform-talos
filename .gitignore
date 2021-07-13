@@ -9,6 +9,9 @@
 *.tfstate
 *.tfstate.*
 
+# packer files
+.auto.pkrvars.hcl
+
 # Crash log files
 crash.log
 
