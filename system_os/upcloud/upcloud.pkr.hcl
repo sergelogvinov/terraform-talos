@@ -45,13 +45,14 @@ source "upcloud" "talos" {
   # clone_zones     = var.upcloud_zones
 }
 
+# FIXME
 build {
   sources = ["source.upcloud.talos"]
   provisioner "shell" {
     inline = [
       "apt-get install -y wget",
       "wget -O /tmp/talos.tar.gz https://github.com/talos-systems/talos/releases/download/${var.talos_version}/metal-amd64.tar.gz",
-      "tar xOzf /tmp/talos.tar.gz | dd of=/dev/vda",
+      "sync && sync && tar xOzf /tmp/talos.tar.gz | dd of=/dev/vda && systemctl --force --force poweroff",
     ]
   }
 }
