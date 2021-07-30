@@ -1,6 +1,26 @@
 
+resource "google_compute_region_instance_group_manager" "worker" {
+  name                      = "${var.cluster_name}-worker-mig"
+  project                   = var.project_id
+  region                    = var.region
+  distribution_policy_zones = var.zones
+  base_instance_name        = "${var.cluster_name}-worker"
+
+  version {
+    instance_template = google_compute_instance_template.worker["all"].id
+  }
+
+  target_pools       = []
+  target_size        = lookup(var.instances["all"], "worker_count", 0)
+  wait_for_instances = false
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "google_compute_instance_group_manager" "worker" {
-  for_each = var.instances
+  for_each = { for k, v in var.instances : k => v if contains(var.zones, "${var.region}-${k}") }
 
   name               = "${var.cluster_name}-worker-${each.key}-mig"
   project            = var.project_id

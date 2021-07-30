@@ -1,6 +1,26 @@
 
+resource "google_compute_region_instance_group_manager" "web" {
+  name                      = "${var.cluster_name}-web-mig"
+  project                   = var.project_id
+  region                    = var.region
+  distribution_policy_zones = var.zones
+  base_instance_name        = "${var.cluster_name}-web"
+
+  version {
+    instance_template = google_compute_instance_template.web["all"].id
+  }
+
+  # target_pools       = [google_compute_target_pool.web.self_link]
+  target_size        = lookup(var.instances["all"], "web_count", 0)
+  wait_for_instances = false
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "google_compute_instance_group_manager" "web" {
-  for_each = var.instances
+  for_each = { for k, v in var.instances : k => v if contains(var.zones, "${var.region}-${k}") }
 
   name               = "${var.cluster_name}-web-${each.key}-mig"
   project            = var.project_id
@@ -82,7 +102,7 @@ resource "google_compute_instance_template" "web" {
 }
 
 # module "web" {
-#   source = "./modules/worker"
+#   source = "./modules/web"
 
 #   for_each = var.instances
 #   location = each.key

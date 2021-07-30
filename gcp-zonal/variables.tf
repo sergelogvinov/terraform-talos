@@ -94,5 +94,11 @@ variable "instances" {
       worker_count         = 0,
       worker_instance_type = "e2-small",
     }
+    "all" = {
+      web_count            = 0,
+      web_instance_type    = "e2-small",
+      worker_count         = 0,
+      worker_instance_type = "e2-small",
+    }
   }
 }
