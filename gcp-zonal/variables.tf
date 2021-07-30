@@ -71,3 +71,28 @@ variable "controlplane" {
     type  = "e2-small"
   }
 }
+
+variable "instances" {
+  description = "Map of region's properties"
+  type        = map(any)
+  default = {
+    "a" = {
+      web_count            = 0,
+      web_instance_type    = "e2-small",
+      worker_count         = 0,
+      worker_instance_type = "e2-small",
+    },
+    "b" = {
+      web_count            = 0,
+      web_instance_type    = "e2-small",
+      worker_count         = 0,
+      worker_instance_type = "e2-small",
+    }
+    "c" = {
+      web_count            = 0,
+      web_instance_type    = "e2-small",
+      worker_count         = 0,
+      worker_instance_type = "e2-small",
+    }
+  }
+}

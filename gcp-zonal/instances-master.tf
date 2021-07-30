@@ -3,39 +3,47 @@ resource "google_compute_address" "controlplane" {
   count        = lookup(var.controlplane, "count", 0)
   project      = var.project_id
   region       = var.region
-  name         = "master-${count.index + 1}"
-  description  = "Local master-${count.index + 1} ip"
+  name         = "${var.cluster_name}-master-${count.index + 1}"
+  description  = "Local ${var.cluster_name}-master-${count.index + 1} ip"
   address_type = "INTERNAL"
   address      = cidrhost(cidrsubnet(var.network_cidr, 8, 0), 11 + count.index)
   subnetwork   = "core"
   purpose      = "GCE_ENDPOINT"
 }
 
-resource "google_compute_instance" "controlplane" {
-  count        = lookup(var.controlplane, "count", 0)
-  name         = "master-${count.index + 1}"
-  machine_type = lookup(var.controlplane, "type", "e2-standard-2")
-  zone         = element(var.zones, count.index)
+resource "google_compute_instance_from_template" "controlplane" {
+  count = lookup(var.controlplane, "count", 0)
+  name  = "master-${count.index + 1}"
 
-  tags = concat(var.tags, ["${var.cluster_name}-infra", "${var.cluster_name}-master", "${var.cluster_name}-web"])
+  project = var.project_id
+  zone    = element(var.zones, count.index)
 
-  boot_disk {
-    auto_delete = true
-    initialize_params {
-      size  = 16
-      type  = "pd-balanced" // pd-ssd
-      image = "debian-cloud/debian-10"
-    }
-  }
 
   network_interface {
     network    = var.network
     network_ip = google_compute_address.controlplane[count.index].address
     subnetwork = "core"
-
     access_config {
       network_tier = "STANDARD"
     }
+  }
+
+  source_instance_template = google_compute_instance_template.controlplane.id
+  depends_on = [
+    google_compute_instance_template.controlplane
+  ]
+}
+
+resource "google_compute_instance_template" "controlplane" {
+  name_prefix  = "${var.cluster_name}-master-"
+  project      = var.project_id
+  region       = var.region
+  machine_type = lookup(var.controlplane, "type", "e2-standard-2")
+  # min_cpu_platform = ""
+
+  tags = concat(var.tags, ["${var.cluster_name}-infra", "${var.cluster_name}-master", "${var.cluster_name}-web"])
+  labels = {
+    label = "controlplane"
   }
 
   metadata = {
@@ -43,11 +51,37 @@ resource "google_compute_instance" "controlplane" {
   }
   metadata_startup_script = "apt-get install -y nginx"
 
+  disk {
+    boot         = true
+    auto_delete  = true
+    disk_size_gb = 16
+    disk_type    = "pd-balanced" // pd-ssd
+    source_image = "debian-cloud/debian-10"
+    labels       = { label = "controlplane" }
+  }
+
+  network_interface {
+    network    = var.network
+    subnetwork = "core"
+
+    access_config {
+      network_tier = "STANDARD"
+    }
+  }
+
+  scheduling {
+    automatic_restart   = true
+    on_host_maintenance = "MIGRATE"
+  }
+
+  shielded_instance_config {
+    enable_integrity_monitoring = true
+    enable_secure_boot          = false
+    enable_vtpm                 = true
+  }
+
   lifecycle {
-    ignore_changes = [
-      machine_type,
-      boot_disk,
-    ]
+    create_before_destroy = "true"
   }
 }
 
