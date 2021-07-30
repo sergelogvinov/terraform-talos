@@ -6,7 +6,7 @@ resource "google_compute_address" "controlplane" {
   name         = "${var.cluster_name}-master-${count.index + 1}"
   description  = "Local ${var.cluster_name}-master-${count.index + 1} ip"
   address_type = "INTERNAL"
-  address      = cidrhost(cidrsubnet(var.network_cidr, 8, 0), 11 + count.index)
+  address      = cidrhost(cidrsubnet(var.network_cidr, 8, 0), 231 + count.index)
   subnetwork   = "core"
   purpose      = "GCE_ENDPOINT"
 }
