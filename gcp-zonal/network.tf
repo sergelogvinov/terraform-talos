@@ -27,3 +27,18 @@ resource "google_compute_subnetwork" "private" {
   ip_cidr_range            = cidrsubnet(var.network_cidr, 8, 1)
   private_ip_google_access = true
 }
+
+resource "google_compute_global_address" "google" {
+  name          = "google-private-ip-address"
+  purpose       = "VPC_PEERING"
+  address       = cidrhost(cidrsubnet(var.network_cidr, 8, 2), 0)
+  address_type  = "INTERNAL"
+  prefix_length = 24
+  network       = google_compute_network.network.id
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = google_compute_network.network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.google.name]
+}
