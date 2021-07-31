@@ -1,25 +1,29 @@
 
-module "gcp-network" {
-  source  = "terraform-google-modules/network/google"
-  version = "~> 3.3"
+resource "google_compute_network" "network" {
+  name                    = var.network
+  description             = "Project ${var.cluster_name}"
+  project                 = var.project_id
+  routing_mode            = "REGIONAL"
+  mtu                     = 1500
+  auto_create_subnetworks = false
+}
 
-  project_id   = var.project_id
-  network_name = var.network
-  routing_mode = "REGIONAL"
-  mtu          = 1500
+resource "google_compute_subnetwork" "core" {
+  name                     = "core"
+  project                  = var.project_id
+  region                   = var.region
+  description              = "Core subnet"
+  network                  = google_compute_network.network.id
+  ip_cidr_range            = cidrsubnet(var.network_cidr, 8, 0)
+  private_ip_google_access = true
+}
 
-  subnets = [
-    {
-      subnet_name           = "core"
-      subnet_ip             = cidrsubnet(var.network_cidr, 8, 0)
-      subnet_region         = var.region
-      subnet_private_access = "true"
-    },
-    {
-      subnet_name           = "private"
-      subnet_ip             = cidrsubnet(var.network_cidr, 8, 1)
-      subnet_region         = var.region
-      subnet_private_access = "true"
-    },
-  ]
+resource "google_compute_subnetwork" "private" {
+  name                     = "private"
+  project                  = var.project_id
+  region                   = var.region
+  description              = "Private subnet"
+  network                  = google_compute_network.network.id
+  ip_cidr_range            = cidrsubnet(var.network_cidr, 8, 1)
+  private_ip_google_access = true
 }
