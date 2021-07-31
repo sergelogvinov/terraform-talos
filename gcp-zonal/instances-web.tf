@@ -10,7 +10,7 @@ resource "google_compute_region_instance_group_manager" "web" {
     instance_template = google_compute_instance_template.web["all"].id
   }
 
-  # target_pools       = [google_compute_target_pool.web.self_link]
+  target_pools       = [google_compute_target_pool.web.self_link]
   target_size        = lookup(var.instances["all"], "web_count", 0)
   wait_for_instances = false
 
@@ -40,7 +40,7 @@ resource "google_compute_instance_group_manager" "web" {
     port = 443
   }
 
-  # target_pools       = [google_compute_target_pool.web.self_link]
+  target_pools       = [google_compute_target_pool.web.self_link]
   target_size        = lookup(each.value, "web_count", 0)
   wait_for_instances = false
 

@@ -70,10 +70,6 @@ resource "google_compute_instance_template" "worker" {
   network_interface {
     network    = var.network
     subnetwork = "core"
-
-    access_config {
-      network_tier = "STANDARD"
-    }
   }
 
   scheduling {

@@ -39,17 +39,17 @@
 #   network_tier = "STANDARD"
 # }
 
-# resource "google_compute_target_pool" "web" {
-#   project = var.project_id
-#   name    = "${var.cluster_name}-web-pool"
-#   region  = var.region
+resource "google_compute_target_pool" "web" {
+  project = var.project_id
+  name    = "${var.cluster_name}-web-pool"
+  region  = var.region
 
-#   health_checks = [google_compute_http_health_check.web.id]
-# }
+  health_checks = [google_compute_http_health_check.web.id]
+}
 
-# resource "google_compute_http_health_check" "web" {
-#   name               = "${var.cluster_name}-web-pool"
-#   check_interval_sec = 15
-#   timeout_sec        = 1
-#   request_path       = "/"
-# }
+resource "google_compute_http_health_check" "web" {
+  name               = "${var.cluster_name}-web-pool"
+  check_interval_sec = 15
+  timeout_sec        = 1
+  request_path       = "/"
+}
