@@ -1,0 +1,60 @@
+---
+
+k8sServiceHost: "172.16.0.231"
+k8sServicePort: "6443"
+
+agent:
+  enabled: true
+
+operator:
+  enabled: true
+  replicas: 1
+  prometheus:
+    enabled: false
+
+identityAllocationMode: crd
+
+cni:
+  install: true
+
+ipam:
+  mode: "kubernetes"
+
+tunnel: "vxlan"
+autoDirectNodeRoutes: false
+
+hostFirewall: true
+kubeProxyReplacement: strict
+
+healthChecking: true
+
+ipv4:
+  enabled: true
+ipv6:
+  enabled: false
+hostServices:
+  enabled: false
+hostPort:
+  enabled: true
+nodePort:
+  enabled: false
+externalIPs:
+  enabled: true
+
+k8s:
+  requireIPv4PodCIDR: true
+  requireIPv6PodCIDR: false
+
+prometheus:
+  enabled: true
+
+encryption:
+  enabled: false
+
+resources:
+  # limits:
+  #   cpu: 4000m
+  #   memory: 4Gi
+  requests:
+    cpu: 100m
+    memory: 128Mi
