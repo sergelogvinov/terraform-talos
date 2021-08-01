@@ -46,18 +46,19 @@ resource "google_compute_instance_template" "controlplane" {
     label = "controlplane"
   }
 
-  metadata = {
-    ssh-keys = "debian:${file("~/.ssh/terraform.pub")}"
-  }
-  metadata_startup_script = "apt-get install -y nginx"
+  # metadata = {
+  #   ssh-keys = "debian:${file("~/.ssh/terraform.pub")}"
+  # }
+  # metadata_startup_script = "apt-get install -y nginx"
 
   disk {
-    boot         = true
-    auto_delete  = true
-    disk_size_gb = 16
-    disk_type    = "pd-balanced" // pd-ssd
-    source_image = "debian-cloud/debian-10"
-    labels       = { label = "controlplane" }
+    boot              = true
+    auto_delete       = true
+    disk_size_gb      = 16
+    disk_type         = "pd-ssd"
+    resource_policies = []
+    source_image      = data.google_compute_image.talos.self_link
+    labels            = { label = "controlplane" }
   }
 
   network_interface {
@@ -85,32 +86,28 @@ resource "google_compute_instance_template" "controlplane" {
   }
 }
 
-# resource "local_file" "controlplane" {
-#   count = lookup(var.controlplane, "count", 0)
-#   content = templatefile("${path.module}/templates/controlplane.yaml",
-#     merge(var.kubernetes, {
-#       name           = "master-${count.index + 1}"
-#       type           = count.index == 0 ? "init" : "controlplane"
-#       ipv4_local     = cidrhost(hcloud_network_subnet.core.ip_range, 11 + count.index)
-#       ipv4           = hcloud_server.controlplane[count.index].ipv4_address
-#       ipv6           = hcloud_server.controlplane[count.index].ipv6_address
-#       lbv4_local     = hcloud_load_balancer_network.api.ip
-#       lbv4           = hcloud_load_balancer.api.ipv4
-#       lbv6           = hcloud_load_balancer.api.ipv6
-#       hcloud_network = hcloud_network.main.id
-#       hcloud_token   = var.hcloud_token
-#     })
-#   )
-#   filename        = "_cfgs/controlplane-${count.index + 1}.yaml"
-#   file_permission = "0640"
+resource "local_file" "controlplane" {
+  count = lookup(var.controlplane, "count", 0)
+  content = templatefile("${path.module}/templates/controlplane.yaml",
+    merge(var.kubernetes, {
+      name           = "master-${count.index + 1}"
+      type           = count.index == 0 ? "init" : "controlplane"
+      ipv4_local     = cidrhost(cidrsubnet(var.network_cidr, 8, 0), 231 + count.index)
+      ipv4           = google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip
+      lbv4_local     = cidrhost(cidrsubnet(var.network_cidr, 8, 0), 230)
+      lbv4           = google_compute_address.api.address
+    })
+  )
+  filename        = "_cfgs/controlplane-${count.index + 1}.yaml"
+  file_permission = "0640"
 
-#   depends_on = [hcloud_server.controlplane]
-# }
+  depends_on = [google_compute_instance_from_template.controlplane]
+}
 
-# resource "null_resource" "controlplane" {
-#   count = lookup(var.controlplane, "count", 0)
-#   provisioner "local-exec" {
-#     command = "sleep 60 && talosctl apply-config --insecure --nodes ${hcloud_server.controlplane[count.index].ipv4_address} --file _cfgs/controlplane-${count.index + 1}.yaml"
-#   }
-#   depends_on = [hcloud_load_balancer_target.api, local_file.controlplane]
-# }
+resource "null_resource" "controlplane" {
+  count = lookup(var.controlplane, "count", 0)
+  provisioner "local-exec" {
+    command = "sleep 60 && talosctl apply-config --insecure --nodes ${google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip} --file _cfgs/controlplane-${count.index + 1}.yaml"
+  }
+  depends_on = [google_compute_address.api, local_file.controlplane]
+}

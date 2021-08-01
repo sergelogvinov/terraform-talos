@@ -1,4 +1,13 @@
 
+resource "google_compute_address" "api" {
+  project      = var.project_id
+  region       = var.region
+  name         = "${var.cluster_name}-controlplane"
+  description  = "External ${var.cluster_name}-controlplane lb ip"
+  address_type = "EXTERNAL"
+  network_tier = "STANDARD"
+}
+
 # resource "google_compute_forwarding_rule" "controlplane" {
 #   project               = var.project_id
 #   name                  = "${var.cluster_name}-controlplane"

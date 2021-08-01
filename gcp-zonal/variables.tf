@@ -17,6 +17,20 @@ variable "zones" {
   description = "The zone to host the cluster in (required if is a zonal cluster)"
 }
 
+variable "kubernetes" {
+  type = map(string)
+  default = {
+    podSubnets     = "10.32.0.0/12"
+    serviceSubnets = "10.200.0.0/22"
+    domain         = "cluster.local"
+    cluster_name   = "talos-k8s-hezner"
+    tokenmachine   = ""
+    token          = ""
+    ca             = ""
+  }
+  sensitive   = true
+}
+
 variable "network" {
   description = "The VPC network created to host the cluster in"
   default     = "production"
