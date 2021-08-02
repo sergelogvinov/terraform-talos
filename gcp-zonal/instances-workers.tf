@@ -48,23 +48,25 @@ resource "google_compute_instance_template" "worker" {
   machine_type = lookup(each.value, "worker_instance_type", "e2-standard-2")
   # min_cpu_platform = ""
 
-  tags = concat(var.tags, ["${var.cluster_name}-infra", "${var.cluster_name}-master", "${var.cluster_name}-worker"])
+  tags = concat(var.tags, ["${var.cluster_name}-infra", "${var.cluster_name}-worker"])
   labels = {
     label = "worker"
   }
 
-  metadata = {
-    ssh-keys = "debian:${file("~/.ssh/terraform.pub")}"
-  }
-  metadata_startup_script = "apt-get install -y nginx"
+  metadata_startup_script = templatefile("${path.module}/templates/worker.yaml.tpl",
+    merge(var.kubernetes, {
+      lbv4 = google_compute_address.lbv4_local.address
+    })
+  )
 
   disk {
-    boot         = true
-    auto_delete  = true
-    disk_size_gb = 16
-    disk_type    = "pd-balanced" // pd-ssd
-    source_image = "debian-cloud/debian-10"
-    labels       = { label = "worker" }
+    boot              = true
+    auto_delete       = true
+    disk_size_gb      = 16
+    disk_type         = "pd-balanced" // pd-ssd
+    resource_policies = []
+    source_image      = data.google_compute_image.talos.self_link
+    labels            = { label = "web" }
   }
 
   network_interface {

@@ -1,6 +1,6 @@
 
 resource "google_compute_address" "controlplane" {
-  count        = lookup(var.controlplane, "count", 0)
+  count        = max(lookup(var.controlplane, "count", 0), length(var.zones))
   project      = var.project_id
   region       = var.region
   name         = "${var.cluster_name}-master-${count.index + 1}"
@@ -14,10 +14,8 @@ resource "google_compute_address" "controlplane" {
 resource "google_compute_instance_from_template" "controlplane" {
   count = lookup(var.controlplane, "count", 0)
   name  = "master-${count.index + 1}"
-
   project = var.project_id
   zone    = element(var.zones, count.index)
-
 
   network_interface {
     network    = var.network
@@ -26,12 +24,23 @@ resource "google_compute_instance_from_template" "controlplane" {
     access_config {
       network_tier = "STANDARD"
     }
+    alias_ip_range = count.index == 0 ? [{
+      ip_cidr_range = "${google_compute_address.lbv4_local.address}/32"
+      subnetwork_range_name = ""
+    }] : []
   }
 
   source_instance_template = google_compute_instance_template.controlplane.id
   depends_on = [
     google_compute_instance_template.controlplane
   ]
+
+  lifecycle {
+    ignore_changes = [
+      source_instance_template,
+      labels
+    ]
+  }
 }
 
 resource "google_compute_instance_template" "controlplane" {
@@ -41,7 +50,7 @@ resource "google_compute_instance_template" "controlplane" {
   machine_type = lookup(var.controlplane, "type", "e2-standard-2")
   # min_cpu_platform = ""
 
-  tags = concat(var.tags, ["${var.cluster_name}-infra", "${var.cluster_name}-master", "${var.cluster_name}-web"])
+  tags = concat(var.tags, ["${var.cluster_name}-infra", "${var.cluster_name}-master"])
   labels = {
     label = "controlplane"
   }
@@ -86,28 +95,28 @@ resource "google_compute_instance_template" "controlplane" {
   }
 }
 
-resource "local_file" "controlplane" {
-  count = lookup(var.controlplane, "count", 0)
-  content = templatefile("${path.module}/templates/controlplane.yaml",
-    merge(var.kubernetes, {
-      name           = "master-${count.index + 1}"
-      type           = count.index == 0 ? "init" : "controlplane"
-      ipv4_local     = cidrhost(cidrsubnet(var.network_cidr, 8, 0), 231 + count.index)
-      ipv4           = google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip
-      lbv4_local     = cidrhost(cidrsubnet(var.network_cidr, 8, 0), 230)
-      lbv4           = google_compute_address.api.address
-    })
-  )
-  filename        = "_cfgs/controlplane-${count.index + 1}.yaml"
-  file_permission = "0640"
+# resource "local_file" "controlplane" {
+#   count = lookup(var.controlplane, "count", 0)
+#   content = templatefile("${path.module}/templates/controlplane.yaml",
+#     merge(var.kubernetes, {
+#       name       = "master-${count.index + 1}"
+#       type       = count.index == 0 ? "init" : "controlplane"
+#       ipv4_local = google_compute_address.controlplane[count.index].address
+#       ipv4       = google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip
+#       lbv4_local = google_compute_address.lbv4_local.address
+#       lbv4       = google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip
+#     })
+#   )
+#   filename        = "_cfgs/controlplane-${count.index + 1}.yaml"
+#   file_permission = "0640"
 
-  depends_on = [google_compute_instance_from_template.controlplane]
-}
+#   depends_on = [google_compute_instance_from_template.controlplane]
+# }
 
-resource "null_resource" "controlplane" {
-  count = lookup(var.controlplane, "count", 0)
-  provisioner "local-exec" {
-    command = "sleep 60 && talosctl apply-config --insecure --nodes ${google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip} --file _cfgs/controlplane-${count.index + 1}.yaml"
-  }
-  depends_on = [google_compute_address.api, local_file.controlplane]
-}
+# resource "null_resource" "controlplane" {
+#   count = lookup(var.controlplane, "count", 0)
+#   provisioner "local-exec" {
+#     command = "sleep 60 && talosctl apply-config --insecure --nodes ${google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip} --file _cfgs/controlplane-${count.index + 1}.yaml"
+#   }
+#   depends_on = [google_compute_instance_from_template.controlplane, local_file.controlplane]
+# }

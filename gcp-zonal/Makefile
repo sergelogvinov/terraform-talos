@@ -19,7 +19,7 @@ create-templates:
 	@yq eval -j '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
 create-controlplane:
-	terraform apply -target=null_resource.controlplane
+	terraform apply -auto-approve -target=null_resource.controlplane
 
 create-infrastructure:
 	cd modules/worker && terraform init

@@ -10,9 +10,18 @@ resource "google_compute_region_instance_group_manager" "web" {
     instance_template = google_compute_instance_template.web["all"].id
   }
 
-  target_pools       = [google_compute_target_pool.web.self_link]
+  target_pools       = []
   target_size        = lookup(var.instances["all"], "web_count", 0)
   wait_for_instances = false
+
+  named_port {
+    name = "http"
+    port = "80"
+  }
+  named_port {
+    name = "https"
+    port = "443"
+  }
 
   lifecycle {
     create_before_destroy = true
@@ -33,14 +42,14 @@ resource "google_compute_instance_group_manager" "web" {
 
   named_port {
     name = "http"
-    port = 80
+    port = "80"
   }
   named_port {
     name = "https"
-    port = 443
+    port = "443"
   }
 
-  target_pools       = [google_compute_target_pool.web.self_link]
+  target_pools       = []
   target_size        = lookup(each.value, "web_count", 0)
   wait_for_instances = false
 
@@ -57,23 +66,25 @@ resource "google_compute_instance_template" "web" {
   machine_type = lookup(each.value, "web_instance_type", "e2-standard-2")
   # min_cpu_platform = ""
 
-  tags = concat(var.tags, ["${var.cluster_name}-infra", "${var.cluster_name}-master", "${var.cluster_name}-web"])
+  tags = concat(var.tags, ["${var.cluster_name}-infra", "${var.cluster_name}-web"])
   labels = {
     label = "web"
   }
 
-  metadata = {
-    ssh-keys = "debian:${file("~/.ssh/terraform.pub")}"
-  }
-  metadata_startup_script = "apt-get install -y nginx"
+  metadata_startup_script = templatefile("${path.module}/templates/worker.yaml.tpl",
+    merge(var.kubernetes, {
+      lbv4 = google_compute_address.lbv4_local.address
+    })
+  )
 
   disk {
-    boot         = true
-    auto_delete  = true
-    disk_size_gb = 16
-    disk_type    = "pd-balanced" // pd-ssd
-    source_image = "debian-cloud/debian-10"
-    labels       = { label = "web" }
+    boot              = true
+    auto_delete       = true
+    disk_size_gb      = 16
+    disk_type         = "pd-balanced" // pd-ssd
+    resource_policies = []
+    source_image      = data.google_compute_image.talos.self_link
+    labels            = { label = "web" }
   }
 
   network_interface {
@@ -101,23 +112,14 @@ resource "google_compute_instance_template" "web" {
   }
 }
 
-# module "web" {
-#   source = "./modules/web"
+resource "local_file" "web" {
+  content = templatefile("${path.module}/templates/worker.yaml.tpl",
+    merge(var.kubernetes, {
+      lbv4 = google_compute_address.lbv4_local.address
+    })
+  )
+  filename        = "${path.module}/_cfgs/worker-0.yaml"
+  file_permission = "0640"
 
-#   for_each = var.instances
-#   location = each.key
-#   labels   = merge(var.tags, { label = "web" })
-#   network  = hcloud_network.main.id
-#   subnet   = hcloud_network_subnet.core.ip_range
-
-#   vm_name           = "web-${each.key}-"
-#   vm_items          = lookup(each.value, "web_count", 0)
-#   vm_type           = lookup(each.value, "web_instance_type", "cx11")
-#   vm_image          = data.hcloud_image.talos.id
-#   vm_ip_start       = (3 + index(var.regions, each.key)) * 10
-#   vm_security_group = [hcloud_firewall.web.id]
-
-#   vm_params = merge(var.kubernetes, {
-#     lbv4 = hcloud_load_balancer_network.api.ip
-#   })
-# }
+  depends_on = [google_compute_region_instance_group_manager.web]
+}

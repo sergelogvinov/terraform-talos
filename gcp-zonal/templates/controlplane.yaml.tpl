@@ -7,6 +7,7 @@ machine:
     - "${lbv4}"
     - "${lbv4_local}"
     - "${ipv4}"
+    - "${ipv4_local}"
   kubelet:
     extraArgs:
       node-ip: "${ipv4_local}"
@@ -57,6 +58,7 @@ cluster:
     certSANs:
       - "${lbv4_local}"
       - "${lbv4}"
+      - "${ipv4_local}"
       - "${ipv4}"
   controllerManager: {}
   scheduler: {}
