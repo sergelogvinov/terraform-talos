@@ -9,6 +9,12 @@ resource "google_compute_region_instance_group_manager" "web" {
   version {
     instance_template = google_compute_instance_template.web["all"].id
   }
+  update_policy {
+    type                         = "OPPORTUNISTIC"
+    instance_redistribution_type = "PROACTIVE"
+    minimal_action               = "REPLACE"
+    replacement_method           = "SUBSTITUTE"
+  }
 
   target_pools       = []
   target_size        = lookup(var.instances["all"], "web_count", 0)
@@ -38,6 +44,12 @@ resource "google_compute_instance_group_manager" "web" {
 
   version {
     instance_template = google_compute_instance_template.web[each.key].id
+  }
+  update_policy {
+    type                  = "OPPORTUNISTIC"
+    minimal_action        = "REPLACE"
+    max_unavailable_fixed = 1
+    replacement_method    = "SUBSTITUTE"
   }
 
   named_port {
@@ -71,11 +83,13 @@ resource "google_compute_instance_template" "web" {
     label = "web"
   }
 
-  metadata_startup_script = templatefile("${path.module}/templates/worker.yaml.tpl",
-    merge(var.kubernetes, {
-      lbv4 = google_compute_address.lbv4_local.address
-    })
-  )
+  metadata = {
+    user-data = templatefile("${path.module}/templates/worker.yaml.tpl",
+      merge(var.kubernetes, {
+        lbv4 = google_compute_address.lbv4_local.address
+      })
+    )
+  }
 
   disk {
     boot              = true
