@@ -7,8 +7,7 @@ machine:
     - "${lbv4}"
     - "${lbv6}"
     - "${lbv4_local}"
-    - "${ipv4}"
-    - "${ipv6}"
+    - "${ipv4_local}"
   kubelet:
     extraArgs:
       node-ip: "${ipv4_local}"
@@ -18,12 +17,6 @@ machine:
     interfaces:
       - interface: eth0
         dhcp: true
-      - interface: eth0
-        cidr: "${ipv6}/64"
-        routes:
-          - network: "::/0"
-            gateway: "fe80::1"
-            metric: 1024
       - interface: eth1
         dhcp: true
       - interface: dummy0
@@ -61,10 +54,10 @@ cluster:
     mode: ipvs
   apiServer:
     certSANs:
-      - "${lbv4_local}"
       - "${lbv4}"
       - "${lbv6}"
-      - "${ipv4}"
+      - "${lbv4_local}"
+      - "${ipv4_local}"
     extraArgs:
         feature-gates: IPv6DualStack=true
   controllerManager:

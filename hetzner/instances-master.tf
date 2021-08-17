@@ -15,6 +15,21 @@ resource "hcloud_server" "controlplane" {
     ip         = cidrhost(hcloud_network_subnet.core.ip_range, 11 + count.index)
   }
 
+  # user_data = templatefile("${path.module}/templates/controlplane.yaml",
+  #   merge(var.kubernetes, {
+  #     name           = "master-${count.index + 1}"
+  #     type           = count.index == 0 ? "init" : "controlplane"
+  #     ipv4_local     = cidrhost(hcloud_network_subnet.core.ip_range, 11 + count.index)
+  #     # ipv4           = hcloud_server.controlplane[count.index].ipv4_address
+  #     # ipv6           = hcloud_server.controlplane[count.index].ipv6_address
+  #     lbv4_local     = hcloud_load_balancer_network.api.ip
+  #     lbv4           = hcloud_load_balancer.api.ipv4
+  #     lbv6           = hcloud_load_balancer.api.ipv6
+  #     hcloud_network = hcloud_network.main.id
+  #     hcloud_token   = var.hcloud_token
+  #   })
+  # )
+
   lifecycle {
     ignore_changes = [
       image,

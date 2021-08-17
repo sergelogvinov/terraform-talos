@@ -21,6 +21,12 @@ resource "hcloud_firewall" "controlplane" {
     source_ips = [var.vpc_main_cidr]
   }
 
+  # rule {
+  #   direction  = "in"
+  #   protocol   = "tcp"
+  #   port       = "22"
+  #   source_ips = var.whitelist_admins
+  # }
   rule {
     direction  = "in"
     protocol   = "tcp"

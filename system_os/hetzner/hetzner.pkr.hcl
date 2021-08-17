@@ -22,7 +22,7 @@ variable "talos_version" {
 source "hcloud" "talos" {
   token        = var.hcloud_token
   rescue       = "linux64"
-  image        = "debian-10"
+  image        = "debian-11"
   location     = "hel1"
   server_type  = "cx11"
   ssh_username = "root"
