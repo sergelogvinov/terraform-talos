@@ -540,7 +540,7 @@ spec:
               name: cilium-config
               optional: true
         - name: KUBERNETES_SERVICE_HOST
-          value: "172.16.0.5"
+          value: "172.16.0.10"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
         image: "quay.io/cilium/cilium:v1.10.3@sha256:8419531c5d3677158802882bdfe2297915c43f2ebe3649551aaac22de9f6d565"
@@ -627,7 +627,7 @@ spec:
               name: cilium-config
               optional: true
         - name: KUBERNETES_SERVICE_HOST
-          value: "172.16.0.5"
+          value: "172.16.0.10"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
         image: "quay.io/cilium/cilium:v1.10.3@sha256:8419531c5d3677158802882bdfe2297915c43f2ebe3649551aaac22de9f6d565"
@@ -783,7 +783,7 @@ spec:
               name: cilium-config
               optional: true
         - name: KUBERNETES_SERVICE_HOST
-          value: "172.16.0.5"
+          value: "172.16.0.10"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
         image: "quay.io/cilium/operator-generic:v1.10.3@sha256:337ebf27eae4fbad51cc4baf9110b3ec6753320dd33075bc136e2a1865be5eb5"

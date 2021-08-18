@@ -32,18 +32,43 @@ resource "hcloud_load_balancer_service" "api" {
   }
 }
 
-resource "hcloud_load_balancer_service" "talos" {
-  load_balancer_id = hcloud_load_balancer.api.id
-  protocol         = "tcp"
-  listen_port      = 50000
-  destination_port = 50000
-  proxyprotocol    = false
+# resource "hcloud_load_balancer_service" "talos" {
+#   load_balancer_id = hcloud_load_balancer.api.id
+#   protocol         = "tcp"
+#   listen_port      = 50000
+#   destination_port = 50000
+#   proxyprotocol    = false
 
-  health_check {
-    protocol = "tcp"
-    port     = 50000
-    interval = 30
-    timeout  = 5
-    retries  = 3
-  }
-}
+#   health_check {
+#     protocol = "tcp"
+#     port     = 50000
+#     interval = 30
+#     timeout  = 5
+#     retries  = 3
+#   }
+# }
+
+# resource "hcloud_load_balancer_service" "https" {
+#   load_balancer_id = hcloud_load_balancer.api.id
+#   protocol         = "tcp"
+#   listen_port      = 443
+#   destination_port = 443
+#   proxyprotocol    = false
+
+#   health_check {
+#     protocol = "http"
+#     port     = 80
+#     interval = 30
+#     timeout  = 5
+#     retries  = 3
+#     http {
+#       path = "/healthz"
+#     }
+#   }
+# }
+
+# resource "hcloud_load_balancer_target" "https" {
+#   type             = "label_selector"
+#   load_balancer_id = hcloud_load_balancer.api.id
+#   label_selector   = "label=web"
+# }

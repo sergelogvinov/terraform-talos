@@ -10,6 +10,7 @@ machine:
       node-ip: "${ipv4}"
       cloud-provider: external
       rotate-server-certificates: true
+      node-labels: "${labels}"
   network:
     hostname: "${name}"
     interfaces:

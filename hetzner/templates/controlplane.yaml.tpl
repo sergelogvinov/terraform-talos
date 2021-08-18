@@ -8,6 +8,7 @@ machine:
     - "${lbv6}"
     - "${lbv4_local}"
     - "${ipv4_local}"
+    - "${ipv4_vip}"
   kubelet:
     extraArgs:
       node-ip: "${ipv4_local}"
@@ -17,16 +18,14 @@ machine:
     interfaces:
       - interface: eth1
         dhcp: true
+        addresses:
+          - ${ipv4_vip}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
           - fd00::169:254:2:53/128
   install:
-    disk: /dev/sda
-    bootloader: true
     wipe: false
-    extraKernelArgs:
-      - elevator=noop
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
@@ -38,7 +37,7 @@ machine:
           slot: 0
 cluster:
   controlPlane:
-    endpoint: https://${lbv4}:6443
+    endpoint: https://${ipv4_vip}:6443
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("[%s]",podSubnets)}
@@ -56,6 +55,7 @@ cluster:
       - "${lbv6}"
       - "${lbv4_local}"
       - "${ipv4_local}"
+      - "${ipv4_vip}"
     extraArgs:
         feature-gates: IPv6DualStack=true
   controllerManager:

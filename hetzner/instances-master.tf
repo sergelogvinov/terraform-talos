@@ -19,6 +19,7 @@ resource "hcloud_server" "controlplane" {
     merge(var.kubernetes, {
       name           = "master-${count.index + 1}"
       type           = count.index == 0 ? "init" : "controlplane"
+      ipv4_vip       = cidrhost(hcloud_network_subnet.core.ip_range, 10)
       ipv4_local     = cidrhost(hcloud_network_subnet.core.ip_range, 11 + count.index)
       lbv4_local     = hcloud_load_balancer_network.api.ip
       lbv4           = hcloud_load_balancer.api.ipv4
@@ -36,6 +37,17 @@ resource "hcloud_server" "controlplane" {
       ssh_keys,
     ]
   }
+}
+
+#
+# Local floating ip
+#
+resource "hcloud_server_network" "controlplane" {
+  count     = lookup(var.controlplane, "count", 0) > 0 ? 1 : 0
+  server_id = hcloud_server.controlplane[0].id
+  subnet_id = hcloud_network_subnet.core.id
+  ip        = cidrhost(hcloud_network_subnet.core.ip_range, 11)
+  alias_ips = [cidrhost(hcloud_network_subnet.core.ip_range, 10)]
 }
 
 resource "hcloud_load_balancer_target" "api" {
