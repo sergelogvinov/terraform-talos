@@ -13,24 +13,17 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
-      - interface: eth0
-        dhcp: true
       - interface: eth1
         dhcp: true
       - interface: dummy0
-        cidr: "169.254.2.53/32"
-      - interface: dummy0
-        cidr: "fd00::169:254:2:53/128"
+        addresses:
+          - 169.254.2.53/32
+          - fd00::169:254:2:53/128
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
   install:
-    disk: /dev/sda
-    extraKernelArgs:
-      - elevator=noop
-    image: ghcr.io/talos-systems/installer:v0.10.3
-    bootloader: true
-    wipe: true
+    wipe: false
   systemDiskEncryption:
     ephemeral:
       provider: luks2

@@ -82,13 +82,13 @@ resource "hcloud_firewall" "web" {
     direction  = "in"
     protocol   = "tcp"
     port       = "80"
-    source_ips = var.whitelist_admins
+    source_ips = var.whitelist_web
   }
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "443"
-    source_ips = var.whitelist_admins
+    source_ips = var.whitelist_web
   }
 }
 

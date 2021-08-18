@@ -15,8 +15,6 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
-      - interface: eth0
-        dhcp: true
       - interface: eth1
         dhcp: true
       - interface: dummy0
