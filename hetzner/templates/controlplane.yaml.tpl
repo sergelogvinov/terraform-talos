@@ -20,9 +20,9 @@ machine:
       - interface: eth1
         dhcp: true
       - interface: dummy0
-        cidr: "169.254.2.53/32"
-      - interface: dummy0
-        cidr: "fd00::169:254:2:53/128"
+        addresses:
+          - 169.254.2.53/32
+          - fd00::169:254:2:53/128
   install:
     disk: /dev/sda
     bootloader: true

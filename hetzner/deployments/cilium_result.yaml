@@ -89,6 +89,8 @@ data:
   bpf-lb-map-max: "65536"
   # bpf-lb-bypass-fib-lookup instructs Cilium to enable the FIB lookup bypass
   # optimization for nodeport reverse NAT handling.
+  bpf-lb-external-clusterip: "false"
+
   # Pre-allocation of map entries allows per-packet latency to be reduced, at
   # the expense of up-front memory allocation for the entries in the maps. The
   # default value below will minimize memory usage in the default installation;
@@ -137,7 +139,7 @@ data:
   install-no-conntrack-iptables-rules: "false"
 
   auto-direct-node-routes: "false"
-  enable-bandwidth-manager: "true"
+  enable-bandwidth-manager: "false"
   enable-local-redirect-policy: "false"
   enable-host-firewall: "true"
 
@@ -166,6 +168,7 @@ data:
   hubble-tls-client-ca-files: /var/lib/cilium/tls/hubble/client-ca.crt
   ipam: "kubernetes"
   disable-cnp-status-updates: "true"
+  cgroup-root: "/sys/fs/cgroup"
 ---
 # Source: cilium/templates/cilium-agent-clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -482,7 +485,7 @@ spec:
             httpHeaders:
             - name: "brief"
               value: "true"
-          failureThreshold: 24
+          failureThreshold: 105
           periodSeconds: 2
           successThreshold: 1
         livenessProbe:
@@ -540,7 +543,7 @@ spec:
           value: "172.16.0.5"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: "quay.io/cilium/cilium:v1.10.0@sha256:587627d909ffe0418c0bd907516496844867a21812946af82096d367760e4c1e"
+        image: "quay.io/cilium/cilium:v1.10.3@sha256:8419531c5d3677158802882bdfe2297915c43f2ebe3649551aaac22de9f6d565"
         imagePullPolicy: IfNotPresent
         lifecycle:
           postStart:
@@ -576,6 +579,9 @@ spec:
         volumeMounts:
         - mountPath: /sys/fs/bpf
           name: bpf-maps
+        # Check for duplicate mounts before mounting
+        - mountPath: /sys/fs/cgroup
+          name: cilium-cgroup
         - mountPath: /var/run/cilium
           name: cilium-run
         - mountPath: /host/opt/cni/bin
@@ -624,7 +630,7 @@ spec:
           value: "172.16.0.5"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: "quay.io/cilium/cilium:v1.10.0@sha256:587627d909ffe0418c0bd907516496844867a21812946af82096d367760e4c1e"
+        image: "quay.io/cilium/cilium:v1.10.3@sha256:8419531c5d3677158802882bdfe2297915c43f2ebe3649551aaac22de9f6d565"
         imagePullPolicy: IfNotPresent
         name: clean-cilium-state
         securityContext:
@@ -635,6 +641,10 @@ spec:
         volumeMounts:
         - mountPath: /sys/fs/bpf
           name: bpf-maps
+          mountPropagation: HostToContainer
+          # Required to mount cgroup filesystem from the host to cilium agent pod
+        - mountPath: /sys/fs/cgroup
+          name: cilium-cgroup
           mountPropagation: HostToContainer
         - mountPath: /var/run/cilium
           name: cilium-run
@@ -660,6 +670,11 @@ spec:
           path: /sys/fs/bpf
           type: DirectoryOrCreate
         name: bpf-maps
+      # To keep state between restarts / upgrades for cgroup2 filesystem
+      - hostPath:
+          path: /sys/fs/cgroup
+          type: DirectoryOrCreate
+        name: cilium-cgroup
       # To install cilium cni plugin in the host
       - hostPath:
           path:  /opt/cni/bin
@@ -771,7 +786,7 @@ spec:
           value: "172.16.0.5"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: "quay.io/cilium/operator-generic:v1.10.0@sha256:65143311a62a95dbe23c69ff2f624e0fdf030eb225e6375d889da66a955dd828"
+        image: "quay.io/cilium/operator-generic:v1.10.3@sha256:337ebf27eae4fbad51cc4baf9110b3ec6753320dd33075bc136e2a1865be5eb5"
         imagePullPolicy: IfNotPresent
         name: cilium-operator
         livenessProbe:

@@ -54,6 +54,11 @@ prometheus:
 encryption:
   enabled: false
 
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+
 resources:
   # limits:
   #   cpu: 4000m

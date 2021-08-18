@@ -56,7 +56,7 @@ spec:
         - key: "node.kubernetes.io/not-ready"
           effect: "NoSchedule"
       containers:
-        - image: hetznercloud/hcloud-cloud-controller-manager:v1.10.0
+        - image: hetznercloud/hcloud-cloud-controller-manager:v1.11.1
           name: hcloud-cloud-controller-manager
           command:
             - "/bin/hcloud-cloud-controller-manager"
@@ -82,3 +82,5 @@ spec:
                 secretKeyRef:
                   name: hcloud
                   key: network
+            - name: HCLOUD_INSTANCES_ADDRESS_FAMILY
+              value: dualstack
