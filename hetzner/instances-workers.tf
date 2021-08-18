@@ -16,8 +16,7 @@ module "worker" {
   vm_security_group = [hcloud_firewall.worker.id]
 
   vm_params = merge(var.kubernetes, {
-    # lbv4   = hcloud_load_balancer_network.api.ip
-    lbv4   = cidrhost(hcloud_network_subnet.core.ip_range, 10)
-    labels = "node.kubernetes.io/role=worker"
+    lbv4   = local.lbv4
+    labels = "node.kubernetes.io/role=worker,node.kubernetes.io/disktype=ssd"
   })
 }

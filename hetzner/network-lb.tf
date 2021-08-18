@@ -1,8 +1,20 @@
 
+locals {
+  lb_enable = lookup(var.controlplane, "type_lb", "") == "" ? false : true
+}
+
+locals {
+  ipv4_vip   = cidrhost(hcloud_network_subnet.core.ip_range, 10)
+  lbv4_local = cidrhost(hcloud_network_subnet.core.ip_range, 5)
+  lbv4       = local.lb_enable ? hcloud_load_balancer.api[0].ipv4 : cidrhost(hcloud_network_subnet.core.ip_range, 10)
+  lbv6       = local.lb_enable ? hcloud_load_balancer.api[0].ipv6 : cidrhost(hcloud_network_subnet.core.ip_range, 10)
+}
+
 resource "hcloud_load_balancer" "api" {
+  count              = local.lb_enable ? 1 : 0
   name               = "api"
   location           = var.regions[0]
-  load_balancer_type = "lb11"
+  load_balancer_type = lookup(var.controlplane, "type_lb", "lb11")
   labels             = merge(var.tags, { type = "infra" })
 
   provisioner "local-exec" {
@@ -11,13 +23,15 @@ resource "hcloud_load_balancer" "api" {
 }
 
 resource "hcloud_load_balancer_network" "api" {
-  load_balancer_id = hcloud_load_balancer.api.id
+  count            = local.lb_enable ? 1 : 0
+  load_balancer_id = hcloud_load_balancer.api[0].id
   subnet_id        = hcloud_network_subnet.core.id
-  ip               = cidrhost(hcloud_network_subnet.core.ip_range, 5)
+  ip               = local.lbv4_local
 }
 
 resource "hcloud_load_balancer_service" "api" {
-  load_balancer_id = hcloud_load_balancer.api.id
+  count            = local.lb_enable ? 1 : 0
+  load_balancer_id = hcloud_load_balancer.api[0].id
   protocol         = "tcp"
   listen_port      = 6443
   destination_port = 6443

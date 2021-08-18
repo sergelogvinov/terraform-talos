@@ -37,11 +37,12 @@ variable "vpc_vswitch_id" {
 }
 
 variable "controlplane" {
-  description = "Count of controlplanes"
+  description = "Property of controlplane"
   type        = map(any)
   default = {
-    count = 0,
-    type  = "cpx11"
+    count   = 0,
+    type    = "cpx11"
+    type_lb = ""
   }
 }
 

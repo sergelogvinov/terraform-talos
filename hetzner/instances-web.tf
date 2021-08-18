@@ -16,8 +16,7 @@ module "web" {
   vm_security_group = [hcloud_firewall.web.id]
 
   vm_params = merge(var.kubernetes, {
-    # lbv4   = hcloud_load_balancer_network.api.ip
-    lbv4   = cidrhost(hcloud_network_subnet.core.ip_range, 10)
-    labels = "node.kubernetes.io/role=web"
+    lbv4   = local.lbv4
+    labels = "node.kubernetes.io/role=web,node.kubernetes.io/disktype=ssd"
   })
 }

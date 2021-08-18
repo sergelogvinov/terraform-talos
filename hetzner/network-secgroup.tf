@@ -6,7 +6,7 @@ resource "hcloud_firewall" "controlplane" {
   rule {
     direction  = "in"
     protocol   = "icmp"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = [var.vpc_main_cidr, "::/0"]
   }
   rule {
     direction  = "in"
@@ -21,12 +21,6 @@ resource "hcloud_firewall" "controlplane" {
     source_ips = [var.vpc_main_cidr]
   }
 
-  # rule {
-  #   direction  = "in"
-  #   protocol   = "tcp"
-  #   port       = "22"
-  #   source_ips = var.whitelist_admins
-  # }
   rule {
     direction  = "in"
     protocol   = "tcp"
@@ -43,15 +37,13 @@ resource "hcloud_firewall" "controlplane" {
     direction  = "in"
     protocol   = "tcp"
     port       = "2380"
-    source_ips = ["0.0.0.0/0", "::/0"]
-    # source_ips = var.whitelist_admins
+    source_ips = ["0.0.0.0/0"]
   }
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "6443"
-    source_ips = ["0.0.0.0/0", "::/0"]
-    # source_ips = var.whitelist_admins
+    source_ips = concat(var.whitelist_admins, [var.vpc_main_cidr, "${local.lbv4}/32"])
   }
 
   # cilium health
@@ -70,7 +62,7 @@ resource "hcloud_firewall" "web" {
   rule {
     direction  = "in"
     protocol   = "icmp"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = [var.vpc_main_cidr, "::/0"]
   }
   rule {
     direction  = "in"
@@ -114,7 +106,7 @@ resource "hcloud_firewall" "worker" {
   rule {
     direction  = "in"
     protocol   = "icmp"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = [var.vpc_main_cidr, "::/0"]
   }
   rule {
     direction  = "in"
