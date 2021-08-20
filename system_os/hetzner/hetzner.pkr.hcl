@@ -8,17 +8,6 @@ packer {
   }
 }
 
-variable "hcloud_token" {
-  type      = string
-  default   = env("HCLOUD_TOKEN")
-  sensitive = true
-}
-
-variable "talos_version" {
-  type    = string
-  default = "v0.11.4"
-}
-
 source "hcloud" "talos" {
   token        = var.hcloud_token
   rescue       = "linux64"
@@ -36,11 +25,28 @@ source "hcloud" "talos" {
 }
 
 build {
+  name    = "release"
   sources = ["source.hcloud.talos"]
+
   provisioner "shell" {
     inline = [
       "apt-get install -y wget",
-      "wget -O /tmp/openstack.tar.gz https://github.com/talos-systems/talos/releases/download/${var.talos_version}/openstack-amd64.tar.gz",
+      "wget -O /tmp/openstack.tar.gz ${local.image}",
+      "tar xOzf /tmp/talos.tar.gz | dd of=/dev/sda && sync",
+    ]
+  }
+}
+
+build {
+  name    = "develop"
+  sources = ["source.hcloud.talos"]
+
+  provisioner "file" {
+    source      = "../../../talos-pr/_out/hcloud-amd64.tar.gz"
+    destination = "/tmp/talos.tar.gz"
+  }
+  provisioner "shell" {
+    inline = [
       "tar xOzf /tmp/talos.tar.gz | dd of=/dev/sda && sync",
     ]
   }
