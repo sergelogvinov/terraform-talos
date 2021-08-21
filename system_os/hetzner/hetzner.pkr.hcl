@@ -31,7 +31,7 @@ build {
   provisioner "shell" {
     inline = [
       "apt-get install -y wget",
-      "wget -O /tmp/openstack.tar.gz ${local.image}",
+      "wget -O /tmp/talos.tar.gz ${local.image}",
       "tar xOzf /tmp/talos.tar.gz | dd of=/dev/sda && sync",
     ]
   }
