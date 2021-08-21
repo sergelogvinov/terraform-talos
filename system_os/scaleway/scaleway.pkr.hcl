@@ -20,6 +20,7 @@ source "scaleway" "talos" {
   remove_volume   = true
   ssh_username    = "root"
 
+  image_name    = "talos-system-disk"
   snapshot_name = "talos system disk"
 }
 
@@ -46,7 +47,7 @@ build {
   }
   provisioner "shell" {
     inline = [
-      "tar xOzf /tmp/talos.tar.gz | dd of=/dev/sda && sync",
+      "tar xOzf /tmp/talos.tar.gz | dd of=/dev/vda && sync",
     ]
   }
 }

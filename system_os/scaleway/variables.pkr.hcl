@@ -18,7 +18,7 @@ variable "scaleway_secret_key" {
 
 variable "scaleway_zone" {
   type    = string
-  default = "fr-par-2"
+  default = "fr-par-1"
 }
 
 variable "talos_version" {
