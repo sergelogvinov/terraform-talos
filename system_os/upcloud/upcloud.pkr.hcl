@@ -8,32 +8,6 @@ packer {
   }
 }
 
-variable "upcloud_username" {
-  type = string
-  default = ""
-}
-
-variable "upcloud_password" {
-  type = string
-  default = ""
-  sensitive = true
-}
-
-variable "upcloud_zone" {
-  type      = string
-  default   = "nl-ams1"
-}
-
-variable "upcloud_zones" {
-  type      = list(string)
-  default   = ["de-fra1", "uk-lon1"]
-}
-
-variable "talos_version" {
-  type    = string
-  default = "v0.11.0"
-}
-
 source "upcloud" "talos" {
   username = var.upcloud_username
   password = var.upcloud_password
@@ -47,12 +21,29 @@ source "upcloud" "talos" {
 
 # FIXME
 build {
+  name    = "release"
   sources = ["source.upcloud.talos"]
+
   provisioner "shell" {
     inline = [
       "apt-get install -y wget",
-      "wget -O /tmp/talos.tar.gz https://github.com/talos-systems/talos/releases/download/${var.talos_version}/metal-amd64.tar.gz",
-      "sync && sync && tar xOzf /tmp/talos.tar.gz | dd of=/dev/vda && systemctl --force --force poweroff",
+      "wget -O /tmp/talos.raw.xz ${local.image}",
+      "sync && xz -d -c /tmp/talos.raw.xz | dd of=/dev/vda && systemctl --force --force poweroff",
+    ]
+  }
+}
+
+build {
+  name    = "develop"
+  sources = ["source.upcloud.talos"]
+
+  provisioner "file" {
+    source      = "../../../talos-pr/_out/upcloud-amd64.raw.xz"
+    destination = "/tmp/talos.raw.xz"
+  }
+  provisioner "shell" {
+    inline = [
+      "sync && xz -d -c /tmp/talos.raw.xz | dd of=/dev/vda && sync",
     ]
   }
 }
