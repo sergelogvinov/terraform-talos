@@ -42,12 +42,12 @@ build {
   sources = ["source.hcloud.talos"]
 
   provisioner "file" {
-    source      = "../../../talos-pr/_out/hcloud-amd64.tar.gz"
-    destination = "/tmp/talos.tar.gz"
+    source      = "../../../talos-pr/_out/hcloud-amd64.raw.xz"
+    destination = "/tmp/talos.raw.xz"
   }
   provisioner "shell" {
     inline = [
-      "tar xOzf /tmp/talos.tar.gz | dd of=/dev/sda && sync",
+      "xz -d -c /tmp/talos.raw.xz | dd of=/dev/sda && sync",
     ]
   }
 }
