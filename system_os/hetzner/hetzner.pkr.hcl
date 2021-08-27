@@ -48,6 +48,7 @@ build {
   provisioner "shell" {
     inline = [
       "xz -d -c /tmp/talos.raw.xz | dd of=/dev/sda && sync",
+      "mount /dev/sda3 /mnt && sed -i 's/set timeout=3/set timeout=10/g' /mnt/grub/grub.cfg && umount /mnt"
     ]
   }
 }
