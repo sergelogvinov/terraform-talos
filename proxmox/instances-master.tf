@@ -1,9 +1,5 @@
 
-locals {
-  gwv4 = cidrhost(var.vpc_main_cidr, -3)
-}
-
-resource "null_resource" "cloud_init_config_files" {
+resource "null_resource" "controlplane_machineconfig" {
   count = lookup(var.controlplane, "count", 0)
   connection {
     type = "ssh"
@@ -22,7 +18,7 @@ resource "proxmox_vm_qemu" "controlplane" {
   count       = lookup(var.controlplane, "count", 0)
   name        = "master-${count.index + 1}"
   target_node = var.proxmox_nodename
-  clone       = "talos"
+  clone       = var.proxmox_image
 
   # preprovision           = false
   define_connection_info  = false
@@ -68,5 +64,5 @@ resource "proxmox_vm_qemu" "controlplane" {
     ]
   }
 
-  depends_on = [null_resource.cloud_init_config_files]
+  depends_on = [null_resource.controlplane_machineconfig]
 }

@@ -10,6 +10,11 @@ variable "proxmox_nodename" {
   type        = string
 }
 
+variable "proxmox_image" {
+  description = "Proxmox source image name"
+  type        = string
+}
+
 variable "proxmox_storage" {
   description = "Proxmox storage name"
   type        = string
