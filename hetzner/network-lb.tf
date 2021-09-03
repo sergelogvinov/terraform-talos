@@ -16,10 +16,6 @@ resource "hcloud_load_balancer" "api" {
   location           = var.regions[0]
   load_balancer_type = lookup(var.controlplane, "type_lb", "lb11")
   labels             = merge(var.tags, { type = "infra" })
-
-  provisioner "local-exec" {
-    command = "echo LB: ${self.ipv4}"
-  }
 }
 
 resource "hcloud_load_balancer_network" "api" {

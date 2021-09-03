@@ -18,8 +18,6 @@ machine:
     interfaces:
       - interface: eth1
         dhcp: true
-        addresses:
-          - ${ipv4_vip}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -30,6 +28,11 @@ machine:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
   systemDiskEncryption:
+    state:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
     ephemeral:
       provider: luks2
       keys:
@@ -56,11 +59,8 @@ cluster:
       - "${lbv4_local}"
       - "${ipv4_local}"
       - "${ipv4_vip}"
-    extraArgs:
-        feature-gates: IPv6DualStack=true
   controllerManager:
     extraArgs:
-        feature-gates: IPv6DualStack=true
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
   scheduler: {}

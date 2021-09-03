@@ -19,7 +19,7 @@ resource "hcloud_server" "controlplane" {
     merge(var.kubernetes, {
       name           = "master-${count.index + 1}"
       type           = count.index == 0 ? "init" : "controlplane"
-      ipv4_vip       = local.ipv4_vip
+      ipv4_vip       = count.index == 0 ? local.ipv4_vip : cidrhost(hcloud_network_subnet.core.ip_range, 11)
       ipv4_local     = cidrhost(hcloud_network_subnet.core.ip_range, 11 + count.index)
       lbv4_local     = local.lbv4_local
       lbv4           = local.lbv4
@@ -40,8 +40,9 @@ resource "hcloud_server" "controlplane" {
 }
 
 #
-# Local floating ip
+# Local floating ip assign to controlplane[0]
 #
+
 resource "hcloud_server_network" "controlplane" {
   count     = lookup(var.controlplane, "count", 0) > 0 ? 1 : 0
   server_id = hcloud_server.controlplane[0].id
@@ -51,14 +52,14 @@ resource "hcloud_server_network" "controlplane" {
 }
 
 resource "hcloud_load_balancer_target" "api" {
-  count            = local.lb_enable ? 1 : 0
+  count            = local.lb_enable ? lookup(var.controlplane, "count", 0) : 0
   type             = "server"
   load_balancer_id = hcloud_load_balancer.api[0].id
   server_id        = hcloud_server.controlplane[count.index].id
 }
 
 #
-# Secure push talos config to the node
+# Secure push talos config to the controlplane
 #
 
 # resource "local_file" "controlplane" {
