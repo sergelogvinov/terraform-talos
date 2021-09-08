@@ -37,8 +37,8 @@ cluster:
   clusterName: ${cluster_name}
   network:
     dnsDomain: ${domain}
-    podSubnets: ${format("[%s]",podSubnets)}
-    serviceSubnets: ${format("[%s]",serviceSubnets)}
+    podSubnets: ${format("%#v",split(",",podSubnets))}
+    serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
   proxy:
     mode: ipvs
   token: ${token}
