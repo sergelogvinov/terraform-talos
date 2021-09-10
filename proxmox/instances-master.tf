@@ -28,7 +28,6 @@ resource "proxmox_vm_qemu" "controlplane" {
   cloudinit_cdrom_storage = var.proxmox_storage
 
   onboot  = false
-  bios    = "ovmf"
   cpu     = "host,flags=+aes"
   cores   = 2
   sockets = 1
@@ -48,7 +47,7 @@ resource "proxmox_vm_qemu" "controlplane" {
     bridge = var.proxmox_bridge
   }
 
-  boot = "order=scsi0;net0"
+  boot = "order=scsi0"
   disk {
     type    = "scsi"
     storage = var.proxmox_storage
