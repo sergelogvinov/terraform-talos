@@ -31,8 +31,8 @@ build {
   provisioner "shell" {
     inline = [
       "apt-get install -y wget",
-      "wget -O /tmp/talos.tar.gz ${local.image}",
-      "tar xOzf /tmp/talos.tar.gz | dd of=/dev/vda",
+      "wget -O /tmp/talos.raw.xz ${local.image}",
+      "xz -d -c /tmp/talos.raw.xz | dd of=/dev/vda && sync",
     ]
   }
 }
@@ -42,12 +42,12 @@ build {
   sources = ["source.scaleway.talos"]
 
   provisioner "file" {
-    source      = "../../../talos-pr/_out/scaleway-amd64.tar.gz"
-    destination = "/tmp/talos.tar.gz"
+    source      = "../../../talos-pr/_out/scaleway-amd64.raw.xz"
+    destination = "/tmp/talos.raw.xz"
   }
   provisioner "shell" {
     inline = [
-      "tar xOzf /tmp/talos.tar.gz | dd of=/dev/vda && sync",
+      "xz -d -c /tmp/talos.raw.xz | dd of=/dev/vda && sync",
     ]
   }
 }

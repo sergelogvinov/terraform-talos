@@ -27,5 +27,5 @@ variable "talos_version" {
 }
 
 locals {
-  image = "https://github.com/talos-systems/talos/releases/download/${var.talos_version}/metal-amd64.tar.gz"
+  image = "https://github.com/talos-systems/talos/releases/download/${var.talos_version}/scaleway-amd64.raw.xz"
 }
