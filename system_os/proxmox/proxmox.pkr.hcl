@@ -15,8 +15,10 @@ source "proxmox" "talos" {
   node                     = var.proxmox_nodename
   insecure_skip_tls_verify = true
 
-  # FIXME
-  iso_file    = "local:iso/debian-11.0.0-amd64-netinst.iso"
+  # iso_url          = "http://mirror.rackspace.com/archlinux/iso/2021.09.01/archlinux-2021.09.01-x86_64.iso"
+  # iso_checksum     = "sha1:a0862c8189290e037ff156b93c60d6150b9363b3"
+  # iso_storage_pool = "local"
+  iso_file    = "local:iso/archlinux-2021.09.01-x86_64.iso"
   unmount_iso = true
 
   scsi_controller = "virtio-scsi-pci"
@@ -35,9 +37,18 @@ source "proxmox" "talos" {
 
   memory       = 2048
   ssh_username = "root"
+  ssh_password = "packer"
+  ssh_timeout  = "15m"
+  qemu_agent   = true
 
   template_name        = "talos"
   template_description = "Talos system disk"
+
+  boot_wait    = "15s"
+  boot_command = [
+    "<enter><wait1m>",
+    "passwd<enter>packer<enter>packer<enter>"
+  ]
 }
 
 build {
@@ -46,9 +57,8 @@ build {
 
   provisioner "shell" {
     inline = [
-      "apt-get install -y wget",
-      "wget -O /tmp/talos.raw.xz ${local.image}",
-      "xz -d -c /tmp/talos.raw.xz | dd of=/dev/vda && sync",
+      "curl -L ${local.image} -o /tmp/talos.raw.xz",
+      "xz -d -c /tmp/talos.raw.xz | dd of=/dev/sda && sync",
     ]
   }
 }
@@ -63,7 +73,7 @@ build {
   }
   provisioner "shell" {
     inline = [
-      "xz -d -c /tmp/talos.raw.xz | dd of=/dev/vda && sync",
+      "xz -d -c /tmp/talos.raw.xz | dd of=/dev/sda && sync",
     ]
   }
 }
