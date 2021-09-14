@@ -1,8 +1,15 @@
 
+data "vultr_snapshot" "talos" {
+  filter {
+    name   = "description"
+    values = ["talos system disk"]
+  }
+}
+
 resource "vultr_instance" "controlplane" {
   plan        = "vc2-1c-1gb"
   region      = "ams"
-  snapshot_id = "0d6f3e7b-62e6-429b-ac53-53108843ee21"
+  snapshot_id = data.vultr_snapshot.talos.id
   label       = "talos"
   tag         = "controlplane"
   hostname    = "master-1"
