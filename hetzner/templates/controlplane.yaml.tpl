@@ -9,6 +9,7 @@ machine:
     - "${lbv4_local}"
     - "${ipv4_local}"
     - "${ipv4_vip}"
+    - "${apiDomain}"
   kubelet:
     extraArgs:
       node-ip: "${ipv4_local}"
@@ -16,8 +17,18 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
+      - interface: eth0
+        dhcp: true
+        vip:
+          ip: ${lbv4}
+          hcloud:
+            apiToken: ${hcloud_token}
       - interface: eth1
         dhcp: true
+        vip:
+          ip: ${ipv4_vip}
+          hcloud:
+            apiToken: ${hcloud_token}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -59,6 +70,7 @@ cluster:
       - "${lbv4_local}"
       - "${ipv4_local}"
       - "${ipv4_vip}"
+      - "${apiDomain}"
   controllerManager:
     extraArgs:
         node-cidr-mask-size-ipv4: 24
