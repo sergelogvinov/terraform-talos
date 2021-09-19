@@ -1,5 +1,4 @@
 # NOTE: this release was tested against kubernetes v1.18.x
-
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -55,8 +54,15 @@ spec:
           effect: NoSchedule
         - key: "node.kubernetes.io/not-ready"
           effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: Exists
       containers:
-        - image: hetznercloud/hcloud-cloud-controller-manager:v1.11.1
+        - image: hetznercloud/hcloud-cloud-controller-manager:v1.12.0
           name: hcloud-cloud-controller-manager
           command:
             - "/bin/hcloud-cloud-controller-manager"
