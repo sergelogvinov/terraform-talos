@@ -14,8 +14,6 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
-      - interface: eth1
-        dhcp: true
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -26,6 +24,11 @@ machine:
   install:
     wipe: false
   systemDiskEncryption:
+    state:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
     ephemeral:
       provider: luks2
       keys:
@@ -33,14 +36,12 @@ machine:
           slot: 0
 cluster:
   controlPlane:
-    endpoint: https://${lbv4}:6443
+    endpoint: https://${ipv4_vip}:6443
   clusterName: ${cluster_name}
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
-  proxy:
-    mode: ipvs
   token: ${token}
   ca:
     crt: ${ca}

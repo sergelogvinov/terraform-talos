@@ -54,8 +54,8 @@ cluster:
     endpoint: https://${ipv4_vip}:6443
   network:
     dnsDomain: ${domain}
-    podSubnets: ${format("[%s]",podSubnets)}
-    serviceSubnets: ${format("[%s]",serviceSubnets)}
+    podSubnets: ${format("%#v",split(",",podSubnets))}
+    serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
     cni:
       name: custom
       urls:
