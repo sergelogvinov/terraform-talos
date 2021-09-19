@@ -36,7 +36,7 @@ machine:
           slot: 0
 cluster:
   controlPlane:
-    endpoint: https://${ipv4_vip}:6443
+    endpoint: https://${lbv4}:6443
   clusterName: ${cluster_name}
   network:
     dnsDomain: ${domain}

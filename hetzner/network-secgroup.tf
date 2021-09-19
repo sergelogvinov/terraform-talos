@@ -129,3 +129,38 @@ resource "hcloud_firewall" "worker" {
     source_ips = ["::/0"]
   }
 }
+
+resource "hcloud_firewall" "autoscale" {
+  name   = "worker-auto-scale"
+  labels = merge(var.tags, { type = "infra", label = "worker-auto-scale" })
+
+  # apply_to {
+  #   label_selector = "hcloud/node-group=worker-hel"
+  # }
+
+  rule {
+    direction  = "in"
+    protocol   = "icmp"
+    source_ips = [var.vpc_main_cidr, "::/0"]
+  }
+  rule {
+    direction  = "in"
+    protocol   = "udp"
+    port       = "any"
+    source_ips = [var.vpc_main_cidr]
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "any"
+    source_ips = [var.vpc_main_cidr]
+  }
+
+  # cilium health
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "4240"
+    source_ips = ["::/0"]
+  }
+}
