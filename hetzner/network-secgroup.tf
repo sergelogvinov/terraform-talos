@@ -36,6 +36,12 @@ resource "hcloud_firewall" "controlplane" {
   rule {
     direction  = "in"
     protocol   = "tcp"
+    port       = "2379"
+    source_ips = ["0.0.0.0/0"]
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
     port       = "2380"
     source_ips = ["0.0.0.0/0"]
   }
