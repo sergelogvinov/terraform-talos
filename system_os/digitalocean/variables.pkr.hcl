@@ -12,5 +12,5 @@ variable "do_region" {
 
 variable "talos_version" {
   type    = string
-  default = "v0.11.0"
+  default = "v0.12.2"
 }

@@ -127,9 +127,6 @@ data:
   # Enables L7 proxy for L7 policy enforcement and visibility
   enable-l7-proxy: "true"
 
-  # wait-bpf-mount makes init container wait until bpf filesystem is mounted
-  wait-bpf-mount: "false"
-
   enable-ipv4-masquerade: "true"
   enable-ipv6-masquerade: "true"
   enable-bpf-masquerade: "false"
@@ -543,7 +540,7 @@ spec:
           value: "172.16.0.10"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: "quay.io/cilium/cilium:v1.10.3@sha256:8419531c5d3677158802882bdfe2297915c43f2ebe3649551aaac22de9f6d565"
+        image: "quay.io/cilium/cilium:v1.10.4@sha256:7d354052ccf2a7445101d78cebd14444c7c40129ce7889f2f04b89374dbf8a1d"
         imagePullPolicy: IfNotPresent
         lifecycle:
           postStart:
@@ -620,17 +617,11 @@ spec:
               key: clean-cilium-bpf-state
               name: cilium-config
               optional: true
-        - name: CILIUM_WAIT_BPF_MOUNT
-          valueFrom:
-            configMapKeyRef:
-              key: wait-bpf-mount
-              name: cilium-config
-              optional: true
         - name: KUBERNETES_SERVICE_HOST
           value: "172.16.0.10"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: "quay.io/cilium/cilium:v1.10.3@sha256:8419531c5d3677158802882bdfe2297915c43f2ebe3649551aaac22de9f6d565"
+        image: "quay.io/cilium/cilium:v1.10.4@sha256:7d354052ccf2a7445101d78cebd14444c7c40129ce7889f2f04b89374dbf8a1d"
         imagePullPolicy: IfNotPresent
         name: clean-cilium-state
         securityContext:
@@ -641,7 +632,6 @@ spec:
         volumeMounts:
         - mountPath: /sys/fs/bpf
           name: bpf-maps
-          mountPropagation: HostToContainer
           # Required to mount cgroup filesystem from the host to cilium agent pod
         - mountPath: /sys/fs/cgroup
           name: cilium-cgroup
@@ -786,7 +776,7 @@ spec:
           value: "172.16.0.10"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: "quay.io/cilium/operator-generic:v1.10.3@sha256:337ebf27eae4fbad51cc4baf9110b3ec6753320dd33075bc136e2a1865be5eb5"
+        image: "quay.io/cilium/operator-generic:v1.10.4@sha256:c49a14e34634ff1a494c84b718641f27267fb3a0291ce3d74352b44f8a8d2f93"
         imagePullPolicy: IfNotPresent
         name: cilium-operator
         livenessProbe:

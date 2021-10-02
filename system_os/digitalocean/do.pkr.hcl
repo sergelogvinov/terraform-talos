@@ -14,6 +14,7 @@ source "digitalocean" "talos" {
   region       = var.do_region
   size         = "s-1vcpu-1gb"
   monitoring   = false
+  rescue       = true
 
   ipv6               = true
   private_networking = false
@@ -24,9 +25,10 @@ source "digitalocean" "talos" {
   snapshot_regions = [var.do_region]
 }
 
-# FIXME
 build {
+  name    = "release"
   sources = ["source.digitalocean.talos"]
+
   provisioner "shell" {
     inline = [
       "apt-get install -y wget",
