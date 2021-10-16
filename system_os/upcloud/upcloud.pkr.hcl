@@ -38,7 +38,7 @@ build {
   sources = ["source.upcloud.talos"]
 
   provisioner "file" {
-    source      = "../../../talos-pr/_out/upcloud-amd64.raw.xz"
+    source      = "../../../talos/_out/upcloud-amd64.raw.xz"
     destination = "/tmp/talos.raw.xz"
   }
   provisioner "shell" {

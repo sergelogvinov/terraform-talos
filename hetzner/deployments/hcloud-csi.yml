@@ -226,8 +226,6 @@ spec:
         app: hcloud-csi
     spec:
       tolerations:
-        - effect: NoExecute
-          operator: Exists
         - effect: NoSchedule
           operator: Exists
         - key: CriticalAddonsOnly

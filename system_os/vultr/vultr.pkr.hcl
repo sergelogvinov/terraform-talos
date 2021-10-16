@@ -42,7 +42,7 @@ build {
   sources = ["source.vultr.talos"]
 
   provisioner "file" {
-    source      = "../../../talos-pr/_out/vultr-amd64.raw.xz"
+    source      = "../../../talos/_out/vultr-amd64.raw.xz"
     destination = "/tmp/talos.raw.xz"
   }
   provisioner "shell" {

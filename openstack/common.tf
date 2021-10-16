@@ -27,13 +27,13 @@ resource "openstack_images_image_v2" "talos" {
   min_disk_gb      = 5
 
   properties = {
-    hw_firmware_type = "uefi"
-    hw_disk_bus      = "scsi"
-    hw_scsi_model    = "virtio-scsi"
-    support_rtm      = "yes"
+    # hw_firmware_type = "uefi"
+    hw_disk_bus   = "scsi"
+    hw_scsi_model = "virtio-scsi"
+    support_rtm   = "yes"
   }
 
   visibility = "private"
   # image_source_url = "https://"
-  local_file_path = "../../talos-pr/_out/disk.raw"
+  local_file_path = "../../talos/disk.raw"
 }

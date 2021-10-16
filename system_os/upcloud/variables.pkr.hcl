@@ -22,7 +22,7 @@ variable "upcloud_zones" {
 
 variable "talos_version" {
   type    = string
-  default = "v0.11.0"
+  default = "v0.13.0"
 }
 
 locals {

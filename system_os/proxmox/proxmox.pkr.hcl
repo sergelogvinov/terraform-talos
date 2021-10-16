@@ -68,7 +68,7 @@ build {
   sources = ["source.proxmox.talos"]
 
   provisioner "file" {
-    source      = "../../../talos-pr/_out/nocloud-amd64.raw.xz"
+    source      = "../../../talos/_out/nocloud-amd64.raw.xz"
     destination = "/tmp/talos.raw.xz"
   }
   provisioner "shell" {

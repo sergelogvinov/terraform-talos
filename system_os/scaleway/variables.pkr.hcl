@@ -23,7 +23,7 @@ variable "scaleway_zone" {
 
 variable "talos_version" {
   type    = string
-  default = "v0.12.0"
+  default = "v0.13.0"
 }
 
 locals {
