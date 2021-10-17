@@ -61,3 +61,11 @@ variable "controlplane" {
     count = 0,
   }
 }
+
+variable "worker" {
+  description = "Property of worker"
+  type        = map(any)
+  default = {
+    count = 0,
+  }
+}

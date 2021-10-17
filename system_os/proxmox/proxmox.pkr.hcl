@@ -15,9 +15,9 @@ source "proxmox" "talos" {
   node                     = var.proxmox_nodename
   insecure_skip_tls_verify = true
 
-  iso_file = "local:iso/archlinux-2021.09.01-x86_64.iso"
-  # iso_url          = "http://mirror.rackspace.com/archlinux/iso/2021.09.01/archlinux-2021.09.01-x86_64.iso"
-  # iso_checksum     = "sha1:a0862c8189290e037ff156b93c60d6150b9363b3"
+  iso_file = "local:iso/archlinux-2021.10.01-x86_64.iso"
+  # iso_url          = "https://mirror.rackspace.com/archlinux/iso/2021.10.01/archlinux-2021.10.01-x86_64.iso"
+  # iso_checksum     = "sha1:77a20dcd9d838398cebb2c7c15f46946bdc3855e"
   # iso_storage_pool = "local"
   unmount_iso = true
 

@@ -1,6 +1,6 @@
 
-resource "null_resource" "controlplane_machineconfig" {
-  count = lookup(var.controlplane, "count", 0)
+resource "null_resource" "worker_machineconfig" {
+  count = lookup(var.worker, "count", 0)
   connection {
     type = "ssh"
     user = "root"
@@ -9,29 +9,29 @@ resource "null_resource" "controlplane_machineconfig" {
 
   provisioner "file" {
     # content     = file("init.yaml")
-    source      = "init.yaml"
-    destination = "/var/lib/vz/snippets/master-${count.index + 1}.yml"
+    source      = "worker.yaml"
+    destination = "/var/lib/vz/snippets/worker-${count.index + 1}.yml"
   }
 }
 
-resource "proxmox_vm_qemu" "controlplane" {
-  count       = lookup(var.controlplane, "count", 0)
-  name        = "master-${count.index + 1}"
+resource "proxmox_vm_qemu" "worker" {
+  count       = lookup(var.worker, "count", 0)
+  name        = "worker-${count.index + 1}"
   target_node = var.proxmox_nodename
   clone       = var.proxmox_image
 
   # preprovision           = false
   define_connection_info  = false
   os_type                 = "ubuntu"
-  ipconfig0               = "ip=${cidrhost(var.vpc_main_cidr, 11 + count.index)}/24,gw=${local.gwv4}"
-  cicustom                = "user=local:snippets/master-${count.index + 1}.yml"
+  ipconfig0               = "ip=${cidrhost(var.vpc_main_cidr, 21 + count.index)}/24,gw=${local.gwv4}"
+  cicustom                = "user=local:snippets/worker-${count.index + 1}.yml"
   cloudinit_cdrom_storage = var.proxmox_storage
 
   onboot  = false
   cpu     = "host,flags=+aes"
-  cores   = 2
+  cores   = 1
   sockets = 1
-  memory  = 2048
+  memory  = 1024
   scsihw  = "virtio-scsi-pci"
 
   vga {
@@ -61,10 +61,11 @@ resource "proxmox_vm_qemu" "controlplane" {
 
   lifecycle {
     ignore_changes = [
+      network,
       desc,
       define_connection_info,
     ]
   }
 
-  depends_on = [null_resource.controlplane_machineconfig]
+  depends_on = [null_resource.worker_machineconfig]
 }
