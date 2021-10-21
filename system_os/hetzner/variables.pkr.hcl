@@ -7,9 +7,9 @@ variable "hcloud_token" {
 
 variable "talos_version" {
   type    = string
-  default = "v0.12.0"
+  default = "v0.13.0"
 }
 
 locals {
-  image = "https://github.com/talos-systems/talos/releases/download/${var.talos_version}/openstack-amd64.tar.gz"
+  image = "https://github.com/talos-systems/talos/releases/download/${var.talos_version}/hcloud-amd64.raw.xz"
 }

@@ -31,8 +31,8 @@ build {
   provisioner "shell" {
     inline = [
       "apt-get install -y wget",
-      "wget -O /tmp/talos.tar.gz ${local.image}",
-      "tar xOzf /tmp/talos.tar.gz | dd of=/dev/sda && sync",
+      "wget -O /tmp/talos.raw.xz ${local.image}",
+      "xz -d -c /tmp/talos.raw.xz | dd of=/dev/sda && sync",
     ]
   }
 }
