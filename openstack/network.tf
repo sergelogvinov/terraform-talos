@@ -48,15 +48,14 @@ data "openstack_networking_network_v2" "external" {
 }
 
 resource "openstack_networking_router_v2" "gw" {
-  count          = length(var.regions)
-  region         = element(var.regions, count.index)
-  name           = "private"
-  admin_state_up = true
-  # enable_snat    = true
+  count               = length(var.regions)
+  region              = element(var.regions, count.index)
+  name                = "private"
+  admin_state_up      = true
   external_network_id = data.openstack_networking_network_v2.external[count.index].id
 }
 
-resource "openstack_networking_port_v2" "private" {
+resource "openstack_networking_port_v2" "gw" {
   count          = length(var.regions)
   region         = element(var.regions, count.index)
   name           = "gw"
@@ -72,5 +71,5 @@ resource "openstack_networking_router_interface_v2" "private" {
   count     = length(var.regions)
   region    = element(var.regions, count.index)
   router_id = openstack_networking_router_v2.gw[count.index].id
-  port_id   = openstack_networking_port_v2.private[count.index].id
+  port_id   = openstack_networking_port_v2.gw[count.index].id
 }

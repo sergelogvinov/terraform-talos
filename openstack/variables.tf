@@ -16,6 +16,20 @@ variable "regions" {
   default     = ["GRA7", "UK1"]
 }
 
+variable "kubernetes" {
+  type = map(string)
+  default = {
+    podSubnets     = "10.32.0.0/12,fd40:10:32::/102"
+    serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
+    domain         = "cluster.local"
+    apiDomain      = "api.cluster.local"
+    cluster_name   = "talos-k8s-hezner"
+    tokenmachine   = ""
+    token          = ""
+    ca             = ""
+  }
+}
+
 variable "controlplane" {
   description = "Property of controlplane"
   type        = map(any)
