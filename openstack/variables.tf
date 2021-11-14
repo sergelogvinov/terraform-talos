@@ -23,11 +23,13 @@ variable "kubernetes" {
     serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
     domain         = "cluster.local"
     apiDomain      = "api.cluster.local"
-    cluster_name   = "talos-k8s-hezner"
-    tokenmachine   = ""
+    clusterName    = "talos-k8s-hezner"
+    tokenMachine   = ""
+    caMachine      = ""
     token          = ""
     ca             = ""
   }
+  sensitive = true
 }
 
 variable "controlplane" {

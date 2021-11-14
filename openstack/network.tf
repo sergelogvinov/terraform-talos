@@ -24,7 +24,8 @@ resource "openstack_networking_subnet_v2" "core" {
     start = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, count.index * 4), 11)
     end   = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, count.index * 4), -7)
   }
-  ip_version = 4
+  ip_version      = 4
+  dns_nameservers = ["1.1.1.1", "8.8.8.8"]
 }
 
 resource "openstack_networking_subnet_v2" "private" {
@@ -37,7 +38,8 @@ resource "openstack_networking_subnet_v2" "private" {
     start = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, 1 + count.index * 4), 11)
     end   = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, 1 + count.index * 4), -7)
   }
-  ip_version = 4
+  ip_version      = 4
+  dns_nameservers = ["1.1.1.1", "8.8.8.8"]
 }
 
 data "openstack_networking_network_v2" "external" {

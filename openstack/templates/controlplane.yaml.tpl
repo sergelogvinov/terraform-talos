@@ -19,6 +19,11 @@ machine:
     interfaces:
       - interface: eth0
         dhcp: true
+        addresses:
+          - ${ipv6}/56
+        routes:
+          - network: ::/0
+            gateway: ${ipv6_gw}
       - interface: eth1
         dhcp: true
         vip:

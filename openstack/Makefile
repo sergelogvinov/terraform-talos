@@ -13,15 +13,13 @@ create-templates:
 	@echo 'serviceSubnets: "10.200.0.0/22,fd40:10:200::/112"'  >> _cfgs/tfstate.vars
 	@echo 'apiDomain: api.cluster.local'                       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.network.dnsDomain' _cfgs/controlplane.yaml | awk '{ print "domain: "$$1}'       >> _cfgs/tfstate.vars
-	@yq eval '.cluster.clusterName' _cfgs/controlplane.yaml       | awk '{ print "cluster_name: "$$1}' >> _cfgs/tfstate.vars
-	@yq eval '.machine.token'  _cfgs/controlplane.yaml            | awk '{ print "tokenmachine: "$$1}' >> _cfgs/tfstate.vars
+	@yq eval '.cluster.clusterName' _cfgs/controlplane.yaml       | awk '{ print "clusterName: "$$1}'  >> _cfgs/tfstate.vars
+	@yq eval '.machine.token'  _cfgs/controlplane.yaml            | awk '{ print "tokenMachine: "$$1}' >> _cfgs/tfstate.vars
+	@yq eval '.machine.ca.crt' _cfgs/controlplane.yaml            | awk '{ print "caMachine: "$$1}'    >> _cfgs/tfstate.vars
 	@yq eval '.cluster.token'  _cfgs/controlplane.yaml            | awk '{ print "token: "$$1}'        >> _cfgs/tfstate.vars
 	@yq eval '.cluster.ca.crt' _cfgs/controlplane.yaml            | awk '{ print "ca: "$$1}'           >> _cfgs/tfstate.vars
 
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
-
-# create-controlplane: ## Bootstrap first controlplane node
-# 	terraform apply -target=hcloud_server.controlplane
 
 create-kubeconfig:
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.18.0.11 kubeconfig
