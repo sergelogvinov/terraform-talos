@@ -8,8 +8,16 @@ resource "null_resource" "controlplane_machineconfig" {
   }
 
   provisioner "file" {
-    # content     = file("init.yaml")
-    source      = "init.yaml"
+    content = templatefile("${path.module}/templates/controlplane.yaml",
+      merge(var.kubernetes, {
+        name        = "master-${count.index + 1}"
+        type        = "controlplane"
+        ipv4_local  = "192.168.10.11"
+        ipv4_vip    = "192.168.10.10"
+        nodeSubnets = "${var.vpc_main_cidr},!192.168.10.10/32"
+      })
+    )
+
     destination = "/var/lib/vz/snippets/master-${count.index + 1}.yml"
   }
 }
@@ -46,7 +54,7 @@ resource "proxmox_vm_qemu" "controlplane" {
   network {
     model    = "virtio"
     bridge   = var.proxmox_bridge
-    firewall = true
+    firewall = false
   }
 
   boot = "order=scsi0"
