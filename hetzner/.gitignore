@@ -1,4 +1,5 @@
 _cfgs/
-controlplane-*.yaml
 templates/controlplane.yaml
+controlplane-*.yaml
+worker-*.yaml
 *.patch

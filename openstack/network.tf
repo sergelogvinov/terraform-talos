@@ -21,7 +21,7 @@ resource "openstack_networking_subnet_v2" "core" {
   cidr       = cidrsubnet(var.vpc_main_cidr, 8, count.index * 4)
   no_gateway = true
   allocation_pool {
-    start = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, count.index * 4), 11)
+    start = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, count.index * 4), 100)
     end   = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, count.index * 4), -7)
   }
   ip_version      = 4
@@ -35,7 +35,7 @@ resource "openstack_networking_subnet_v2" "private" {
   network_id = data.openstack_networking_network_v2.main[count.index].id
   cidr       = cidrsubnet(var.vpc_main_cidr, 8, 1 + count.index * 4)
   allocation_pool {
-    start = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, 1 + count.index * 4), 11)
+    start = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, 1 + count.index * 4), 100)
     end   = cidrhost(cidrsubnet(var.vpc_main_cidr, 8, 1 + count.index * 4), -7)
   }
   ip_version      = 4

@@ -14,7 +14,7 @@ resource "null_resource" "controlplane_machineconfig" {
         type        = "controlplane"
         ipv4_local  = "192.168.10.11"
         ipv4_vip    = "192.168.10.10"
-        nodeSubnets = "${var.vpc_main_cidr},!192.168.10.10/32"
+        nodeSubnets = "${var.vpc_main_cidr}"
       })
     )
 

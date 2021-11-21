@@ -17,7 +17,7 @@ locals {
 }
 
 resource "openstack_compute_instance_v2" "worker" {
-  count       = 1
+  count       = 0
   name        = "worker-${count.index + 1}"
   image_id    = openstack_images_image_v2.talos[count.index].id
   flavor_name = "s1-2"

@@ -43,7 +43,7 @@ data "openstack_networking_subnet_v2" "controlplane_public" {
 }
 
 resource "openstack_compute_instance_v2" "controlplane" {
-  count       = 1
+  count       = 0
   name        = "master-${count.index + 1}"
   image_id    = openstack_images_image_v2.talos[count.index].id
   flavor_name = "s1-2"
