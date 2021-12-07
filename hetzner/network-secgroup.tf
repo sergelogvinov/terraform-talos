@@ -6,7 +6,7 @@ resource "hcloud_firewall" "controlplane" {
   rule {
     direction  = "in"
     protocol   = "icmp"
-    source_ips = [var.vpc_main_cidr, "::/0"]
+    source_ips = concat(var.whitelist_admins, [var.vpc_main_cidr, "::/0"])
   }
   rule {
     direction  = "in"
@@ -19,6 +19,24 @@ resource "hcloud_firewall" "controlplane" {
     protocol   = "tcp"
     port       = "any"
     source_ips = [var.vpc_main_cidr]
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "any"
+    source_ips = var.whitelist_admins
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "80"
+    source_ips = var.whitelist_admins
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "443"
+    source_ips = var.whitelist_admins
   }
 
   rule {

@@ -16,10 +16,12 @@ variable "kubernetes" {
   default = {
     podSubnets     = "10.32.0.0/12,fd40:10:32::/102"
     serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
+    nodeSubnets    = "192.168.0.0/16"
     domain         = "cluster.local"
     apiDomain      = "api.cluster.local"
-    cluster_name   = "talos-k8s-hezner"
-    tokenmachine   = ""
+    clusterName    = "talos-k8s-hezner"
+    tokenMachine   = ""
+    caMachine      = ""
     token          = ""
     ca             = ""
   }

@@ -16,7 +16,7 @@ module "worker" {
   vm_security_group = [hcloud_firewall.worker.id]
 
   vm_params = merge(var.kubernetes, {
-    lbv4   = local.lbv4
-    labels = "node.kubernetes.io/role=worker,node.kubernetes.io/disktype=ssd"
+    lbv4   = local.ipv4_vip
+    labels = "node.kubernetes.io/role=worker,node.kubernetes.io/disktype=ssd,topology.kubernetes.io/region=${each.key}"
   })
 }

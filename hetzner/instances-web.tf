@@ -17,6 +17,6 @@ module "web" {
 
   vm_params = merge(var.kubernetes, {
     lbv4   = local.ipv4_vip
-    labels = "node.kubernetes.io/role=web,node.kubernetes.io/disktype=ssd"
+    labels = "node.kubernetes.io/role=web,node.kubernetes.io/disktype=ssd,topology.kubernetes.io/region=${each.key}"
   })
 }
