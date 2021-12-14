@@ -22,13 +22,8 @@ resource "oci_core_route_table" "private" {
     destination_type  = "CIDR_BLOCK"
   }
   route_rules {
-    network_entity_id = oci_core_internet_gateway.main.id
-    destination       = "::/0"
-    destination_type  = "CIDR_BLOCK"
-  }
-  route_rules {
     network_entity_id = oci_core_service_gateway.main.id
-    destination       = data.oci_core_services.main.services[0]["cidr_block"]
+    destination       = data.oci_core_services.object_store.services[0]["cidr_block"]
     destination_type  = "SERVICE_CIDR_BLOCK"
   }
 }
