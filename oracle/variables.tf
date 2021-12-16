@@ -28,7 +28,11 @@ locals {
   nsg_contolplane_lb = data.terraform_remote_state.prepare.outputs.nsg_contolplane_lb
   network_lb         = data.terraform_remote_state.prepare.outputs.network_lb
 
+  nsg_cilium      = data.terraform_remote_state.prepare.outputs.nsg_cilium
+  nsg_talos       = data.terraform_remote_state.prepare.outputs.nsg_talos
   nsg_contolplane = data.terraform_remote_state.prepare.outputs.nsg_contolplane
+  nsg_web         = data.terraform_remote_state.prepare.outputs.nsg_web
+
   network_public  = data.terraform_remote_state.prepare.outputs.network_public
   network_private = data.terraform_remote_state.prepare.outputs.network_private
 }
