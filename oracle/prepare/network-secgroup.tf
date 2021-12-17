@@ -1,4 +1,58 @@
 
+resource "oci_core_default_security_list" "main" {
+  compartment_id             = var.compartment_ocid
+  manage_default_resource_id = oci_core_vcn.main.default_security_list_id
+  display_name               = "DefaultSecurityList"
+
+  dynamic "egress_security_rules" {
+    for_each = ["0.0.0.0/0", "::/0"]
+    content {
+      destination = egress_security_rules.value
+      protocol    = 6
+      stateless   = true
+    }
+  }
+  dynamic "egress_security_rules" {
+    for_each = ["0.0.0.0/0", "::/0"]
+    content {
+      destination = egress_security_rules.value
+      protocol    = 17
+      stateless   = true
+    }
+  }
+  egress_security_rules {
+    destination = "0.0.0.0/0"
+    protocol    = "1"
+  }
+
+  dynamic "ingress_security_rules" {
+    for_each = ["0.0.0.0/0", "::/0"]
+    content {
+      source    = ingress_security_rules.value
+      protocol  = 6
+      stateless = true
+    }
+  }
+  dynamic "ingress_security_rules" {
+    for_each = ["0.0.0.0/0", "::/0"]
+    content {
+      source    = ingress_security_rules.value
+      protocol  = 17
+      stateless = true
+    }
+  }
+
+  ingress_security_rules {
+    protocol  = 1
+    source    = "0.0.0.0/0"
+    stateless = true
+    icmp_options {
+      type = 3
+      code = 4
+    }
+  }
+}
+
 resource "oci_core_network_security_group" "cilium" {
   display_name   = "${var.project}-cilium"
   compartment_id = var.compartment_ocid

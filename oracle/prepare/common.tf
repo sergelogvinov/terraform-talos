@@ -14,3 +14,7 @@ data "oci_core_services" "object_store" {
     regex  = true
   }
 }
+
+data "oci_objectstorage_namespace" "ns" {
+  compartment_id = var.tenancy_ocid
+}
