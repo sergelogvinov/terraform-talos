@@ -4,48 +4,39 @@ resource "oci_core_default_security_list" "main" {
   manage_default_resource_id = oci_core_vcn.main.default_security_list_id
   display_name               = "DefaultSecurityList"
 
-  dynamic "egress_security_rules" {
-    for_each = ["0.0.0.0/0", "::/0"]
-    content {
-      destination = egress_security_rules.value
-      protocol    = 6
-      stateless   = true
-    }
-  }
-  dynamic "egress_security_rules" {
-    for_each = ["0.0.0.0/0", "::/0"]
-    content {
-      destination = egress_security_rules.value
-      protocol    = 17
-      stateless   = true
-    }
+  egress_security_rules {
+    protocol    = 1
+    destination = oci_core_vcn.main.cidr_block
+    stateless   = true
   }
   egress_security_rules {
-    destination = "0.0.0.0/0"
-    protocol    = "1"
+    protocol    = 58
+    destination = oci_core_vcn.main.ipv6cidr_blocks[0]
+    stateless   = true
   }
-
-  dynamic "ingress_security_rules" {
+  dynamic "egress_security_rules" {
     for_each = ["0.0.0.0/0", "::/0"]
     content {
-      source    = ingress_security_rules.value
-      protocol  = 6
-      stateless = true
-    }
-  }
-  dynamic "ingress_security_rules" {
-    for_each = ["0.0.0.0/0", "::/0"]
-    content {
-      source    = ingress_security_rules.value
-      protocol  = 17
-      stateless = true
+      protocol    = "all"
+      destination = egress_security_rules.value
+      stateless   = false
     }
   }
 
   ingress_security_rules {
     protocol  = 1
-    source    = "0.0.0.0/0"
+    source    = oci_core_vcn.main.cidr_block
     stateless = true
+  }
+  ingress_security_rules {
+    protocol  = 58
+    source    = oci_core_vcn.main.ipv6cidr_blocks[0]
+    stateless = true
+  }
+  ingress_security_rules {
+    protocol  = 1
+    source    = "0.0.0.0/0"
+    stateless = false
     icmp_options {
       type = 3
       code = 4
@@ -58,24 +49,54 @@ resource "oci_core_network_security_group" "cilium" {
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.main.id
 }
-resource "oci_core_network_security_group_security_rule" "cilium_vxvlan" {
-  network_security_group_id = oci_core_network_security_group.cilium.id
+resource "oci_core_network_security_group_security_rule" "cilium_vxvlan_in" {
+  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
 
-  protocol  = "17"
-  direction = "INGRESS"
-  source    = var.vpc_main_cidr
-  stateless = true
+  network_security_group_id = oci_core_network_security_group.cilium.id
+  protocol                  = "17"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = true
 
   udp_options {
+    source_port_range {
+      min = 8472
+      max = 8472
+    }
+    destination_port_range {
+      min = 8472
+      max = 8472
+    }
+  }
+}
+resource "oci_core_network_security_group_security_rule" "cilium_vxvlan_out" {
+  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
+
+  network_security_group_id = oci_core_network_security_group.cilium.id
+  protocol                  = "17"
+  direction                 = "EGRESS"
+  destination               = each.value
+  stateless                 = true
+
+  udp_options {
+    source_port_range {
+      min = 8472
+      max = 8472
+    }
+    destination_port_range {
+      min = 8472
+      max = 8472
+    }
   }
 }
 resource "oci_core_network_security_group_security_rule" "cilium_health" {
-  network_security_group_id = oci_core_network_security_group.cilium.id
+  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
 
-  protocol  = "6"
-  direction = "INGRESS"
-  source    = var.vpc_main_cidr
-  stateless = true
+  network_security_group_id = oci_core_network_security_group.cilium.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
 
   tcp_options {
     destination_port_range {
@@ -92,12 +113,13 @@ resource "oci_core_network_security_group" "talos" {
 }
 
 resource "oci_core_network_security_group_security_rule" "talos" {
-  network_security_group_id = oci_core_network_security_group.talos.id
+  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
 
-  protocol  = "6"
-  direction = "INGRESS"
-  source    = var.vpc_main_cidr
-  stateless = true
+  network_security_group_id = oci_core_network_security_group.talos.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
 
   tcp_options {
     destination_port_range {
@@ -106,19 +128,35 @@ resource "oci_core_network_security_group_security_rule" "talos" {
     }
   }
 }
+resource "oci_core_network_security_group_security_rule" "talos_admin" {
+  for_each = toset(var.whitelist_admins)
 
-resource "oci_core_network_security_group_security_rule" "admin_ssh" {
   network_security_group_id = oci_core_network_security_group.talos.id
-
-  protocol  = "6"
-  direction = "INGRESS"
-  source    = var.vpc_main_cidr
-  stateless = true
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
 
   tcp_options {
     destination_port_range {
-      min = 22
-      max = 22
+      min = 50000
+      max = 50001
+    }
+  }
+}
+resource "oci_core_network_security_group_security_rule" "ntp" {
+  for_each = toset(["0.0.0.0/0", "::/0"])
+
+  network_security_group_id = oci_core_network_security_group.talos.id
+  protocol                  = "17"
+  direction                 = "EGRESS"
+  destination               = each.value
+  stateless                 = false
+
+  udp_options {
+    destination_port_range {
+      min = 123
+      max = 123
     }
   }
 }
@@ -130,20 +168,54 @@ resource "oci_core_network_security_group" "contolplane_lb" {
 }
 
 resource "oci_core_network_security_group_security_rule" "kubernetes" {
-  network_security_group_id = oci_core_network_security_group.contolplane_lb.id
+  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
 
-  protocol  = "6"
-  direction = "INGRESS"
-  source    = var.vpc_main_cidr
-  stateless = true
+  network_security_group_id = oci_core_network_security_group.contolplane_lb.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
 
   tcp_options {
     destination_port_range {
-      min = 80
-      max = 80
+      min = 6443
+      max = 6443
     }
   }
 }
+resource "oci_core_network_security_group_security_rule" "kubernetes_admin" {
+  for_each = toset(var.whitelist_admins)
+
+  network_security_group_id = oci_core_network_security_group.contolplane_lb.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 6443
+      max = 6443
+    }
+  }
+}
+resource "oci_core_network_security_group_security_rule" "kubernetes_talos_admin" {
+  for_each = toset(var.whitelist_admins)
+
+  network_security_group_id = oci_core_network_security_group.contolplane_lb.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 50000
+      max = 50000
+    }
+  }
+}
+
 
 resource "oci_core_network_security_group" "contolplane" {
   display_name   = "${var.project}-contolplane"
@@ -151,12 +223,29 @@ resource "oci_core_network_security_group" "contolplane" {
   vcn_id         = oci_core_vcn.main.id
 }
 resource "oci_core_network_security_group_security_rule" "contolplane_kubernetes" {
-  network_security_group_id = oci_core_network_security_group.contolplane.id
+  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
 
-  protocol  = "6"
-  direction = "INGRESS"
-  source    = "0.0.0.0/0"
-  stateless = true
+  network_security_group_id = oci_core_network_security_group.contolplane.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 6443
+      max = 6443
+    }
+  }
+}
+resource "oci_core_network_security_group_security_rule" "contolplane_kubernetes_admin" {
+  for_each = toset(var.whitelist_admins)
+
+  network_security_group_id = oci_core_network_security_group.contolplane.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
 
   tcp_options {
     destination_port_range {
@@ -166,12 +255,13 @@ resource "oci_core_network_security_group_security_rule" "contolplane_kubernetes
   }
 }
 resource "oci_core_network_security_group_security_rule" "contolplane_etcd" {
-  network_security_group_id = oci_core_network_security_group.contolplane.id
+  for_each = toset([oci_core_vcn.main.cidr_block])
 
-  protocol  = "6"
-  direction = "INGRESS"
-  source    = var.vpc_main_cidr
-  stateless = true
+  network_security_group_id = oci_core_network_security_group.contolplane.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
 
   tcp_options {
     destination_port_range {
@@ -186,13 +276,46 @@ resource "oci_core_network_security_group" "web" {
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.main.id
 }
-resource "oci_core_network_security_group_security_rule" "web_http" {
-  network_security_group_id = oci_core_network_security_group.web.id
+resource "oci_core_network_security_group_security_rule" "web_http_health_check" {
+  for_each = toset([oci_core_vcn.main.cidr_block])
 
-  protocol  = "6"
-  direction = "INGRESS"
-  source    = "0.0.0.0/0"
-  stateless = true
+  network_security_group_id = oci_core_network_security_group.web.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 80
+      max = 80
+    }
+  }
+}
+resource "oci_core_network_security_group_security_rule" "web_http_admin" {
+  for_each = toset(var.whitelist_admins)
+
+  network_security_group_id = oci_core_network_security_group.web.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 80
+      max = 80
+    }
+  }
+}
+resource "oci_core_network_security_group_security_rule" "web_http" {
+  for_each = toset(var.whitelist_web)
+
+  network_security_group_id = oci_core_network_security_group.web.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
 
   tcp_options {
     destination_port_range {
@@ -202,12 +325,13 @@ resource "oci_core_network_security_group_security_rule" "web_http" {
   }
 }
 resource "oci_core_network_security_group_security_rule" "web_https" {
-  network_security_group_id = oci_core_network_security_group.web.id
+  for_each = toset(var.whitelist_web)
 
-  protocol  = "6"
-  direction = "INGRESS"
-  source    = "0.0.0.0/0"
-  stateless = true
+  network_security_group_id = oci_core_network_security_group.web.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
 
   tcp_options {
     destination_port_range {

@@ -1,2 +1,5 @@
+_cfgs/
+templates/controlplane.yaml
 *.json
 *.qcow2
+talosctl*
