@@ -7,6 +7,14 @@ resource "oci_objectstorage_object" "talos_amd64" {
   content_md5 = filemd5("oracle-amd64.qcow2")
 }
 
+resource "oci_objectstorage_object" "talos_arm64" {
+  bucket      = oci_objectstorage_bucket.images.name
+  namespace   = data.oci_objectstorage_namespace.ns.namespace
+  object      = "talos-arm64.qcow2"
+  source      = "oracle-arm64.qcow2"
+  content_md5 = filemd5("oracle-arm64.qcow2")
+}
+
 resource "oci_core_image" "talos_amd64" {
   compartment_id = var.tenancy_ocid
 
@@ -18,6 +26,28 @@ resource "oci_core_image" "talos_amd64" {
     namespace_name = oci_objectstorage_bucket.images.namespace
     bucket_name    = oci_objectstorage_bucket.images.name
     object_name    = oci_objectstorage_object.talos_amd64.object
+
+    operating_system         = "Talos"
+    operating_system_version = "0.14.0"
+    source_image_type        = "QCOW2"
+  }
+
+  timeouts {
+    create = "30m"
+  }
+}
+
+resource "oci_core_image" "talos_arm64" {
+  compartment_id = var.tenancy_ocid
+
+  display_name = "Talos-arm64"
+  launch_mode  = "NATIVE"
+
+  image_source_details {
+    source_type    = "objectStorageTuple"
+    namespace_name = oci_objectstorage_bucket.images.namespace
+    bucket_name    = oci_objectstorage_bucket.images.name
+    object_name    = oci_objectstorage_object.talos_arm64.object
 
     operating_system         = "Talos"
     operating_system_version = "0.14.0"
