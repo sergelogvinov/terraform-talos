@@ -12,13 +12,6 @@ resource "oci_core_instance_pool" "web" {
     primary_subnet_id   = local.network_public[local.zone].id
   }
 
-  # load_balancers {
-  #   backend_set_name = oci_network_load_balancer_backend_set.web.name
-  #   load_balancer_id = oci_network_load_balancer_network_load_balancer.web.id
-  #   port             = 80
-  #   vnic_selection   = "PrimaryVnic"
-  # }
-
   lifecycle {
     ignore_changes = [
       # size,
@@ -49,13 +42,13 @@ resource "oci_core_instance_configuration" "web" {
       }
 
       metadata = {
-        user_data = templatefile("${path.module}/templates/web.yaml.tpl",
+        user_data = base64encode(templatefile("${path.module}/templates/web.yaml.tpl",
           merge(var.kubernetes, {
             lbv4        = local.lbv4_local
             lbv4_web    = local.lbv4_web
             nodeSubnets = local.network_public[local.zone].cidr_block
           })
-        )
+        ))
       }
 
       source_details {
@@ -67,7 +60,7 @@ resource "oci_core_instance_configuration" "web" {
         display_name              = "${var.project}-web"
         assign_private_dns_record = false
         assign_public_ip          = true
-        nsg_ids                   = [local.nsg_talos, local.nsg_cilium, local.nsg_web, local.nsg_contolplane]
+        nsg_ids                   = [local.nsg_talos, local.nsg_cilium, local.nsg_web]
         subnet_id                 = local.network_public[local.zone].id
         skip_source_dest_check    = true
       }
@@ -99,7 +92,7 @@ data "oci_core_instance_pool_instances" "web" {
 }
 
 resource "oci_network_load_balancer_backend" "web_http" {
-  for_each = { for instances in data.oci_core_instance_pool_instances.web.instances.* : instances.display_name => instances.id }
+  for_each = local.lbv4_web_enable ? { for instances in data.oci_core_instance_pool_instances.web.instances.* : instances.display_name => instances.id } : {}
 
   backend_set_name         = oci_network_load_balancer_backend_set.web_http[0].name
   network_load_balancer_id = oci_network_load_balancer_network_load_balancer.web[0].id
@@ -114,7 +107,7 @@ resource "oci_network_load_balancer_backend" "web_http" {
 }
 
 resource "oci_network_load_balancer_backend" "web_https" {
-  for_each = { for instances in data.oci_core_instance_pool_instances.web.instances.* : instances.display_name => instances.id }
+  for_each = local.lbv4_web_enable ? { for instances in data.oci_core_instance_pool_instances.web.instances.* : instances.display_name => instances.id } : {}
 
   backend_set_name         = oci_network_load_balancer_backend_set.web_https[0].name
   network_load_balancer_id = oci_network_load_balancer_network_load_balancer.web[0].id

@@ -3,6 +3,9 @@ variable "compartment_ocid" {}
 variable "tenancy_ocid" {}
 variable "user_ocid" {}
 variable "fingerprint" {}
+variable "key_file" {
+  default = "~/.oci/oci_public.pem"
+}
 
 variable "project" {
   type    = string
@@ -26,16 +29,15 @@ locals {
   project = data.terraform_remote_state.prepare.outputs.project
   zone    = data.terraform_remote_state.prepare.outputs.zones[0]
 
-  nsg_contolplane_lb = data.terraform_remote_state.prepare.outputs.nsg_contolplane_lb
-  network_lb         = data.terraform_remote_state.prepare.outputs.network_lb
-
-  nsg_cilium      = data.terraform_remote_state.prepare.outputs.nsg_cilium
-  nsg_talos       = data.terraform_remote_state.prepare.outputs.nsg_talos
-  nsg_contolplane = data.terraform_remote_state.prepare.outputs.nsg_contolplane
-  nsg_web         = data.terraform_remote_state.prepare.outputs.nsg_web
-
+  network_lb      = data.terraform_remote_state.prepare.outputs.network_lb
   network_public  = data.terraform_remote_state.prepare.outputs.network_public
   network_private = data.terraform_remote_state.prepare.outputs.network_private
+
+  nsg_contolplane_lb = data.terraform_remote_state.prepare.outputs.nsg_contolplane_lb
+  nsg_contolplane    = data.terraform_remote_state.prepare.outputs.nsg_contolplane
+  nsg_web            = data.terraform_remote_state.prepare.outputs.nsg_web
+  nsg_cilium         = data.terraform_remote_state.prepare.outputs.nsg_cilium
+  nsg_talos          = data.terraform_remote_state.prepare.outputs.nsg_talos
 }
 
 variable "kubernetes" {
@@ -52,7 +54,7 @@ variable "kubernetes" {
     token          = ""
     ca             = ""
   }
-  # sensitive = true
+  sensitive = true
 }
 
 variable "controlplane" {
@@ -72,9 +74,9 @@ variable "instances" {
   default = {
     "jNdv:eu-amsterdam-1-AD-1" = {
       web_count             = 0,
-      web_instance_shape    = "VM.Standard.E4.Flex",
+      web_instance_shape    = "VM.Standard.E2.1.Micro",
       web_instance_ocpus    = 1,
-      web_instance_memgb    = 3,
+      web_instance_memgb    = 1,
       worker_count          = 0,
       worker_instance_shape = "VM.Standard.E2.1.Micro",
       worker_instance_ocpus = 1,
