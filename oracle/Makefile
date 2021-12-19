@@ -5,7 +5,8 @@ help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 create-network: ## Create networks
-	cd prepare && terraform init && terraform apply -auto-approve
+	cd prepare && terraform init && terraform apply -target=oci_core_vcn.main -auto-approve
+	cd prepare && terraform apply -auto-approve
 
 create-lb: ## Create loadbalancer
 	terraform init

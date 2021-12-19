@@ -1,6 +1,10 @@
 
 data "oci_identity_availability_domains" "main" {
-  compartment_id = var.tenancy_ocid
+  compartment_id = var.compartment_ocid
+}
+
+data "oci_objectstorage_namespace" "ns" {
+  compartment_id = var.compartment_ocid
 }
 
 locals {
@@ -13,8 +17,4 @@ data "oci_core_services" "object_store" {
     values = ["OCI .* Object Storage"]
     regex  = true
   }
-}
-
-data "oci_objectstorage_namespace" "ns" {
-  compartment_id = var.tenancy_ocid
 }

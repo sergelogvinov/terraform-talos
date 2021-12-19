@@ -16,10 +16,10 @@ resource "oci_objectstorage_object" "talos_arm64" {
 }
 
 resource "oci_core_image" "talos_amd64" {
-  compartment_id = var.tenancy_ocid
+  compartment_id = var.compartment_ocid
 
   display_name = "Talos-amd64"
-  launch_mode  = "NATIVE"
+  launch_mode  = "PARAVIRTUALIZED"
 
   image_source_details {
     source_type    = "objectStorageTuple"
@@ -38,10 +38,10 @@ resource "oci_core_image" "talos_amd64" {
 }
 
 resource "oci_core_image" "talos_arm64" {
-  compartment_id = var.tenancy_ocid
+  compartment_id = var.compartment_ocid
 
   display_name = "Talos-arm64"
-  launch_mode  = "NATIVE"
+  launch_mode  = "PARAVIRTUALIZED"
 
   image_source_details {
     source_type    = "objectStorageTuple"
@@ -59,69 +59,36 @@ resource "oci_core_image" "talos_arm64" {
   }
 }
 
-# resource "oci_core_compute_image_capability_schema" "talos_amd64" {
-#   compartment_id = var.tenancy_ocid
+data "oci_core_compute_global_image_capability_schemas" "default" {}
+data "oci_core_compute_global_image_capability_schemas_version" "default" {
+  compute_global_image_capability_schema_id           = data.oci_core_compute_global_image_capability_schemas.default.compute_global_image_capability_schemas[0].id
+  compute_global_image_capability_schema_version_name = data.oci_core_compute_global_image_capability_schemas.default.compute_global_image_capability_schemas[0].current_version_name
+}
 
-#   compute_global_image_capability_schema_version_name = data.oci_core_compute_global_image_capability_schemas_version.default.name
+resource "oci_core_compute_image_capability_schema" "talos_amd64" {
+  compartment_id                                      = var.compartment_ocid
+  compute_global_image_capability_schema_version_name = data.oci_core_compute_global_image_capability_schemas.default.compute_global_image_capability_schemas[0].current_version_name
 
-#   display_name = "Talos-amd64"
-#   image_id     = oci_core_image.talos_amd64.id
+  display_name = "Talos-amd64"
+  image_id     = oci_core_image.talos_amd64.id
+  schema_data = {
+    "Storage.BootVolumeType" = "{\"descriptorType\":\"enumstring\",\"values\":[\"SCSI\",\"IDE\",\"PARAVIRTUALIZED\"],\"defaultValue\":\"PARAVIRTUALIZED\",\"source\":\"IMAGE\"}",
+  }
+}
 
-#   schema_data = {
-#     "Storage.BootVolumeType" = "{\"descriptorType\":\"enumstring\",\"values\":[\"SCSI\",\"IDE\",\"PARAVIRTUALIZED\"],\"defaultValue\":\"PARAVIRTUALIZED\",\"source\":\"GLOBAL\"}",
-#   }
-# }
+resource "oci_core_compute_image_capability_schema" "talos_arm64" {
+  compartment_id                                      = var.compartment_ocid
+  compute_global_image_capability_schema_version_name = data.oci_core_compute_global_image_capability_schemas.default.compute_global_image_capability_schemas[0].current_version_name
 
-# data "oci_core_compute_image_capability_schemas" "talos_amd64" {
-#   compartment_id = var.tenancy_ocid
-#   image_id       = oci_core_image.talos_amd64.id
-# }
+  display_name = "Talos-arm64"
+  image_id     = oci_core_image.talos_arm64.id
+  schema_data = {
+    "Storage.BootVolumeType" = "{\"descriptorType\":\"enumstring\",\"values\":[\"SCSI\",\"IDE\",\"PARAVIRTUALIZED\"],\"defaultValue\":\"PARAVIRTUALIZED\",\"source\":\"IMAGE\"}",
+  }
+}
 
-# data "oci_core_compute_global_image_capability_schemas_versions" "default" {
-#   compute_global_image_capability_schema_id = data.oci_core_compute_global_image_capability_schema.default.id
-# }
-
-# data "oci_core_compute_global_image_capability_schemas" "default" {
-#   display_name = "OCI.ComputeGlobalImageCapabilitySchema"
-# }
-
-# data "oci_core_compute_global_image_capability_schema" "default" {
-#   compute_global_image_capability_schema_id = data.oci_core_compute_global_image_capability_schemas.default.compute_global_image_capability_schemas[0].id
-# }
-
-# data "oci_core_compute_global_image_capability_schemas_version" "default" {
-#   compute_global_image_capability_schema_id           = data.oci_core_compute_global_image_capability_schema.default.id
-#   compute_global_image_capability_schema_version_name = data.oci_core_compute_global_image_capability_schemas_versions.default.compute_global_image_capability_schema_versions[0].name
-# }
-
-# data "oci_core_compute_image_capability_schema" "test_compute_image_capability_schema" {
-#   compute_image_capability_schema_id = oci_core_compute_image_capability_schema.test_compute_image_capability_schema.id
-#   is_merge_enabled                   = "true"
-# }
-
-# resource "oci_core_compute_image_capability_schema" "test_compute_image_capability_schema" {
-#   compartment_id                                      = var.tenancy_ocid
-#   compute_global_image_capability_schema_version_name = data.oci_core_compute_global_image_capability_schemas_versions.test_compute_global_image_capability_schemas_versions_datasource.compute_global_image_capability_schema_versions[0].name
-#   display_name                                        = "displayName"
-#   image_id                                            = oci_core_image.talos_amd64.id
-
-#   schema_data = {
-#     "Storage.BootVolumeType" = "{\"descriptorType\":\"enumstring\",\"values\":[\"SCSI\",\"IDE\",\"PARAVIRTUALIZED\"],\"defaultValue\":\"PARAVIRTUALIZED\",\"source\":\"GLOBAL\"}",
-#   }
-# }
-
-# data "oci_core_compute_global_image_capability_schemas_version" "test_compute_global_image_capability_schemas_version_datasource" {
-#   compute_global_image_capability_schema_id           = data.oci_core_compute_global_image_capability_schema.test_compute_global_image_capability_schema_datasource.id
-#   compute_global_image_capability_schema_version_name = data.oci_core_compute_global_image_capability_schemas_versions.test_compute_global_image_capability_schemas_versions_datasource.compute_global_image_capability_schema_versions[0].name
-# }
-
-# data "oci_core_compute_global_image_capability_schemas_versions" "test_compute_global_image_capability_schemas_versions_datasource" {
-#   compute_global_image_capability_schema_id = data.oci_core_compute_global_image_capability_schema.test_compute_global_image_capability_schema_datasource.id
-# }
-
-# data "oci_core_compute_global_image_capability_schema" "test_compute_global_image_capability_schema_datasource" {
-#   compute_global_image_capability_schema_id = data.oci_core_compute_global_image_capability_schemas.test_compute_global_image_capability_schemas_datasource.compute_global_image_capability_schemas[0].id
-# }
-
-# data "oci_core_compute_global_image_capability_schemas" "test_compute_global_image_capability_schemas_datasource" {
-# }
+resource "oci_core_shape_management" "talos_arm64" {
+  compartment_id = var.compartment_ocid
+  image_id       = oci_core_image.talos_arm64.id
+  shape_name     = "VM.Standard.A1.Flex"
+}

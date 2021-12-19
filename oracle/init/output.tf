@@ -1,7 +1,7 @@
 
 output "compartment_ocid" {
   description = "compartment id"
-  value       = oci_identity_compartment.project.compartment_id
+  value       = oci_identity_compartment.project.id
 }
 
 output "user_ocid" {

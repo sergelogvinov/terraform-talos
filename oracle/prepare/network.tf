@@ -1,7 +1,6 @@
 
 resource "oci_core_vcn" "main" {
-  compartment_id = var.tenancy_ocid
-
+  compartment_id = var.compartment_ocid
   display_name   = var.project
   cidr_blocks    = [var.vpc_main_cidr]
   is_ipv6enabled = true
