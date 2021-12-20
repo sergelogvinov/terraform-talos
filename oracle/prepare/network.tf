@@ -4,6 +4,7 @@ resource "oci_core_vcn" "main" {
   display_name   = var.project
   cidr_blocks    = [var.vpc_main_cidr]
   is_ipv6enabled = true
+  dns_label      = var.project
 }
 
 resource "oci_core_internet_gateway" "main" {
@@ -50,6 +51,7 @@ resource "oci_core_subnet" "regional_lb" {
   prohibit_public_ip_on_vnic = false
 
   display_name = "${oci_core_vcn.main.display_name}-regional-lb"
+  dns_label    = "lb"
 }
 resource "oci_core_subnet" "regional" {
   cidr_block                 = cidrsubnet(oci_core_vcn.main.cidr_block, 10, 1)
@@ -61,6 +63,7 @@ resource "oci_core_subnet" "regional" {
   prohibit_public_ip_on_vnic = false
 
   display_name = "${oci_core_vcn.main.display_name}-regional"
+  dns_label    = "regional"
 }
 
 resource "oci_core_subnet" "public" {
@@ -76,6 +79,7 @@ resource "oci_core_subnet" "public" {
   availability_domain        = each.key
 
   display_name = "${oci_core_vcn.main.display_name}-public-zone-${each.value}"
+  dns_label    = "public${each.value}"
 }
 
 resource "oci_core_subnet" "private" {
@@ -90,4 +94,5 @@ resource "oci_core_subnet" "private" {
   availability_domain        = each.key
 
   display_name = "${oci_core_vcn.main.display_name}-private-zone-${each.value}"
+  dns_label    = "private${each.value}"
 }

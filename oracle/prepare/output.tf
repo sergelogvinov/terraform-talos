@@ -14,6 +14,11 @@ output "zones" {
   value       = local.zones
 }
 
+output "dns_zone_id" {
+  description = "DNS zones id"
+  value       = oci_dns_zone.cluster.id
+}
+
 output "network_nat" {
   description = "The nat IP"
   value       = oci_core_public_ip.nat.ip_address

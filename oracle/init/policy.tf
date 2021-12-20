@@ -7,6 +7,7 @@ resource "oci_identity_policy" "terraform" {
   statements = [
     "Allow group ${oci_identity_group.terraform.name} to manage virtual-network-family in compartment ${oci_identity_compartment.project.name}",
     "Allow group ${oci_identity_group.terraform.name} to manage load-balancers in compartment ${oci_identity_compartment.project.name}",
+    "Allow group ${oci_identity_group.terraform.name} to manage dns in compartment ${oci_identity_compartment.project.name}",
     "Allow group ${oci_identity_group.terraform.name} to manage compute-management-family in compartment ${oci_identity_compartment.project.name}",
     "Allow group ${oci_identity_group.terraform.name} to manage instances in compartment ${oci_identity_compartment.project.name}",
     "Allow group ${oci_identity_group.terraform.name} to manage instance-family in compartment ${oci_identity_compartment.project.name}",

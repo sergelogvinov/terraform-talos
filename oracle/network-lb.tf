@@ -2,10 +2,23 @@
 locals {
   lbv4_enable = false
   lbv4        = local.lbv4_enable ? [for ip in oci_network_load_balancer_network_load_balancer.contolplane[0].ip_addresses : ip.ip_address if ip.is_public][0] : "127.0.0.1"
-  lbv4_local  = local.lbv4_enable ? [for ip in oci_network_load_balancer_network_load_balancer.contolplane[0].ip_addresses : ip.ip_address if !ip.is_public][0] : "127.0.0.1"
+  lbv4_local  = local.lbv4_enable ? [for ip in oci_network_load_balancer_network_load_balancer.contolplane[0].ip_addresses : ip.ip_address if !ip.is_public][0] : cidrhost(local.network_public[local.zone].cidr_block, 11)
 
   lbv4_web_enable = false
   lbv4_web        = local.lbv4_web_enable ? [for ip in oci_network_load_balancer_network_load_balancer.web[0].ip_addresses : ip.ip_address if ip.is_public][0] : "127.0.0.1"
+}
+
+resource "oci_dns_rrset" "lbv4_local" {
+  zone_name_or_id = local.dns_zone_id
+  domain          = var.kubernetes["apiDomain"]
+  rtype           = "A"
+
+  items {
+    domain = var.kubernetes["apiDomain"]
+    rdata  = local.lbv4_local
+    rtype  = "A"
+    ttl    = 3600
+  }
 }
 
 resource "oci_network_load_balancer_network_load_balancer" "contolplane" {
