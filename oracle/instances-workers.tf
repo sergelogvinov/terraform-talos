@@ -58,7 +58,7 @@ resource "oci_core_instance_configuration" "workers" {
         display_name              = "${var.project}-workers"
         assign_private_dns_record = false
         assign_public_ip          = false
-        nsg_ids                   = [local.nsg_talos, local.nsg_cilium]
+        nsg_ids                   = [local.nsg_talos, local.nsg_cilium, local.nsg_worker]
         subnet_id                 = local.network_private[local.zone].id
       }
 

@@ -25,7 +25,6 @@ resource "oci_core_instance" "contolplane" {
   }
 
   metadata = {
-    ssh_authorized_keys = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDd+wfWIKi1dDZuCsd/zNw2n4WuHHa21N/Ltmo3umH2d local"
     user_data = base64encode(templatefile("${path.module}/templates/controlplane.yaml",
       merge(var.kubernetes, {
         name        = "contolplane-${count.index + 1}"
@@ -38,7 +37,7 @@ resource "oci_core_instance" "contolplane" {
 
   source_details {
     source_type             = "image"
-    source_id               = data.oci_core_images.talos_x64.images[0].id
+    source_id               = lookup(var.controlplane, "type", "VM.Standard.E4.Flex") == "VM.Standard.A1.Flex" ? data.oci_core_images.talos_arm.images[0].id : data.oci_core_images.talos_x64.images[0].id
     boot_volume_size_in_gbs = "50"
   }
   create_vnic_details {

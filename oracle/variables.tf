@@ -37,6 +37,7 @@ locals {
   nsg_contolplane_lb = data.terraform_remote_state.prepare.outputs.nsg_contolplane_lb
   nsg_contolplane    = data.terraform_remote_state.prepare.outputs.nsg_contolplane
   nsg_web            = data.terraform_remote_state.prepare.outputs.nsg_web
+  nsg_worker         = data.terraform_remote_state.prepare.outputs.nsg_worker
   nsg_cilium         = data.terraform_remote_state.prepare.outputs.nsg_cilium
   nsg_talos          = data.terraform_remote_state.prepare.outputs.nsg_talos
 }

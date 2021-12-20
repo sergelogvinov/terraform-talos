@@ -56,39 +56,39 @@ resource "oci_core_network_security_group_security_rule" "cilium_vxvlan_in" {
   protocol                  = "17"
   direction                 = "INGRESS"
   source                    = each.value
-  stateless                 = true
+  stateless                 = false
 
   udp_options {
-    source_port_range {
-      min = 8472
-      max = 8472
-    }
+    # source_port_range {
+    #   min = 8472
+    #   max = 8472
+    # }
     destination_port_range {
       min = 8472
       max = 8472
     }
   }
 }
-resource "oci_core_network_security_group_security_rule" "cilium_vxvlan_out" {
-  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
+# resource "oci_core_network_security_group_security_rule" "cilium_vxvlan_out" {
+#   for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
 
-  network_security_group_id = oci_core_network_security_group.cilium.id
-  protocol                  = "17"
-  direction                 = "EGRESS"
-  destination               = each.value
-  stateless                 = true
+#   network_security_group_id = oci_core_network_security_group.cilium.id
+#   protocol                  = "17"
+#   direction                 = "EGRESS"
+#   destination               = each.value
+#   stateless                 = true
 
-  udp_options {
-    source_port_range {
-      min = 8472
-      max = 8472
-    }
-    destination_port_range {
-      min = 8472
-      max = 8472
-    }
-  }
-}
+#   udp_options {
+#     source_port_range {
+#       min = 8472
+#       max = 8472
+#     }
+#     destination_port_range {
+#       min = 8472
+#       max = 8472
+#     }
+#   }
+# }
 resource "oci_core_network_security_group_security_rule" "cilium_health" {
   for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
 
@@ -270,11 +270,43 @@ resource "oci_core_network_security_group_security_rule" "contolplane_etcd" {
     }
   }
 }
+resource "oci_core_network_security_group_security_rule" "contolplane_kubelet" {
+  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
+
+  network_security_group_id = oci_core_network_security_group.contolplane.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 10250
+      max = 10250
+    }
+  }
+}
 
 resource "oci_core_network_security_group" "web" {
   display_name   = "${var.project}-web"
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.main.id
+}
+resource "oci_core_network_security_group_security_rule" "web_kubelet" {
+  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
+
+  network_security_group_id = oci_core_network_security_group.web.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 10250
+      max = 10250
+    }
+  }
 }
 resource "oci_core_network_security_group_security_rule" "web_http_health_check" {
   for_each = toset([oci_core_vcn.main.cidr_block])
@@ -337,6 +369,28 @@ resource "oci_core_network_security_group_security_rule" "web_https" {
     destination_port_range {
       min = 443
       max = 443
+    }
+  }
+}
+
+resource "oci_core_network_security_group" "worker" {
+  display_name   = "${var.project}-worker"
+  compartment_id = var.compartment_ocid
+  vcn_id         = oci_core_vcn.main.id
+}
+resource "oci_core_network_security_group_security_rule" "worker_kubelet" {
+  for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
+
+  network_security_group_id = oci_core_network_security_group.worker.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 10250
+      max = 10250
     }
   }
 }

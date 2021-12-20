@@ -83,3 +83,7 @@ output "nsg_web" {
   description = "The web Network Security Groups"
   value       = oci_core_network_security_group.web.id
 }
+output "nsg_worker" {
+  description = "The worker Network Security Groups"
+  value       = oci_core_network_security_group.worker.id
+}
