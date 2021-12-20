@@ -39,6 +39,12 @@ cluster:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
+    cni:
+      name: custom
+      urls:
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/cilium_result.yaml
+  proxy:
+    disabled: true
   apiServer:
     certSANs:
       - ${lbv4}
@@ -50,3 +56,9 @@ cluster:
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd: {}
+  externalCloudProvider:
+    enabled: true
+    manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/kubelet-serving-cert-approver.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/metrics-server.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/local-path-storage.yaml
