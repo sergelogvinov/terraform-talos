@@ -36,7 +36,7 @@ resource "oci_core_instance" "contolplane" {
         lbv4_local  = local.lbv4_local
         nodeSubnets = local.network_public[local.zone].cidr_block
         labels      = local.contolplane_labels
-        ccm         = base64encode("useInstancePrincipals: true")
+        ccm         = base64encode("useInstancePrincipals: true\nloadBalancer:\n  disabled: true")
       })
     ))
   }

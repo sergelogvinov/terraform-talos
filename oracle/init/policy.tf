@@ -18,6 +18,19 @@ resource "oci_identity_policy" "terraform" {
   ]
 }
 
+resource "oci_identity_policy" "ccm" {
+  name           = "ccm"
+  description    = "policy created by terraform for ccm"
+  compartment_id = oci_identity_compartment.project.id
+
+  # https://github.com/oracle/oci-cloud-controller-manager/blob/master/manifests/provider-config-example.yaml
+  statements = [
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to read instance-family in compartment ${oci_identity_compartment.project.name}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to read virtual-network-family in compartment ${oci_identity_compartment.project.name}"
+    # "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to manage load-balancers in compartment ${oci_identity_compartment.project.name}"
+  ]
+}
+
 resource "oci_identity_policy" "operator" {
   name           = "operator"
   description    = "policy created by terraform for operators"

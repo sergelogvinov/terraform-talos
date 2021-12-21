@@ -168,6 +168,7 @@ spec:
         tier: control-plane
     spec:
       serviceAccountName: cloud-controller-manager
+      dnsPolicy: ClusterFirstWithHostNet
       nodeSelector:
         node-role.kubernetes.io/master: ""
       tolerations:

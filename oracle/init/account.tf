@@ -51,3 +51,10 @@ resource "oci_identity_api_key" "terraform" {
 
   depends_on = [null_resource.terraform_key]
 }
+
+resource "oci_identity_dynamic_group" "ccm" {
+  compartment_id = var.tenancy_ocid
+  name           = "oci-ccm"
+  description    = "dynamic group created by terraform for oci-cloud-controller-manager"
+  matching_rule  = "ANY {instance.compartment.id = '${oci_identity_compartment.project.id}'}"
+}
