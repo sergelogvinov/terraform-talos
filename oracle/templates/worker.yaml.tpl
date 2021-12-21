@@ -11,6 +11,7 @@ machine:
     extraArgs:
       cloud-provider: external
       rotate-server-certificates: true
+      node-labels: ${labels}
     clusterDNS:
       - 169.254.2.53
       - 10.200.16.10

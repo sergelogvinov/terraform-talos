@@ -1,10 +1,10 @@
 
-resource "oci_core_instance_pool" "workers" {
+resource "oci_core_instance_pool" "worker" {
   compartment_id            = var.compartment_ocid
-  instance_configuration_id = oci_core_instance_configuration.workers.id
+  instance_configuration_id = oci_core_instance_configuration.worker.id
   size                      = lookup(var.instances[local.zone], "worker_count", 0)
   state                     = "RUNNING"
-  display_name              = "${var.project}-workers"
+  display_name              = "${var.project}-worker"
 
   placement_configurations {
     availability_domain = local.network_private[local.zone].availability_domain
@@ -20,16 +20,20 @@ resource "oci_core_instance_pool" "workers" {
   }
 }
 
-resource "oci_core_instance_configuration" "workers" {
+locals {
+  worker_labels = "topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=${local.zone_label},project.io/node-pool=worker"
+}
+
+resource "oci_core_instance_configuration" "worker" {
   compartment_id = var.compartment_ocid
-  display_name   = "${var.project}-workers"
+  display_name   = "${var.project}-worker"
 
   instance_details {
     instance_type = "compute"
 
     launch_details {
       compartment_id                      = var.compartment_ocid
-      display_name                        = "${var.project}-workers"
+      display_name                        = "${var.project}-worker"
       is_pv_encryption_in_transit_enabled = true
       preferred_maintenance_action        = "LIVE_MIGRATE"
       launch_mode                         = "NATIVE"
@@ -44,7 +48,9 @@ resource "oci_core_instance_configuration" "workers" {
         user_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
           merge(var.kubernetes, {
             lbv4        = local.lbv4_local
+            clusterDns  = cidrhost(split(",", var.kubernetes["serviceSubnets"])[0], 10)
             nodeSubnets = local.network_private[local.zone].cidr_block
+            labels      = local.worker_labels
           })
         ))
       }
@@ -55,7 +61,7 @@ resource "oci_core_instance_configuration" "workers" {
         boot_volume_size_in_gbs = "50"
       }
       create_vnic_details {
-        display_name              = "${var.project}-workers"
+        display_name              = "${var.project}-worker"
         assign_private_dns_record = false
         assign_public_ip          = false
         nsg_ids                   = [local.nsg_talos, local.nsg_cilium, local.nsg_worker]

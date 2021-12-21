@@ -10,6 +10,10 @@ resource "oci_core_ipv6" "contolplane" {
   vnic_id = data.oci_core_vnic_attachments.contolplane[count.index].vnic_attachments[0]["vnic_id"]
 }
 
+locals {
+  contolplane_labels = "topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=${local.zone_label}"
+}
+
 resource "oci_core_instance" "contolplane" {
   count = lookup(var.controlplane, "count", 0)
 
@@ -31,6 +35,8 @@ resource "oci_core_instance" "contolplane" {
         lbv4        = local.lbv4
         lbv4_local  = local.lbv4_local
         nodeSubnets = local.network_public[local.zone].cidr_block
+        labels      = local.contolplane_labels
+        ccm         = base64encode("useInstancePrincipals: true")
       })
     ))
   }

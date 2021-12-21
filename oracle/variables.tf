@@ -28,6 +28,7 @@ data "terraform_remote_state" "prepare" {
 locals {
   project     = data.terraform_remote_state.prepare.outputs.project
   zone        = data.terraform_remote_state.prepare.outputs.zones[0]
+  zone_label  = split(":", local.zone)[1]
   dns_zone_id = data.terraform_remote_state.prepare.outputs.dns_zone_id
 
   network_lb      = data.terraform_remote_state.prepare.outputs.network_lb

@@ -80,6 +80,19 @@ resource "oci_network_load_balancer_backend_set" "contolplane_talos" {
   }
 }
 
+resource "oci_dns_rrset" "lbv4_web" {
+  zone_name_or_id = local.dns_zone_id
+  domain          = var.kubernetes["domain"]
+  rtype           = "A"
+
+  items {
+    domain = var.kubernetes["domain"]
+    rdata  = local.lbv4_web
+    rtype  = "A"
+    ttl    = 3600
+  }
+}
+
 resource "oci_network_load_balancer_network_load_balancer" "web" {
   count                      = local.lbv4_web_enable ? 1 : 0
   compartment_id             = var.compartment_ocid
@@ -87,7 +100,7 @@ resource "oci_network_load_balancer_network_load_balancer" "web" {
   subnet_id                  = local.network_lb.id
   network_security_group_ids = [local.nsg_web]
 
-  is_preserve_source_destination = true
+  is_preserve_source_destination = false
   is_private                     = false
 }
 
@@ -113,7 +126,7 @@ resource "oci_network_load_balancer_backend_set" "web_http" {
     interval_in_millis = 15000
     protocol           = "HTTP"
     port               = 80
-    url_path           = "/"
+    url_path           = "/healthz"
     return_code        = 200
   }
 }
@@ -139,7 +152,7 @@ resource "oci_network_load_balancer_backend_set" "web_https" {
     interval_in_millis = 15000
     protocol           = "HTTP"
     port               = 80
-    url_path           = "/"
+    url_path           = "/healthz"
     return_code        = 200
   }
 }

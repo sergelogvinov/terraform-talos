@@ -11,18 +11,17 @@ machine:
     extraArgs:
       cloud-provider: external
       rotate-server-certificates: true
+      node-labels: ${labels}
     clusterDNS:
       - 169.254.2.53
-      - 10.200.16.10
+      - ${clusterDns}
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
     interfaces:
       - interface: eth0
-        addresses:
-          - ${lbv4_web}/32
         dhcp: true
-        dhcpOptions
+        dhcpOptions:
           ipv6: true
       - interface: dummy0
         addresses:

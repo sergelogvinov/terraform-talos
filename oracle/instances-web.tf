@@ -14,11 +14,14 @@ resource "oci_core_instance_pool" "web" {
 
   lifecycle {
     ignore_changes = [
-      # size,
       state,
       defined_tags
     ]
   }
+}
+
+locals {
+  web_labels = "topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=${local.zone_label},project.io/node-pool=web"
 }
 
 resource "oci_core_instance_configuration" "web" {
@@ -45,8 +48,9 @@ resource "oci_core_instance_configuration" "web" {
         user_data = base64encode(templatefile("${path.module}/templates/web.yaml.tpl",
           merge(var.kubernetes, {
             lbv4        = local.lbv4_local
-            lbv4_web    = local.lbv4_web
+            clusterDns  = cidrhost(split(",", var.kubernetes["serviceSubnets"])[0], 10)
             nodeSubnets = local.network_public[local.zone].cidr_block
+            labels      = local.web_labels
           })
         ))
       }
@@ -90,6 +94,15 @@ data "oci_core_instance_pool_instances" "web" {
   compartment_id   = var.compartment_ocid
   instance_pool_id = oci_core_instance_pool.web.id
 }
+
+# locals {
+#   lbv4_web_instances = local.lbv4_web_enable && length(data.oci_core_instance_pool_instances.web.instances) > 0
+# }
+
+# resource "oci_core_ipv6" "web" {
+#   for_each = data.oci_core_instance_pool_instances.web.instances
+#   vnic_id  = data.oci_core_vnic_attachments.contolplane[count.index].vnic_attachments[0]["vnic_id"]
+# }
 
 resource "oci_network_load_balancer_backend" "web_http" {
   for_each = local.lbv4_web_enable ? { for instances in data.oci_core_instance_pool_instances.web.instances.* : instances.display_name => instances.id } : {}

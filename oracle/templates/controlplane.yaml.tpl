@@ -9,6 +9,7 @@ machine:
   kubelet:
     extraArgs:
       rotate-server-certificates: true
+      node-labels: ${labels}
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
@@ -56,9 +57,20 @@ cluster:
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd: {}
+  inlineManifests:
+    - name: cloud-provider.yaml
+      contents: |-
+        apiVersion: v1
+        kind: Secret
+        type: Opaque
+        metadata:
+          name: oci-cloud-controller-manager
+          namespace: kube-system
+        data:
+          cloud-provider.yaml: ${ccm}
   externalCloudProvider:
     enabled: true
     manifests:
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/kubelet-serving-cert-approver.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/oci-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/local-path-storage.yaml

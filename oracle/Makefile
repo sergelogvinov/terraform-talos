@@ -11,6 +11,7 @@ create-network: ## Create networks
 create-lb: ## Create loadbalancer
 	terraform init
 	terraform apply -auto-approve -target=output.controlplane_endpoint
+	terraform apply -auto-approve -target=oci_network_load_balancer_network_load_balancer.web
 
 create-config: ## Genereate talos configs
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-oracle https://${ENDPOINT}:6443
