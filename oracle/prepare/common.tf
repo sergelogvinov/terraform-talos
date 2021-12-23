@@ -3,10 +3,6 @@ data "oci_identity_availability_domains" "main" {
   compartment_id = var.compartment_ocid
 }
 
-data "oci_objectstorage_namespace" "ns" {
-  compartment_id = var.compartment_ocid
-}
-
 locals {
   zones = [for ad in data.oci_identity_availability_domains.main.availability_domains : ad.name]
 }
