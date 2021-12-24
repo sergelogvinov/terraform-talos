@@ -45,7 +45,7 @@ variable "controlplane" {
   default = {
     count   = 0,
     type    = "cpx11"
-    type_lb = ""
+    type_lb = "" # lb11, if "" use floating-ip
   }
 }
 

@@ -5,6 +5,12 @@ output "controlplane_endpoint" {
   depends_on  = [hcloud_load_balancer.api]
 }
 
+output "controlplane_firstnode" {
+  description = "Kubernetes controlplane first node"
+  value       = hcloud_server.controlplane[0].ipv4_address
+}
+
+
 output "controlplane_nodes" {
   description = "Kubernetes controlplane nodes"
   value = [

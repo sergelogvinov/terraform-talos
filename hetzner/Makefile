@@ -9,8 +9,7 @@ prepare:
 
 create-lb: ## Create load balancer
 	terraform init
-	terraform apply -auto-approve -target=output.controlplane_endpoint
-	terraform output controlplane_endpoint
+	terraform apply -auto-approve -target=hcloud_floating_ip.api -target=hcloud_load_balancer.api
 
 create-config: ## Genereate talos configs
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-hetzner https://${ENDPOINT}:6443
@@ -31,11 +30,11 @@ create-templates:
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
 create-controlplane: ## Bootstrap first controlplane node
-	terraform apply -target=hcloud_server.controlplane
+	terraform apply -auto-approve -target=hcloud_server.controlplane
 
 create-infrastructure: ## Bootstrap all nodes
 	cd modules/worker && terraform init
 	terraform apply
 
-create-kubeconfig:
+create-kubeconfig: ## Prepare kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 kubeconfig

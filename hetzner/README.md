@@ -23,33 +23,18 @@ This terraform example install Talos on [HCloud](https://www.hetzner.com/cloud) 
 
 ## Prepare the base image
 
-First, prepare variables to your environment
+Use packer (system_os/hetzner) to upload image.
 
-```shell
-export TF_VAR_hcloud_token=KEY
-```
+## Create control plane lb
 
-Terraform will run the VM in recovery mode, replace the base image and take a snapshote. Do not run terraform destroy after. It will delete the snapshot.
-
-```shell
-make prepare-image
-```
-
-## Install control plane
-
-Generate the default talos config
-
-```shell
-make create-config create-templates
-```
-
-open config file **terraform.tfvars** and add params
+open config file **terraform.tfvars** and add params.
 
 ```hcl
 # counts and type of kubernetes master nodes
 controlplane = {
-    count = 1,
-    type  = "cpx11"
+    count   = 1,
+    type    = "cpx11"
+    type_lb = ""
 }
 
 # regions to use
@@ -58,15 +43,15 @@ regions = ["nbg1", "fsn1", "hel1"]
 # counts and type of worker nodes by redion
 instances = {
     "nbg1" = {
-      web_count            = 1,
+      web_count            = 0,
       web_instance_type    = "cx11",
-      worker_count         = 1,
+      worker_count         = 0,
       worker_instance_type = "cx11",
     },
     "fsn1" = {
-      web_count            = 1,
+      web_count            = 0,
       web_instance_type    = "cx11",
-      worker_count         = 1,
+      worker_count         = 0,
       worker_instance_type = "cx11",
     }
     "hel1" = {
@@ -78,13 +63,36 @@ instances = {
 }
 ```
 
+```shell
+make create-lb
+```
+
+## Install control plane
+
+Generate the default talos config
+
+```shell
+make create-config create-templates
+```
+
 And deploy the kubernetes master nodes
 
 ```shell
 make create-controlplane
 ```
 
-Then deploy all other instances
+Bootstrap the first node
+
+```shell
+talosctl --talosconfig _cfgs/talosconfig config endpoint $controlplane_firstnode
+talosctl --talosconfig _cfgs/talosconfig --nodes $controlplane_firstnode bootstrap
+```
+
+```shell
+make create-kubeconfig
+```
+
+## Deploy all other instances
 
 ```shell
 make create-infrastructure

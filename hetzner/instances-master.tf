@@ -26,6 +26,7 @@ resource "hcloud_server" "controlplane" {
       lbv6           = local.lbv6
       hcloud_network = hcloud_network.main.id
       hcloud_token   = var.hcloud_token
+      labels         = "topology.kubernetes.io/region=${element(var.regions, count.index)}"
     })
   )
 

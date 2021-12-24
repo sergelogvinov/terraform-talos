@@ -14,6 +14,12 @@ machine:
     extraArgs:
       node-ip: "${ipv4_local}"
       rotate-server-certificates: true
+      node-labels: "${labels}"
+    clusterDNS:
+      - 169.254.2.53
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
+    nodeIP:
+      validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
     hostname: "${name}"
     interfaces:
@@ -49,6 +55,9 @@ machine:
       keys:
         - nodeID: {}
           slot: 0
+      options:
+        - no_read_workqueue
+        - no_write_workqueue
 cluster:
   controlPlane:
     endpoint: https://${ipv4_vip}:6443
