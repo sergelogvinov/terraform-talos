@@ -13,7 +13,7 @@ create-lb: ## Create load balancer
 	terraform output controlplane_endpoint
 
 create-config: ## Genereate talos configs
-	./talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-hezner https://${ENDPOINT}:6443
+	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-hetzner https://${ENDPOINT}:6443
 
 create-templates:
 	@yq ea -P '. as $$item ireduce ({}; . * $$item )' _cfgs/controlplane.yaml templates/controlplane.yaml.tpl > templates/controlplane.yaml

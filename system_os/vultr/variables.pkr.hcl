@@ -11,7 +11,7 @@ variable "vultr_region" {
 
 variable "talos_version" {
   type    = string
-  default = "v0.13.0"
+  default = "v0.14.0"
 }
 
 locals {
