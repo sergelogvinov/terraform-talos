@@ -38,3 +38,6 @@ create-infrastructure: ## Bootstrap all nodes
 
 create-kubeconfig: ## Prepare kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 kubeconfig
+
+create-deployments:
+	helm template --namespace=kube-system   --version=1.11.0 -f deployments/cilium.yaml cilium cilium/cilium > deployments/cilium_result.yaml

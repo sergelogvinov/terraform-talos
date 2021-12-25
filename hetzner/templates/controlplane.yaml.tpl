@@ -101,6 +101,7 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/coredns-local.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/metrics-server.yaml

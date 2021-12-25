@@ -13,24 +13,26 @@ operator:
     enabled: false
 
 identityAllocationMode: crd
+kubeProxyReplacement: strict
+enableK8sEndpointSlice: true
+localRedirectPolicy: true
 
-bpf:
-  masquerade: false
+healthChecking: true
+
+tunnel: "vxlan"
+autoDirectNodeRoutes: false
 
 cni:
   install: true
 
 ipam:
   mode: "kubernetes"
+k8s:
+  requireIPv4PodCIDR: true
+  requireIPv6PodCIDR: true
 
-tunnel: "vxlan"
-autoDirectNodeRoutes: false
-
-hostFirewall: true
-kubeProxyReplacement: strict
-
-healthChecking: true
-
+bpf:
+  masquerade: false
 ipv4:
   enabled: true
 ipv6:
@@ -43,16 +45,14 @@ nodePort:
   enabled: false
 externalIPs:
   enabled: true
+hostFirewall:
+  enabled: true
 
-k8s:
-  requireIPv4PodCIDR: true
-  requireIPv6PodCIDR: true
+hubble:
+  enabled: false
 
 prometheus:
   enabled: true
-
-encryption:
-  enabled: false
 
 cgroup:
   autoMount:
