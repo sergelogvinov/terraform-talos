@@ -57,7 +57,7 @@ resource "hcloud_load_balancer_target" "api" {
 #   content = templatefile("${path.module}/templates/controlplane.yaml",
 #     merge(var.kubernetes, {
 #       name           = "master-${count.index + 1}"
-#       type           = count.index == 0 ? "init" : "controlplane"
+#       type           = "controlplane"
 #       ipv4_vip       = local.ipv4_vip
 #       ipv4_local     = cidrhost(hcloud_network_subnet.core.ip_range, 11 + count.index)
 #       lbv4_local     = local.lbv4_local
@@ -65,10 +65,11 @@ resource "hcloud_load_balancer_target" "api" {
 #       lbv6           = local.lbv6
 #       hcloud_network = hcloud_network.main.id
 #       hcloud_token   = var.hcloud_token
+#       labels         = "topology.kubernetes.io/region=${hcloud_server.controlplane[count.index].location},topology.kubernetes.io/zone=${hcloud_server.controlplane[count.index].datacenter}"
 #     })
 #   )
 #   filename        = "_cfgs/controlplane-${count.index + 1}.yaml"
-#   file_permission = "0640"
+#   file_permission = "0600"
 
 #   depends_on = [hcloud_server.controlplane]
 # }
