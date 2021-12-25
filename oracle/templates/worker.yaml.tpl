@@ -14,7 +14,7 @@ machine:
       node-labels: ${labels}
     clusterDNS:
       - 169.254.2.53
-      - 10.200.16.10
+      - ${clusterDns}
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:

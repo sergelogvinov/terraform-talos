@@ -1,11 +1,11 @@
 
 locals {
-  lbv4_enable = false
+  lbv4_enable = true
   lbv4        = local.lbv4_enable ? [for ip in oci_network_load_balancer_network_load_balancer.contolplane[0].ip_addresses : ip.ip_address if ip.is_public][0] : "127.0.0.1"
   lbv4_local  = local.lbv4_enable ? [for ip in oci_network_load_balancer_network_load_balancer.contolplane[0].ip_addresses : ip.ip_address if !ip.is_public][0] : cidrhost(local.network_public[local.zone].cidr_block, 11)
 
   lbv4_web_enable = false
-  lbv4_web        = local.lbv4_web_enable ? [for ip in oci_network_load_balancer_network_load_balancer.web[0].ip_addresses : ip.ip_address if ip.is_public][0] : "127.0.0.1"
+  lbv4_web        = local.lbv4_web_enable ? [for ip in oci_network_load_balancer_network_load_balancer.web[0].ip_addresses : ip.ip_address if ip.is_public][0] : oci_load_balancer.web.ip_addresses[0]
 }
 
 resource "oci_dns_rrset" "lbv4_local" {

@@ -12,6 +12,13 @@ resource "oci_core_instance_pool" "web" {
     primary_subnet_id   = local.network_public[local.zone].id
   }
 
+  load_balancers {
+    backend_set_name = oci_load_balancer_backend_set.web.name
+    load_balancer_id = oci_load_balancer.web.id
+    port             = 80
+    vnic_selection   = "primaryvnic"
+  }
+
   lifecycle {
     ignore_changes = [
       state,
@@ -70,8 +77,9 @@ resource "oci_core_instance_configuration" "web" {
       }
 
       agent_config {
-        is_management_disabled = false
-        is_monitoring_disabled = false
+        are_all_plugins_disabled = true
+        is_management_disabled   = true
+        is_monitoring_disabled   = true
       }
       launch_options {
         network_type = "PARAVIRTUALIZED"
@@ -90,10 +98,10 @@ resource "oci_core_instance_configuration" "web" {
   }
 }
 
-data "oci_core_instance_pool_instances" "web" {
-  compartment_id   = var.compartment_ocid
-  instance_pool_id = oci_core_instance_pool.web.id
-}
+# data "oci_core_instance_pool_instances" "web" {
+#   compartment_id   = var.compartment_ocid
+#   instance_pool_id = oci_core_instance_pool.web.id
+# }
 
 # locals {
 #   lbv4_web_instances = local.lbv4_web_enable && length(data.oci_core_instance_pool_instances.web.instances) > 0
@@ -104,32 +112,32 @@ data "oci_core_instance_pool_instances" "web" {
 #   vnic_id  = data.oci_core_vnic_attachments.contolplane[count.index].vnic_attachments[0]["vnic_id"]
 # }
 
-resource "oci_network_load_balancer_backend" "web_http" {
-  for_each = local.lbv4_web_enable ? { for instances in data.oci_core_instance_pool_instances.web.instances.* : instances.display_name => instances.id } : {}
+# resource "oci_network_load_balancer_backend" "web_http" {
+#   for_each = local.lbv4_web_enable ? { for instances in data.oci_core_instance_pool_instances.web.instances.* : instances.display_name => instances.id } : {}
 
-  backend_set_name         = oci_network_load_balancer_backend_set.web_http[0].name
-  network_load_balancer_id = oci_network_load_balancer_network_load_balancer.web[0].id
-  port                     = 80
+#   backend_set_name         = oci_network_load_balancer_backend_set.web_http[0].name
+#   network_load_balancer_id = oci_network_load_balancer_network_load_balancer.web[0].id
+#   port                     = 80
 
-  name      = "web-http-lb"
-  target_id = each.value
+#   name      = "web-http-lb"
+#   target_id = each.value
 
-  depends_on = [
-    oci_core_instance_pool.web
-  ]
-}
+#   depends_on = [
+#     oci_core_instance_pool.web
+#   ]
+# }
 
-resource "oci_network_load_balancer_backend" "web_https" {
-  for_each = local.lbv4_web_enable ? { for instances in data.oci_core_instance_pool_instances.web.instances.* : instances.display_name => instances.id } : {}
+# resource "oci_network_load_balancer_backend" "web_https" {
+#   for_each = local.lbv4_web_enable ? { for instances in data.oci_core_instance_pool_instances.web.instances.* : instances.display_name => instances.id } : {}
 
-  backend_set_name         = oci_network_load_balancer_backend_set.web_https[0].name
-  network_load_balancer_id = oci_network_load_balancer_network_load_balancer.web[0].id
-  port                     = 443
+#   backend_set_name         = oci_network_load_balancer_backend_set.web_https[0].name
+#   network_load_balancer_id = oci_network_load_balancer_network_load_balancer.web[0].id
+#   port                     = 443
 
-  name      = "web-https-lb"
-  target_id = each.value
+#   name      = "web-https-lb"
+#   target_id = each.value
 
-  depends_on = [
-    oci_core_instance_pool.web
-  ]
-}
+#   depends_on = [
+#     oci_core_instance_pool.web
+#   ]
+# }

@@ -57,7 +57,6 @@ resource "oci_core_instance" "contolplane" {
     are_all_plugins_disabled = true
     is_management_disabled   = true
     is_monitoring_disabled   = true
-
   }
   availability_config {
     is_live_migration_preferred = true
