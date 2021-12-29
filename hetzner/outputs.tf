@@ -7,9 +7,8 @@ output "controlplane_endpoint" {
 
 output "controlplane_firstnode" {
   description = "Kubernetes controlplane first node"
-  value       = hcloud_server.controlplane[0].ipv4_address
+  value       = try(hcloud_server.controlplane[0].ipv4_address, "none")
 }
-
 
 output "controlplane_nodes" {
   description = "Kubernetes controlplane nodes"
