@@ -48,6 +48,13 @@ resource "oci_core_network_security_group" "cilium" {
   display_name   = "${var.project}-cilium"
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.main.id
+  defined_tags   = merge(var.tags, { "Kubernetes.Type" = "infra" })
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags
+    ]
+  }
 }
 resource "oci_core_network_security_group_security_rule" "cilium_vxvlan_in" {
   for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
@@ -110,6 +117,13 @@ resource "oci_core_network_security_group" "talos" {
   display_name   = "${var.project}-talos"
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.main.id
+  defined_tags   = merge(var.tags, { "Kubernetes.Type" = "infra" })
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags
+    ]
+  }
 }
 
 resource "oci_core_network_security_group_security_rule" "talos" {
@@ -165,6 +179,13 @@ resource "oci_core_network_security_group" "contolplane_lb" {
   display_name   = "${var.project}-contolplane-lb"
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.main.id
+  defined_tags   = merge(var.tags, { "Kubernetes.Type" = "infra" })
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags
+    ]
+  }
 }
 
 resource "oci_core_network_security_group_security_rule" "kubernetes" {
@@ -216,11 +237,17 @@ resource "oci_core_network_security_group_security_rule" "kubernetes_talos_admin
   }
 }
 
-
 resource "oci_core_network_security_group" "contolplane" {
   display_name   = "${var.project}-contolplane"
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.main.id
+  defined_tags   = merge(var.tags, { "Kubernetes.Type" = "infra" })
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags
+    ]
+  }
 }
 resource "oci_core_network_security_group_security_rule" "contolplane_kubernetes" {
   for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
@@ -291,6 +318,13 @@ resource "oci_core_network_security_group" "web" {
   display_name   = "${var.project}-web"
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.main.id
+  defined_tags   = merge(var.tags, { "Kubernetes.Type" = "worker" })
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags
+    ]
+  }
 }
 resource "oci_core_network_security_group_security_rule" "web_kubelet" {
   for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])
@@ -377,6 +411,13 @@ resource "oci_core_network_security_group" "worker" {
   display_name   = "${var.project}-worker"
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.main.id
+  defined_tags   = merge(var.tags, { "Kubernetes.Type" = "worker" })
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags
+    ]
+  }
 }
 resource "oci_core_network_security_group_security_rule" "worker_kubelet" {
   for_each = toset([oci_core_vcn.main.cidr_block, oci_core_vcn.main.ipv6cidr_blocks[0]])

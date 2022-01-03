@@ -5,6 +5,7 @@ resource "oci_identity_policy" "terraform" {
   compartment_id = oci_identity_compartment.project.id
 
   statements = [
+    "Allow group ${oci_identity_group.terraform.name} to use tag-namespaces in compartment ${oci_identity_compartment.project.name}",
     "Allow group ${oci_identity_group.terraform.name} to manage virtual-network-family in compartment ${oci_identity_compartment.project.name}",
     "Allow group ${oci_identity_group.terraform.name} to manage load-balancers in compartment ${oci_identity_compartment.project.name}",
     "Allow group ${oci_identity_group.terraform.name} to manage dns in compartment ${oci_identity_compartment.project.name}",

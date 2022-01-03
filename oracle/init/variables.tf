@@ -12,3 +12,13 @@ variable "project" {
   type    = string
   default = "main"
 }
+
+variable "tags" {
+  description = "Defined Tags of resources"
+  type        = map(string)
+  default = {
+    "Environment" = "Resource environment"
+    "Role"        = "Kubernetes node role"
+    "Type"        = "Type of resource"
+  }
+}

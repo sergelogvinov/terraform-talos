@@ -18,6 +18,14 @@ variable "region" {
   default     = null
 }
 
+variable "tags" {
+  description = "Defined Tags of resources"
+  type        = map(string)
+  default = {
+    "Kubernetes.Environment" = "Develop"
+  }
+}
+
 data "terraform_remote_state" "prepare" {
   backend = "local"
   config = {

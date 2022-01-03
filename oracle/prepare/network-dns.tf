@@ -14,4 +14,11 @@ resource "oci_dns_zone" "cluster" {
   zone_type      = "PRIMARY"
   scope          = "PRIVATE"
   view_id        = data.oci_dns_resolver.main.default_view_id
+  defined_tags   = merge(var.tags, { "Kubernetes.Type" = "infra" })
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags
+    ]
+  }
 }

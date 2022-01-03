@@ -25,11 +25,18 @@ resource "oci_network_load_balancer_network_load_balancer" "contolplane" {
   count                      = local.lbv4_enable ? 1 : 0
   compartment_id             = var.compartment_ocid
   display_name               = "${local.project}-contolplane-lb"
+  defined_tags               = merge(var.tags, { "Kubernetes.Type" = "infra", "Kubernetes.Role" = "contolplane" })
   subnet_id                  = local.network_lb.id
   network_security_group_ids = [local.nsg_contolplane_lb]
 
   is_preserve_source_destination = false
   is_private                     = false
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags,
+    ]
+  }
 }
 
 resource "oci_network_load_balancer_listener" "contolplane" {
@@ -97,11 +104,18 @@ resource "oci_network_load_balancer_network_load_balancer" "web" {
   count                      = local.lbv4_web_enable ? 1 : 0
   compartment_id             = var.compartment_ocid
   display_name               = "${local.project}-web-lb"
+  defined_tags               = merge(var.tags, { "Kubernetes.Type" = "infra" })
   subnet_id                  = local.network_lb.id
   network_security_group_ids = [local.nsg_web]
 
   is_preserve_source_destination = false
   is_private                     = false
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags,
+    ]
+  }
 }
 
 resource "oci_network_load_balancer_listener" "http" {

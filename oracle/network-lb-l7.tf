@@ -2,6 +2,7 @@
 resource "oci_load_balancer" "web" {
   compartment_id = var.compartment_ocid
   display_name   = "${local.project}-web-lb-l7"
+  defined_tags   = merge(var.tags, { "Kubernetes.Type" = "infra" })
   shape          = "flexible"
   shape_details {
     maximum_bandwidth_in_mbps = 10
@@ -10,6 +11,12 @@ resource "oci_load_balancer" "web" {
 
   subnet_ids                 = [local.network_lb.id]
   network_security_group_ids = [local.nsg_web]
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags,
+    ]
+  }
 }
 
 resource "oci_load_balancer_listener" "web_http" {

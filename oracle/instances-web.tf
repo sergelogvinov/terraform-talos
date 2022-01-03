@@ -5,6 +5,7 @@ resource "oci_core_instance_pool" "web" {
   size                      = lookup(var.instances[local.zone], "web_count", 0)
   state                     = "RUNNING"
   display_name              = "${var.project}-web"
+  defined_tags              = merge(var.tags, { "Kubernetes.Role" = "web" })
 
   placement_configurations {
     availability_domain = local.network_public[local.zone].availability_domain
@@ -34,6 +35,7 @@ locals {
 resource "oci_core_instance_configuration" "web" {
   compartment_id = var.compartment_ocid
   display_name   = "${var.project}-web"
+  defined_tags   = merge(var.tags, { "Kubernetes.Role" = "web" })
 
   instance_details {
     instance_type = "compute"
@@ -95,6 +97,9 @@ resource "oci_core_instance_configuration" "web" {
 
   lifecycle {
     create_before_destroy = "true"
+    ignore_changes = [
+      defined_tags
+    ]
   }
 }
 

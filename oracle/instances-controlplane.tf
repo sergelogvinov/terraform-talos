@@ -19,6 +19,7 @@ resource "oci_core_instance" "contolplane" {
 
   compartment_id      = var.compartment_ocid
   display_name        = "${local.project}-contolplane-${count.index + 1}"
+  defined_tags        = merge(var.tags, { "Kubernetes.Type" = "infra", "Kubernetes.Role" = "contolplane" })
   availability_domain = local.zone
   fault_domain        = element(data.oci_identity_fault_domains.domains.fault_domains, count.index).name
 
