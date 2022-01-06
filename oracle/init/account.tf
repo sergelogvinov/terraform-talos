@@ -56,5 +56,5 @@ resource "oci_identity_dynamic_group" "ccm" {
   compartment_id = var.tenancy_ocid
   name           = "oci-ccm"
   description    = "dynamic group created by terraform for oci-cloud-controller-manager"
-  matching_rule  = "ANY {instance.compartment.id = '${oci_identity_compartment.project.id}'}"
+  matching_rule  = "ALL {instance.compartment.id = '${oci_identity_compartment.project.id}', tag.Kubernetes.Role.value = 'contolplane'}"
 }

@@ -72,5 +72,6 @@ cluster:
     enabled: true
     manifests:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/oci-cloud-controller-manager.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/local-path-storage.yaml
