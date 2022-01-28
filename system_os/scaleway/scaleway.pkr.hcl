@@ -42,7 +42,7 @@ build {
   sources = ["source.scaleway.talos"]
 
   provisioner "file" {
-    source      = "../../../talos/_out/scaleway-amd64.raw.xz"
+    source      = "scaleway-amd64.raw.xz"
     destination = "/tmp/talos.raw.xz"
   }
   provisioner "shell" {

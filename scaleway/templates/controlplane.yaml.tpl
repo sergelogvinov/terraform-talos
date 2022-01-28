@@ -6,16 +6,26 @@ machine:
   certSANs:
     - "${lbv4}"
     - "${ipv4}"
+    - "${ipv4_local}"
+    - "${ipv4_vip}"
   kubelet:
     extraArgs:
+      node-ip: "${ipv4_local}"
       rotate-server-certificates: true
+      node-labels: "${labels}"
+    clusterDNS:
+      - 169.254.2.53
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
+    nodeIP:
+      validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
     hostname: "${name}"
     interfaces:
       - interface: eth1
-        dhcp: true
-        dhcpOptions:
-          routeMetric: 2048
+        addresses:
+          - ${ipv4_local}/24
+        vip:
+          ip: ${ipv4_vip}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -26,18 +36,26 @@ machine:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
   systemDiskEncryption:
+    state:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
     ephemeral:
       provider: luks2
       keys:
         - nodeID: {}
           slot: 0
+      options:
+        - no_read_workqueue
+        - no_write_workqueue
 cluster:
   controlPlane:
-    endpoint: https://${lbv4}:6443
+    endpoint: https://${ipv4_vip}:6443
   network:
     dnsDomain: ${domain}
-    podSubnets: ${format("[%s]",podSubnets)}
-    serviceSubnets: ${format("[%s]",serviceSubnets)}
+    podSubnets: ${format("%#v",split(",",podSubnets))}
+    serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
   proxy:
     mode: ipvs
   apiServer:
@@ -50,7 +68,9 @@ cluster:
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd: {}
-  extraManifests:
-    - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/kubelet-serving-cert-approver.yaml
-    - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/metrics-server.yaml
-    - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/local-path-storage.yaml
+  externalCloudProvider:
+    enabled: true
+    manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/kubelet-serving-cert-approver.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/metrics-server.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/local-path-storage.yaml

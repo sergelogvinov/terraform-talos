@@ -26,11 +26,14 @@ variable "regions" {
 variable "kubernetes" {
   type = map(string)
   default = {
-    podSubnets     = "10.32.0.0/12,f00d:10:32::/102"
+    podSubnets     = "10.32.0.0/12,fd40:10:32::/102"
     serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
+    nodeSubnets    = "192.168.0.0/16"
     domain         = "cluster.local"
-    cluster_name   = "talos-k8s-scaleway"
-    tokenmachine   = ""
+    apiDomain      = "api.cluster.local"
+    clusterName    = "talos-k8s-hetzner"
+    tokenMachine   = ""
+    caMachine      = ""
     token          = ""
     ca             = ""
   }
@@ -53,27 +56,13 @@ variable "controlplane" {
 }
 
 variable "instances" {
-  description = "Map of region's properties"
+  description = "Map of instance properties"
   type        = map(any)
   default = {
-    "nbg1" = {
-      web_count            = 0,
-      web_instance_type    = "DEV1-L",
-      worker_count         = 0,
-      worker_instance_type = "DEV1-L",
-    },
-    "fsn1" = {
-      web_count            = 0,
-      web_instance_type    = "DEV1-L",
-      worker_count         = 0,
-      worker_instance_type = "DEV1-L",
-    }
-    "hel1" = {
-      web_count            = 0,
-      web_instance_type    = "DEV1-L",
-      worker_count         = 0,
-      worker_instance_type = "DEV1-L",
-    }
+    web_count            = 0,
+    web_instance_type    = "DEV1-L",
+    worker_count         = 0,
+    worker_instance_type = "DEV1-L",
   }
 }
 
