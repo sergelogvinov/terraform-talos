@@ -1,12 +1,12 @@
 # OracleCloud
 
 1. Upload the talos image to the cloud
-2. Create networks (loadbalancer + controlplane)
-3.
+2. Create networks
+3. Launch the loadbalancer
+4. Launch the controlplane
+5. Scale the cluster
 
-## Create compartment
-
-This is ``optional`` stage.
+## Create compartment (optional)
 
 First you need to prepare your compartment:
 

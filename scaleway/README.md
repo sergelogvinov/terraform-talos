@@ -16,6 +16,8 @@ Local utilities
 
 ## Prepare the base image
 
+Use [packer](../system_os/scaleway) to upload the Talos image.
+
 ## Install control plane
 
 Generate the default talos config
