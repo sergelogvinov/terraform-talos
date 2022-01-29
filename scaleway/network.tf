@@ -16,8 +16,15 @@ resource "scaleway_vpc_public_gateway" "main" {
 }
 
 resource "scaleway_vpc_public_gateway_dhcp" "main" {
-  subnet   = local.main_subnet
-  pool_low = cidrhost(local.main_subnet, 16)
+  subnet             = local.main_subnet
+  push_default_route = true
+  pool_low           = cidrhost(local.main_subnet, 16)
+
+  lifecycle {
+    ignore_changes = [
+      dns_server_override
+    ]
+  }
 }
 
 resource "scaleway_vpc_private_network" "main" {

@@ -30,6 +30,8 @@ machine:
         addresses:
           - 169.254.2.53/32
           - fd00::169:254:2:53/128
+    kubespan:
+      enabled: true
   install:
     wipe: false
   sysctls:
@@ -52,12 +54,18 @@ machine:
 cluster:
   controlPlane:
     endpoint: https://${ipv4_vip}:6443
+  discovery:
+    enabled: true
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
+    cni:
+      name: custom
+      urls:
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/cilium_result.yaml
   proxy:
-    mode: ipvs
+    disabled: true
   apiServer:
     certSANs:
       - "${lbv4}"

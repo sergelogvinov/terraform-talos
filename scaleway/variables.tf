@@ -32,6 +32,8 @@ variable "kubernetes" {
     domain         = "cluster.local"
     apiDomain      = "api.cluster.local"
     clusterName    = "talos-k8s-hetzner"
+    clusterID      = ""
+    clusterSecret  = ""
     tokenMachine   = ""
     caMachine      = ""
     token          = ""
