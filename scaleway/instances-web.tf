@@ -8,6 +8,7 @@ resource "scaleway_instance_server" "web" {
   type              = lookup(var.instances, "web_instance_type", "DEV1-M")
   enable_ipv6       = true
   enable_dynamic_ip = true
+  security_group_id = scaleway_instance_security_group.web.id
   tags              = concat(var.tags, ["web"])
 
   private_network {

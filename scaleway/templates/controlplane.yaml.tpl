@@ -59,6 +59,9 @@ cluster:
     endpoint: https://${ipv4_vip}:6443
   discovery:
     enabled: true
+    registries:
+      service:
+        disabled: true
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}

@@ -5,7 +5,7 @@ resource "scaleway_instance_security_group" "controlplane" {
   outbound_default_policy = "accept"
 
   dynamic "inbound_rule" {
-    for_each = ["50000", "50001", "6443", "2379", "2380"]
+    for_each = ["50000", "6443", "2379", "2380"]
 
     content {
       action   = "accept"
@@ -15,7 +15,7 @@ resource "scaleway_instance_security_group" "controlplane" {
   }
 
   dynamic "inbound_rule" {
-    for_each = ["50000", "50001", "6443"]
+    for_each = ["50000", "6443"]
 
     content {
       action   = "accept"
@@ -25,8 +25,33 @@ resource "scaleway_instance_security_group" "controlplane" {
     }
   }
 
+  inbound_rule {
+    action   = "accept"
+    protocol = "ANY"
+    ip_range = local.main_subnet
+  }
+
+  # KubeSpan
+  inbound_rule {
+    action   = "accept"
+    protocol = "UDP"
+    port     = 51820
+  }
+  inbound_rule {
+    action   = "accept"
+    protocol = "UDP"
+    port     = 51820
+    ip_range = "::/0"
+  }
+}
+
+resource "scaleway_instance_security_group" "web" {
+  name                    = "web"
+  inbound_default_policy  = "drop"
+  outbound_default_policy = "accept"
+
   dynamic "inbound_rule" {
-    for_each = ["10250"]
+    for_each = ["80", "443"]
 
     content {
       action   = "accept"
@@ -37,65 +62,45 @@ resource "scaleway_instance_security_group" "controlplane" {
 
   inbound_rule {
     action   = "accept"
-    protocol = "UDP"
+    protocol = "ANY"
+    ip_range = local.main_subnet
   }
 
+  # KubeSpan
   inbound_rule {
     action   = "accept"
-    protocol = "ICMP"
+    protocol = "UDP"
+    port     = 51820
+  }
+  inbound_rule {
+    action   = "accept"
+    protocol = "UDP"
+    port     = 51820
+    ip_range = "::/0"
   }
 }
 
-# resource "scaleway_instance_security_group" "web" {
-#   name                    = "web"
-#   inbound_default_policy  = "drop"
-#   outbound_default_policy = "accept"
+resource "scaleway_instance_security_group" "worker" {
+  name                    = "worker"
+  inbound_default_policy  = "drop"
+  outbound_default_policy = "accept"
 
-#   dynamic "inbound_rule" {
-#     for_each = ["80", "443"]
+  inbound_rule {
+    action   = "accept"
+    protocol = "ANY"
+    ip_range = local.main_subnet
+  }
 
-#     content {
-#       action   = "accept"
-#       protocol = "TCP"
-#       port     = inbound_rule.value
-#     }
-#   }
-
-#   dynamic "inbound_rule" {
-#     for_each = ["4240"]
-
-#     content {
-#       action   = "accept"
-#       protocol = "TCP"
-#       port     = inbound_rule.value
-#       ip_range = "::/0"
-#     }
-#   }
-
-#   inbound_rule {
-#     action   = "accept"
-#     protocol = "ICMP"
-#   }
-# }
-
-# resource "scaleway_instance_security_group" "worker" {
-#   name                    = "worker"
-#   inbound_default_policy  = "drop"
-#   outbound_default_policy = "accept"
-
-#   dynamic "inbound_rule" {
-#     for_each = ["4240"]
-
-#     content {
-#       action   = "accept"
-#       protocol = "TCP"
-#       port     = inbound_rule.value
-#       ip_range = "::/0"
-#     }
-#   }
-
-#   inbound_rule {
-#     action   = "accept"
-#     protocol = "ICMP"
-#   }
-# }
+  # KubeSpan
+  inbound_rule {
+    action   = "accept"
+    protocol = "UDP"
+    port     = 51820
+  }
+  inbound_rule {
+    action   = "accept"
+    protocol = "UDP"
+    port     = 51820
+    ip_range = "::/0"
+  }
+}

@@ -53,6 +53,9 @@ cluster:
   clusterName: ${clusterName}
   discovery:
     enabled: true
+    registries:
+      service:
+        disabled: true
   network:
     dnsDomain: ${domain}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
