@@ -30,6 +30,9 @@ machine:
         addresses:
           - 169.254.2.53/32
           - fd00::169:254:2:53/128
+    nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
     kubespan:
       enabled: true
   install:
