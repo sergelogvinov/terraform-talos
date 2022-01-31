@@ -132,6 +132,7 @@ data:
   enable-ipv4-masquerade: "true"
   enable-ipv6-masquerade: "true"
   enable-bpf-masquerade: "false"
+  enable-wireguard: "true"
 
   enable-xt-socket-fallback: "true"
   install-iptables-rules: "true"
@@ -141,6 +142,9 @@ data:
   enable-bandwidth-manager: "false"
   enable-local-redirect-policy: "true"
   enable-host-firewall: "true"
+  # List of devices used to attach bpf_host.o (implements BPF NodePort,
+  # host-firewall and BPF masquerading)
+  devices: "eth0 eth1"
 
   kube-proxy-replacement:  "strict"
   kube-proxy-replacement-healthz-bind-address: ""

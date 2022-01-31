@@ -34,7 +34,7 @@ machine:
       - 1.1.1.1
       - 8.8.8.8
     kubespan:
-      enabled: true
+      enabled: false
       allowDownPeerBypass: true
   install:
     wipe: false

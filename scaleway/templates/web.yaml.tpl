@@ -30,7 +30,7 @@ machine:
           - 169.254.2.53/32
           - fd00::169:254:2:53/128
     kubespan:
-      enabled: true
+      enabled: false
       allowDownPeerBypass: true
   install:
     wipe: true

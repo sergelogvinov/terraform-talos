@@ -21,7 +21,11 @@ healthChecking: true
 
 tunnel: "vxlan"
 autoDirectNodeRoutes: false
-# devices: [eth0]
+devices: [eth0,eth1]
+
+encryption:
+  enabled: true
+  type: wireguard
 
 cni:
   install: true
