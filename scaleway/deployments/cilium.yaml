@@ -23,6 +23,7 @@ tunnel: "vxlan"
 autoDirectNodeRoutes: false
 devices: [eth0,eth1]
 
+l7Proxy: false
 encryption:
   enabled: true
   type: wireguard

@@ -27,6 +27,12 @@ resource "scaleway_instance_security_group" "controlplane" {
 
   inbound_rule {
     action   = "accept"
+    protocol = "TCP"
+    port     = 4240
+    ip_range = "::/0"
+  }
+  inbound_rule {
+    action   = "accept"
     protocol = "ANY"
     ip_range = local.main_subnet
   }
@@ -41,6 +47,12 @@ resource "scaleway_instance_security_group" "controlplane" {
     action   = "accept"
     protocol = "UDP"
     port     = 51820
+    ip_range = "::/0"
+  }
+
+  inbound_rule {
+    action   = "accept"
+    protocol = "ICMP"
     ip_range = "::/0"
   }
 }
@@ -62,6 +74,12 @@ resource "scaleway_instance_security_group" "web" {
 
   inbound_rule {
     action   = "accept"
+    protocol = "TCP"
+    port     = 4240
+    ip_range = "::/0"
+  }
+  inbound_rule {
+    action   = "accept"
     protocol = "ANY"
     ip_range = local.main_subnet
   }
@@ -76,6 +94,12 @@ resource "scaleway_instance_security_group" "web" {
     action   = "accept"
     protocol = "UDP"
     port     = 51820
+    ip_range = "::/0"
+  }
+
+  inbound_rule {
+    action   = "accept"
+    protocol = "ICMP"
     ip_range = "::/0"
   }
 }
