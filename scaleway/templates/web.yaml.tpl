@@ -31,6 +31,7 @@ machine:
           - fd00::169:254:2:53/128
     kubespan:
       enabled: true
+      allowDownPeerBypass: true
   install:
     wipe: true
   sysctls:
