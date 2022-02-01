@@ -21,7 +21,7 @@ resource "oci_core_instance" "contolplane" {
   display_name        = "${local.project}-contolplane-${count.index + 1}"
   defined_tags        = merge(var.tags, { "Kubernetes.Type" = "infra", "Kubernetes.Role" = "contolplane" })
   availability_domain = local.zones[count.index % local.zone_count]
-  fault_domain        = element(data.oci_identity_fault_domains.domains[local.zones[count.index]].fault_domains, floor(count.index / local.zone_count)).name
+  fault_domain        = element(data.oci_identity_fault_domains.domains[element(local.zones, count.index)].fault_domains, floor(count.index / local.zone_count)).name
 
   shape = lookup(var.controlplane, "type", "VM.Standard.E4.Flex")
   shape_config {
@@ -35,7 +35,7 @@ resource "oci_core_instance" "contolplane" {
         name        = "contolplane-${count.index + 1}"
         lbv4        = local.lbv4
         lbv4_local  = local.lbv4_local
-        nodeSubnets = local.network_public[local.zones[count.index]].cidr_block
+        nodeSubnets = local.network_public[element(local.zones, count.index)].cidr_block
         labels      = local.contolplane_labels
         ccm         = base64encode("useInstancePrincipals: true\nloadBalancer:\n  disabled: true")
       })
@@ -49,8 +49,8 @@ resource "oci_core_instance" "contolplane" {
   }
   create_vnic_details {
     assign_public_ip = true
-    subnet_id        = local.network_public[local.zones[count.index]].id
-    private_ip       = cidrhost(local.network_public[local.zones[count.index]].cidr_block, 11 + floor(count.index / local.zone_count))
+    subnet_id        = local.network_public[element(local.zones, count.index)].id
+    private_ip       = cidrhost(local.network_public[element(local.zones, count.index)].cidr_block, 11 + floor(count.index / local.zone_count))
     nsg_ids          = [local.nsg_talos, local.nsg_cilium, local.nsg_contolplane]
   }
 
