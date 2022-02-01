@@ -30,6 +30,7 @@ data "oci_core_images" "talos_arm" {
 # }
 
 data "oci_identity_fault_domains" "domains" {
+  for_each            = { for idx, ad in local.zones : ad => idx }
   compartment_id      = var.compartment_ocid
-  availability_domain = local.network_public[local.zone].availability_domain
+  availability_domain = local.network_public[each.key].availability_domain
 }

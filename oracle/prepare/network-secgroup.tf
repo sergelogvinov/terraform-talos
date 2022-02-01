@@ -342,7 +342,7 @@ resource "oci_core_network_security_group_security_rule" "web_kubelet" {
     }
   }
 }
-resource "oci_core_network_security_group_security_rule" "web_http_health_check" {
+resource "oci_core_network_security_group_security_rule" "web_http_lb" {
   for_each = toset([oci_core_vcn.main.cidr_block])
 
   network_security_group_id = oci_core_network_security_group.web.id
@@ -358,6 +358,23 @@ resource "oci_core_network_security_group_security_rule" "web_http_health_check"
     }
   }
 }
+resource "oci_core_network_security_group_security_rule" "web_https_lb" {
+  for_each = toset([oci_core_vcn.main.cidr_block])
+
+  network_security_group_id = oci_core_network_security_group.web.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 443
+      max = 443
+    }
+  }
+}
+
 resource "oci_core_network_security_group_security_rule" "web_http_admin" {
   for_each = toset(var.whitelist_admins)
 
@@ -371,6 +388,22 @@ resource "oci_core_network_security_group_security_rule" "web_http_admin" {
     destination_port_range {
       min = 80
       max = 80
+    }
+  }
+}
+resource "oci_core_network_security_group_security_rule" "web_https_admin" {
+  for_each = toset(var.whitelist_admins)
+
+  network_security_group_id = oci_core_network_security_group.web.id
+  protocol                  = "6"
+  direction                 = "INGRESS"
+  source                    = each.value
+  stateless                 = false
+
+  tcp_options {
+    destination_port_range {
+      min = 443
+      max = 443
     }
   }
 }
