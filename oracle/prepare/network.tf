@@ -135,8 +135,8 @@ resource "oci_core_subnet" "public" {
 resource "oci_core_subnet" "private" {
   for_each = { for idx, ad in local.zones : ad => idx }
 
-  cidr_block                 = cidrsubnet(oci_core_vcn.main.cidr_block, 8, each.value + 4)
-  ipv6cidr_block             = cidrsubnet(oci_core_vcn.main.ipv6cidr_blocks[0], 8, each.value + 11)
+  cidr_block                 = cidrsubnet(oci_core_vcn.main.cidr_block, 8, each.value + 8)
+  ipv6cidr_block             = cidrsubnet(oci_core_vcn.main.ipv6cidr_blocks[0], 8, each.value + 16)
   compartment_id             = var.compartment_ocid
   vcn_id                     = oci_core_vcn.main.id
   route_table_id             = oci_core_route_table.private.id

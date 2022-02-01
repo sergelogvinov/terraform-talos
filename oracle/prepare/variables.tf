@@ -4,7 +4,7 @@ variable "tenancy_ocid" {}
 variable "user_ocid" {}
 variable "fingerprint" {}
 variable "key_file" {
-  default = "~/.oci/oci_public.pem"
+  default = "~/.oci/oci_main_terraform_public.pem"
 }
 
 variable "project" {
