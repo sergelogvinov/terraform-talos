@@ -37,7 +37,6 @@ resource "oci_core_instance_pool" "web" {
 }
 
 locals {
-  # topology.kubernetes.io/zone=${split(":", local.zone)[1]}
   web_labels = "topology.kubernetes.io/region=${var.region},project.io/node-pool=web"
 }
 
@@ -69,7 +68,7 @@ resource "oci_core_instance_configuration" "web" {
             lbv4        = local.lbv4_local
             clusterDns  = cidrhost(split(",", var.kubernetes["serviceSubnets"])[0], 10)
             nodeSubnets = local.network_public[each.key].cidr_block
-            labels      = local.web_labels
+            labels      = "${local.web_labels},topology.kubernetes.io/zone=${split(":", each.key)[1]}"
           })
         ))
       }
