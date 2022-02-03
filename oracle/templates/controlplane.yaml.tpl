@@ -34,6 +34,8 @@ machine:
     servers:
       - 169.254.169.254
 cluster:
+  id: ${clusterID}
+  secret: ${clusterSecret}
   controlPlane:
     endpoint: https://${lbv4_local}:6443
   network:
@@ -75,3 +77,5 @@ cluster:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/local-path-storage.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/ingress_result.yaml

@@ -34,9 +34,10 @@ data "terraform_remote_state" "prepare" {
 }
 
 locals {
-  project     = data.terraform_remote_state.prepare.outputs.project
-  zone        = data.terraform_remote_state.prepare.outputs.zones[0]
-  zone_label  = split(":", local.zone)[1]
+  project    = data.terraform_remote_state.prepare.outputs.project
+  zones      = data.terraform_remote_state.prepare.outputs.zones
+  zone_count = length(local.zones)
+
   dns_zone_id = data.terraform_remote_state.prepare.outputs.dns_zone_id
 
   network_lb      = data.terraform_remote_state.prepare.outputs.network_lb
@@ -55,11 +56,12 @@ variable "kubernetes" {
   type = map(string)
   default = {
     podSubnets     = "10.32.0.0/12,fd40:10:32::/102"
-    serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
-    nodeSubnets    = "192.168.0.0/16"
+    serviceSubnets = "10.200.0.0/22,fd40:10:200::/112",
     domain         = "cluster.local"
     apiDomain      = "api.cluster.local"
     clusterName    = "talos-k8s-oracle"
+    clusterID      = ""
+    clusterSecret  = ""
     tokenMachine   = ""
     caMachine      = ""
     token          = ""
