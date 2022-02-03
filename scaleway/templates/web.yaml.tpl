@@ -21,10 +21,13 @@ machine:
     interfaces:
       - interface: eth0
         dhcp: true
-      - interface: eth1
-        dhcp: true
         dhcpOptions:
           routeMetric: 2048
+        routes:
+          - network: 169.254.42.42/32
+            metric: 1024
+      - interface: eth1
+        dhcp: true
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
