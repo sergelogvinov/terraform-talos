@@ -83,6 +83,20 @@ cluster:
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd: {}
+  inlineManifests:
+    - name: scaleway-secret
+      contents: |-
+        apiVersion: v1
+        kind: Secret
+        type: Opaque
+        metadata:
+          name: scaleway-secret
+          namespace: kube-system
+        data:
+          SCW_ACCESS_KEY: ${base64encode(access)}
+          SCW_SECRET_KEY: ${base64encode(secret)}
+          SCW_DEFAULT_PROJECT_ID:  ${base64encode(project_id)}
+          SCW_DEFAULT_REGION: ${base64encode("fr-par")}
   externalCloudProvider:
     enabled: true
     manifests:

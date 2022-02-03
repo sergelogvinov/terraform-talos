@@ -28,6 +28,9 @@ resource "scaleway_instance_server" "controlplane" {
         lbv4       = local.lbv4
         ipv4       = scaleway_instance_ip.controlplane[count.index].address
         labels     = "topology.kubernetes.io/region=fr-par"
+        access     = var.scaleway_access
+        secret     = var.scaleway_secret
+        project_id = var.scaleway_project_id
       })
     )
   }
