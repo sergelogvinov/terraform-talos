@@ -39,9 +39,9 @@ variable "controlplane" {
   description = "Property of controlplane"
   type        = map(any)
   default = {
-    count   = 0,
-    type    = "g6-standard-2"
-    type_lb = ""
+    count = 0,
+    type  = "g6-standard-2"
+    lb    = false
   }
 }
 

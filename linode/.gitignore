@@ -1,3 +1,4 @@
 _cfgs/
+deployments/cilium_result.yaml
 templates/controlplane.yaml
 *.json
