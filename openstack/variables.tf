@@ -23,7 +23,7 @@ variable "kubernetes" {
     serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
     domain         = "cluster.local"
     apiDomain      = "api.cluster.local"
-    clusterName    = "talos-k8s-hezner"
+    clusterName    = "talos-k8s-openstack"
     tokenMachine   = ""
     caMachine      = ""
     token          = ""

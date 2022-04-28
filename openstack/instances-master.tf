@@ -46,7 +46,7 @@ resource "openstack_compute_instance_v2" "controlplane" {
   count       = 0
   name        = "master-${count.index + 1}"
   image_id    = openstack_images_image_v2.talos[count.index].id
-  flavor_name = "s1-2"
+  flavor_name = "d2-4"
   region      = element(var.regions, count.index)
 
   user_data = templatefile("${path.module}/templates/controlplane.yaml",
