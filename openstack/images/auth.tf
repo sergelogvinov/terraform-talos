@@ -1,0 +1,4 @@
+
+provider "openstack" {
+  cloud = "openstack"
+}
