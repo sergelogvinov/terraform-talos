@@ -32,6 +32,8 @@ resource "openstack_compute_instance_v2" "controlplane" {
   flavor_name = var.instance_flavor
   image_id    = var.instance_image
 
+  stop_before_destroy = true
+
   network {
     port = openstack_networking_port_v2.controlplane_public[count.index].id
   }
@@ -46,7 +48,7 @@ resource "openstack_compute_instance_v2" "controlplane" {
 
 locals {
   ipv4_local     = var.instance_count > 0 ? [for k in try(openstack_networking_port_v2.controlplane_public[0].all_fixed_ips, []) : k if length(regexall("[0-9]+.[0-9.]+", k)) > 0][0] : ""
-  ipv4_local_vip = cidrhost(var.network_internal.cidr, 5)
+  ipv4_local_vip = var.instance_count > 0 ? cidrhost(var.network_internal.cidr, 5) : ""
 
   controlplane_labels = "topology.kubernetes.io/region=nova,topology.kubernetes.io/zone=${var.region}"
 }
