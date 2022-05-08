@@ -1,4 +1,9 @@
 
+output "controlplane_lb" {
+  description = "Kubernetes controlplane local loadbalancer ip"
+  value       = local.ipv4_local_vip
+}
+
 output "controlplane_endpoints" {
   description = "Kubernetes controlplane endpoint"
   value       = [for ip in try(openstack_networking_port_v2.controlplane_public[*].all_fixed_ips, []) : ip]

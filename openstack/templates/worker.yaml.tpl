@@ -20,10 +20,19 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
+      - interface: ${iface}
+        dhcp: true
+        routes:
+          - network: ${ipv4_local_network}
+            gateway: ${ipv4_local_gw}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
           - fd00::169:254:2:53/128
+    extraHostEntries:
+      - ip: ${lbv4}
+        aliases:
+          - ${apiDomain}
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
