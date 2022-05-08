@@ -32,6 +32,10 @@ resource "openstack_compute_instance_v2" "controlplane" {
   flavor_name = var.instance_flavor
   image_id    = var.instance_image
 
+  scheduler_hints {
+    group = var.instance_servergroup
+  }
+
   stop_before_destroy = true
 
   network {

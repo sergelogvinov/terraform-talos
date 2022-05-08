@@ -1,11 +1,20 @@
 
+resource "openstack_compute_servergroup_v2" "controlplane" {
+  for_each = { for idx, name in local.regions : name => idx }
+  region   = each.key
+  name     = "controlplane"
+  policies = ["anti-affinity"]
+}
+
 module "controlplane" {
-  source          = "./modules/controlplane"
-  for_each        = { for idx, name in local.regions : name => idx }
-  region          = each.key
-  instance_count  = lookup(try(var.controlplane[each.key], {}), "count", 0)
-  instance_flavor = lookup(try(var.controlplane[each.key], {}), "instance_type", "d2-2")
-  instance_image  = data.openstack_images_image_v2.talos[each.key].id
+  source   = "./modules/controlplane"
+  for_each = { for idx, name in local.regions : name => idx }
+  region   = each.key
+
+  instance_servergroup = openstack_compute_servergroup_v2.controlplane[each.key].id
+  instance_count       = lookup(try(var.controlplane[each.key], {}), "count", 0)
+  instance_flavor      = lookup(try(var.controlplane[each.key], {}), "instance_type", "d2-2")
+  instance_image       = data.openstack_images_image_v2.talos[each.key].id
   instance_params = merge(var.kubernetes, {
     ipv4_local_network = local.network[each.key].cidr
     ipv4_local_gw      = local.network_public[each.key].gateway

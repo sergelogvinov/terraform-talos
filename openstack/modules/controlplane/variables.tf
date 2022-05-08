@@ -12,6 +12,12 @@ variable "network_external" {
   description = "External network"
 }
 
+variable "instance_servergroup" {
+  description = "Server Group"
+  type        = string
+  default     = ""
+}
+
 variable "instance_count" {
   description = "Instances in region"
   type        = number
