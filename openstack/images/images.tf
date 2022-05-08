@@ -1,7 +1,7 @@
 
 resource "openstack_images_image_v2" "talos" {
-  count            = length(var.regions)
-  region           = element(var.regions, count.index)
+  for_each         = { for idx, name in var.regions : name => idx }
+  region           = each.key
   name             = "talos"
   container_format = "bare"
   disk_format      = "raw"
