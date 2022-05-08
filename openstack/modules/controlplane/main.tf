@@ -1,15 +1,19 @@
 
 resource "openstack_networking_port_v2" "controlplane" {
-  count                 = var.instance_count
-  region                = var.region
-  name                  = "controlplane-${lower(var.region)}-${count.index + 1}"
-  network_id            = var.network_internal.network_id
-  admin_state_up        = true
-  port_security_enabled = false
+  count          = var.instance_count
+  region         = var.region
+  name           = "controlplane-${lower(var.region)}-${count.index + 1}"
+  network_id     = var.network_internal.network_id
+  admin_state_up = true
+  # port_security_enabled = false ### FIXME
 
   fixed_ip {
     subnet_id  = var.network_internal.subnet_id
     ip_address = cidrhost(var.network_internal.cidr, var.instance_ip_start + count.index)
+  }
+
+  lifecycle {
+    ignore_changes = [port_security_enabled]
   }
 }
 
@@ -44,7 +48,7 @@ locals {
   ipv4_local     = var.instance_count > 0 ? [for k in try(openstack_networking_port_v2.controlplane_public[0].all_fixed_ips, []) : k if length(regexall("[0-9]+.[0-9.]+", k)) > 0][0] : ""
   ipv4_local_vip = cidrhost(var.network_internal.cidr, 5)
 
-  controlplane_labels = ""
+  controlplane_labels = "topology.kubernetes.io/region=nova,topology.kubernetes.io/zone=${var.region}"
 }
 
 resource "local_file" "controlplane" {

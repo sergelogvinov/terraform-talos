@@ -8,13 +8,15 @@ machine:
     crt: ${caMachine}
   kubelet:
     extraArgs:
-      cloud-provider: external
       rotate-server-certificates: true
+      cloud-provider: external
       node-labels: "${labels}"
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
     clusterDNS:
       - 169.254.2.53
+      - fd00::169:254:2:53
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
   network:
     hostname: "${name}"
     interfaces:

@@ -28,7 +28,7 @@ create-templates:
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
 create-kubeconfig:
-	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 kubeconfig .
+	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.132.11 kubeconfig .
 
 create-deployments:
 	helm template --namespace=kube-system   --version=1.11.4 -f deployments/cilium.yaml cilium \

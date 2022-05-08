@@ -1,19 +1,18 @@
 
-variable "openstack_api" {}
-variable "openstack_user" {}
-variable "openstack_password" {}
-variable "openstack_tenant_id" {}
-variable "openstack_tenant_name" {}
-variable "openstack_project" {}
-
-variable "vpc_main_cidr" {
-  default = "172.18.0.0/16"
+data "terraform_remote_state" "prepare" {
+  backend = "local"
+  config = {
+    path = "${path.module}/prepare/terraform.tfstate"
+  }
 }
 
-variable "regions" {
-  type        = list(string)
-  description = "The id of the openstack region"
-  default     = ["GRA7", "UK1"]
+locals {
+  regions          = data.terraform_remote_state.prepare.outputs.regions
+  network_external = data.terraform_remote_state.prepare.outputs.network_external
+
+  network         = data.terraform_remote_state.prepare.outputs.network
+  network_public  = data.terraform_remote_state.prepare.outputs.network_public
+  network_private = data.terraform_remote_state.prepare.outputs.network_private
 }
 
 variable "kubernetes" {
@@ -24,6 +23,8 @@ variable "kubernetes" {
     domain         = "cluster.local"
     apiDomain      = "api.cluster.local"
     clusterName    = "talos-k8s-openstack"
+    clusterID      = ""
+    clusterSecret  = ""
     tokenMachine   = ""
     caMachine      = ""
     token          = ""
@@ -33,20 +34,30 @@ variable "kubernetes" {
 }
 
 variable "controlplane" {
-  description = "Property of controlplane"
+  description = "Controlplane config"
   type        = map(any)
   default = {
-    count   = 0,
-    type    = ""
-    type_lb = ""
+    "GRA7" = {
+      count         = 0,
+      instance_type = "d2-2",
+    },
+    "GRA9" = {
+      count         = 0,
+      instance_type = "d2-2",
+    },
   }
 }
 
-variable "tags" {
-  description = "Tags of resources"
-  type        = map(string)
+variable "instances" {
+  description = "Map of region's properties"
+  type        = map(any)
   default = {
-    environment = "Develop"
+    "GRA9" = {
+      web_count            = 0,
+      web_instance_type    = "d2-2",
+      worker_count         = 0,
+      worker_instance_type = "d2-2",
+    },
   }
 }
 

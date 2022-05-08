@@ -1,56 +1,44 @@
 
-resource "openstack_networking_port_v2" "worker" {
-  count          = length(var.regions)
-  region         = element(var.regions, count.index)
-  name           = "worker-${count.index + 1}"
-  network_id     = data.openstack_networking_network_v2.main[count.index].id
-  admin_state_up = "true"
+# resource "openstack_networking_port_v2" "worker" {
+#   for_each       = { for idx, name in local.regions : name => idx }
+#   region         = each.key
+#   name           = "worker-${lower(each.key)}-${each.value + 1}"
+#   network_id     = local.network[each.key].id
+#   admin_state_up = true
 
-  fixed_ip {
-    subnet_id  = openstack_networking_subnet_v2.private[count.index].id
-    ip_address = cidrhost(openstack_networking_subnet_v2.private[count.index].cidr, 40 + count.index)
-  }
-}
-
-locals {
-  worker_labels = "project.io/node-pool=worker"
-}
-
-resource "openstack_compute_instance_v2" "worker" {
-  count       = 0
-  name        = "worker-${count.index + 1}"
-  image_id    = openstack_images_image_v2.talos[count.index].id
-  flavor_name = "s1-2"
-  region      = element(var.regions, count.index)
-
-  user_data = templatefile("${path.module}/templates/worker.yaml.tpl",
-    merge(var.kubernetes, {
-      name        = "worker-${count.index + 1}"
-      lbv4        = local.lbv4
-      nodeSubnets = var.vpc_main_cidr
-      labels      = local.worker_labels
-    })
-  )
-
-  network {
-    port = openstack_networking_port_v2.worker[count.index].id
-  }
-
-  lifecycle {
-    ignore_changes = [user_data, image_id]
-  }
-}
-
-# resource "local_file" "worker" {
-#   count = 1
-#   content = templatefile("${path.module}/templates/worker.yaml.tpl",
-#     merge(var.kubernetes, {
-#       name        = "worker-${count.index + 1}"
-#       lbv4        = local.lbv4
-#       nodeSubnets = var.vpc_main_cidr
-#       labels      = local.worker_labels
-#     })
-#   )
-#   filename        = "_cfgs/worker-${count.index + 1}.yaml"
-#   file_permission = "0640"
+#   fixed_ip {
+#     subnet_id  = local.network_private[each.key].id
+#     ip_address = cidrhost(local.network_private[each.key].cidr, 31 + each.value)
+#   }
 # }
+
+# locals {
+#   worker_labels = "project.io/node-pool=worker"
+# }
+
+# # resource "openstack_compute_instance_v2" "worker" {
+# #   for_each = { for idx, name in local.regions : name => idx }
+# #   region   = each.key
+
+# #   name        = "worker-${lower(each.key)}-${each.value + 1}"
+# #   flavor_name = "d2-2"
+# #   image_id    = data.openstack_images_image_v2.talos[each.key].id
+# #   key_pair    = data.openstack_compute_keypair_v2.terraform[each.key].name
+
+# #   user_data = templatefile("${path.module}/templates/worker.yaml.tpl",
+# #     merge(var.kubernetes, {
+# #       name        = "web-${lower(each.key)}-${each.value + 1}"
+# #       lbv4        = openstack_networking_port_v2.vip[each.key].fixed_ip[0].ip_address
+# #       nodeSubnets = local.network_private[each.key].cidr
+# #       labels      = local.web_labels
+# #     })
+# #   )
+
+# #   network {
+# #     port = openstack_networking_port_v2.worker[each.key].id
+# #   }
+
+# #   lifecycle {
+# #     ignore_changes = [flavor_name, image_id, user_data]
+# #   }
+# # }

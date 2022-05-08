@@ -5,15 +5,21 @@ machine:
   type: ${type}
   certSANs:
     - "${lbv4}"
+    - "${ipv4}"
     - "${ipv4_local}"
-    - "${ipv4_vip}"
+    - "${ipv4_local_vip}"
     - "${apiDomain}"
   kubelet:
     extraArgs:
       node-ip: "${ipv4_local}"
+      node-labels: "${labels}"
       rotate-server-certificates: true
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
+    clusterDNS:
+      - 169.254.2.53
+      - fd00::169:254:2:53
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
   network:
     hostname: "${name}"
     interfaces:
@@ -21,17 +27,22 @@ machine:
         dhcp: true
         addresses:
           - ${ipv6}/56
-        routes:
-          - network: ::/0
-            gateway: ${ipv6_gw}
       - interface: eth1
-        dhcp: true
+        addresses:
+          - ${ipv4_local}/24
         vip:
-          ip: ${ipv4_vip}
+          ip: ${ipv4_local_vip}
+        routes:
+          - network: ${ipv4_local_network}
+            gateway: ${ipv4_local_gw}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
           - fd00::169:254:2:53/128
+    extraHostEntries:
+      - ip: ${ipv4_local_vip}
+        aliases:
+          - ${apiDomain}
   install:
     wipe: false
   sysctls:
@@ -39,7 +50,7 @@ machine:
     net.core.netdev_max_backlog: 4096
 cluster:
   controlPlane:
-    endpoint: https://${ipv4_vip}:6443
+    endpoint: https://${ipv4_local_vip}:6443
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
@@ -53,8 +64,9 @@ cluster:
   apiServer:
     certSANs:
       - "${lbv4}"
+      - "${ipv4}"
       - "${ipv4_local}"
-      - "${ipv4_vip}"
+      - "${ipv4_local_vip}"
       - "${apiDomain}"
   controllerManager:
     extraArgs:
