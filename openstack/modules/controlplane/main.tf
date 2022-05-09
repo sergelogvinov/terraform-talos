@@ -54,7 +54,7 @@ locals {
   ipv4_local     = var.instance_count > 0 ? [for k in try(openstack_networking_port_v2.controlplane_public[0].all_fixed_ips, []) : k if length(regexall("[0-9]+.[0-9.]+", k)) > 0][0] : ""
   ipv4_local_vip = var.instance_count > 0 ? cidrhost(var.network_internal.cidr, 5) : ""
 
-  controlplane_labels = "topology.kubernetes.io/region=nova,topology.kubernetes.io/zone=${var.region}"
+  controlplane_labels = "topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=nova"
 }
 
 resource "local_file" "controlplane" {

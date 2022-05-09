@@ -1,0 +1,182 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: openstack-cloud-controller-manager
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:openstack-cloud-controller-manager
+rules:
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - create
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - nodes/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts/token
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - list
+  - get
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:openstack-cloud-controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openstack-cloud-controller-manager
+subjects:
+- kind: ServiceAccount
+  name: openstack-cloud-controller-manager
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openstack-cloud-controller-manager
+  namespace: kube-system
+  labels:
+    tier: control-plane
+    k8s-app: openstack-cloud-controller-manager
+spec:
+  selector:
+    matchLabels:
+     k8s-app: openstack-cloud-controller-manager
+  template:
+    metadata:
+      labels:
+        tier: control-plane
+        k8s-app: openstack-cloud-controller-manager
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Exists
+      - effect: NoSchedule
+        key: node.cloudprovider.kubernetes.io/uninitialized
+        operator: Exists
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+        runAsUser: 1001
+        runAsNonRoot: true
+      priorityClassName: system-cluster-critical
+      hostNetwork: true
+      serviceAccountName: openstack-cloud-controller-manager
+      containers:
+        - name: cloud-controller-manager
+          image: docker.io/k8scloudprovider/openstack-cloud-controller-manager:v1.23.0
+          command:
+            - /bin/openstack-cloud-controller-manager
+          args:
+            - --v=2
+            - --cluster-name=$(CLUSTER_NAME)
+            - --cloud-config=/etc/config/cloud.conf
+            - --cloud-provider=openstack
+            - --allocate-node-cidrs=false
+            - --controllers=cloud-node,cloud-node-lifecycle
+            - --use-service-account-credentials
+            - --bind-address=127.0.0.1
+          env:
+            - name: CLUSTER_NAME
+              value: kubernetes
+          envFrom:
+            - secretRef:
+                name: openstack-cloud-controller-manager
+          volumeMounts:
+            - mountPath: /etc/config
+              name: cloud-config
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+      volumes:
+      - name: cloud-config
+        configMap:
+          name: openstack-cloud-controller-manager

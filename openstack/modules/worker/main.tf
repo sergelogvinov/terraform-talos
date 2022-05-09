@@ -13,7 +13,7 @@ resource "openstack_networking_port_v2" "worker" {
 }
 
 locals {
-  worker_labels = "topology.kubernetes.io/region=nova,topology.kubernetes.io/zone=${var.region},project.io/node-pool=${var.instance_name}"
+  worker_labels = "topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=nova,project.io/node-pool=${var.instance_name}"
 }
 
 resource "openstack_compute_instance_v2" "worker" {

@@ -19,6 +19,12 @@ module "controlplane" {
     ipv4_local_network = local.network[each.key].cidr
     ipv4_local_gw      = local.network_public[each.key].gateway
     lbv4               = local.lbv4
+
+    region              = each.key
+    auth                = local.openstack_auth_url
+    project_id          = local.project_id
+    project_domain_name = local.project_domain_name
+    network_public_name = local.network_external[each.key].name
   })
 
   network_internal = local.network_public[each.key]

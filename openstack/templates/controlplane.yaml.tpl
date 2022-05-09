@@ -74,9 +74,27 @@ cluster:
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd: {}
+  inlineManifests:
+    - name: openstack-cloud-controller-config
+      contents: |-
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: openstack-cloud-controller-manager
+          namespace: kube-system
+        data:
+          cloud.conf: |
+            [Global]
+            region=${region}
+            auth-url=${auth}v3/
+            tenant-id=${project_id}
+            domain-name=${project_domain_name}
+            [Networking]
+            public-network-name=${network_public_name}
   externalCloudProvider:
     enabled: true
     manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/openstack-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/local-path-storage.yaml
