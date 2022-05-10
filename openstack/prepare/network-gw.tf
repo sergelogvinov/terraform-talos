@@ -6,6 +6,13 @@ data "openstack_networking_network_v2" "external" {
   external = true
 }
 
+data "openstack_networking_subnet_ids_v2" "external_v6" {
+  for_each   = { for idx, name in var.regions : name => idx }
+  region     = each.key
+  network_id = data.openstack_networking_network_v2.external[each.key].id
+  ip_version = 6
+}
+
 resource "openstack_networking_router_v2" "gw" {
   for_each            = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
   region              = each.key

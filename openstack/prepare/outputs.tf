@@ -16,10 +16,11 @@ output "network" {
 output "network_external" {
   description = "The public network"
   value = { for zone, subnet in data.openstack_networking_network_v2.external : zone => {
-    name    = var.network_name_external
-    id      = subnet.id
-    subnets = sort(subnet.subnets)
-    mtu     = subnet.mtu
+    name       = var.network_name_external
+    id         = subnet.id
+    subnets    = sort(subnet.subnets)
+    subnets_v6 = sort(data.openstack_networking_subnet_ids_v2.external_v6[zone].ids)
+    mtu        = subnet.mtu
   } }
 }
 

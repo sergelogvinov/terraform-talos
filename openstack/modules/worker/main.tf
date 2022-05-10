@@ -12,6 +12,21 @@ resource "openstack_networking_port_v2" "worker" {
   }
 }
 
+resource "openstack_networking_port_v2" "worker_public" {
+  count          = length(try(var.network_external, {})) == 0 ? 0 : var.instance_count
+  region         = var.region
+  name           = "${var.instance_name}-${lower(var.region)}-${count.index + 1}"
+  network_id     = var.network_external.id
+  admin_state_up = true
+
+  dynamic "fixed_ip" {
+    for_each = try([var.network_external.subnet], [])
+    content {
+      subnet_id = fixed_ip.value
+    }
+  }
+}
+
 locals {
   worker_labels = "topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=nova,project.io/node-pool=${var.instance_name}"
 }
@@ -27,15 +42,15 @@ resource "openstack_compute_instance_v2" "worker" {
     merge(var.instance_params, {
       name        = "${var.instance_name}-${lower(var.region)}-${count.index + 1}"
       labels      = local.worker_labels
-      iface       = try(var.network_external.name, "") == "" ? "eth0" : "eth1"
+      iface       = length(try(var.network_external, {})) == 0 ? "eth0" : "eth1"
       nodeSubnets = var.network_internal.cidr
     })
   )
 
   dynamic "network" {
-    for_each = try([var.network_external.name], [])
+    for_each = try([openstack_networking_port_v2.worker_public[count.index]], [])
     content {
-      name = network.value
+      port = network.value.id
     }
   }
   network {

@@ -9,9 +9,14 @@ module "worker" {
   instance_image  = data.openstack_images_image_v2.talos[each.key].id
   instance_params = merge(var.kubernetes, {
     ipv4_local_network = local.network[each.key].cidr
-    ipv4_local_gw      = local.network_public[each.key].gateway
+    ipv4_local_gw      = local.network_private[each.key].gateway
     lbv4               = module.controlplane[each.key].controlplane_lb
   })
 
-  network_internal = local.network_public[each.key]
+  network_internal = local.network_private[each.key]
+  network_external = {
+    id     = local.network_external[each.key].id
+    subnet = local.network_external[each.key].subnets_v6[0]
+    mtu    = local.network_external[each.key].mtu
+  }
 }
