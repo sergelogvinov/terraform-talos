@@ -23,7 +23,7 @@ module "controlplane" {
     region              = each.key
     auth                = local.openstack_auth_url
     project_id          = local.project_id
-    project_domain_name = local.project_domain_name
+    project_domain_id   = local.project_domain_id
     network_public_name = local.network_external[each.key].name
   })
 

@@ -6,19 +6,18 @@ data "openstack_networking_network_v2" "external" {
   external = true
 }
 
-# resource "openstack_networking_router_v2" "gw" {
-#   for_each       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
-#   region         = each.key
-#   name           = openstack_networking_subnet_v2.private[each.key].name
-#   admin_state_up = true
-#   # enable_snat         = true
-#   external_network_id = data.openstack_networking_network_v2.external[each.key].id
+resource "openstack_networking_router_v2" "gw" {
+  for_each            = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
+  region              = each.key
+  name                = openstack_networking_subnet_v2.private[each.key].name
+  external_network_id = data.openstack_networking_network_v2.external[each.key].id
+  admin_state_up      = true
 
-#   # external_fixed_ip {
-#   #   subnet_id  = data.openstack_networking_network_v2.external[each.key].id
-#   #   ip_address = [for k in openstack_networking_port_v2.gw_external[each.key].all_fixed_ips : k if length(regexall("[0-9.]+", k)) > 0][0]
-#   # }
-# }
+  # external_fixed_ip {
+  #   subnet_id  = data.openstack_networking_network_v2.external[each.key].id
+  #   ip_address = [for k in openstack_networking_port_v2.gw_external[each.key].all_fixed_ips : k if length(regexall("[0-9.]+", k)) > 0][0]
+  # }
+}
 
 resource "openstack_networking_port_v2" "gw_external" {
   for_each       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) == false }
@@ -52,14 +51,13 @@ resource "openstack_networking_port_v2" "gw_private" {
   }
 }
 
-# resource "openstack_networking_router_interface_v2" "private" {
-#   for_each  = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
-#   region    = each.key
-#   router_id = openstack_networking_router_v2.gw[each.key].id
-#   port_id   = openstack_networking_port_v2.gw[each.key].id
-
-#   # subnet_id = openstack_networking_subnet_v2.private[each.key].id
-# }
+resource "openstack_networking_router_interface_v2" "private" {
+  for_each  = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
+  region    = each.key
+  router_id = openstack_networking_router_v2.gw[each.key].id
+  subnet_id = openstack_networking_subnet_v2.private[each.key].id
+  port_id   = openstack_networking_port_v2.gw_private[each.key].id
+}
 
 ### Soft gateway
 

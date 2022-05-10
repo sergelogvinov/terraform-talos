@@ -4,8 +4,8 @@ data "openstack_identity_auth_scope_v3" "scope" {
 }
 
 locals {
-  project_domain_name = data.openstack_identity_auth_scope_v3.scope.project_domain_name
-  project_id          = data.openstack_identity_auth_scope_v3.scope.project_id
+  project_domain_id = data.openstack_identity_auth_scope_v3.scope.project_domain_id
+  project_id        = data.openstack_identity_auth_scope_v3.scope.project_id
 
   openstack_auth_identity = [for entry in data.openstack_identity_auth_scope_v3.scope.service_catalog :
   entry if entry.type == "identity"][0]

@@ -88,7 +88,7 @@ cluster:
             region=${region}
             auth-url=${auth}v3/
             tenant-id=${project_id}
-            domain-name=${project_domain_name}
+            domain-id=${project_domain_id}
             [Networking]
             public-network-name=${network_public_name}
   externalCloudProvider:
