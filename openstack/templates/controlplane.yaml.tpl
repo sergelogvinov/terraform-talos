@@ -6,6 +6,7 @@ machine:
   certSANs:
     - "${lbv4}"
     - "${ipv4}"
+    - "${ipv6}"
     - "${ipv4_local}"
     - "${ipv4_local_vip}"
     - "${apiDomain}"
@@ -23,18 +24,12 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
-      - interface: eth0
-        dhcp: true
-        addresses:
-          - ${ipv6}/56
       - interface: eth1
         addresses:
           - ${ipv4_local}/24
         vip:
           ip: ${ipv4_local_vip}
-        routes:
-          - network: ${ipv4_local_network}
-            gateway: ${ipv4_local_gw}
+        routes: ${indent(10,routes)}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -65,6 +60,7 @@ cluster:
     certSANs:
       - "${lbv4}"
       - "${ipv4}"
+      - "${ipv6}"
       - "${ipv4_local}"
       - "${ipv4_local_vip}"
       - "${apiDomain}"

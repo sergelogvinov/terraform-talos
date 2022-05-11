@@ -22,9 +22,7 @@ machine:
     interfaces:
       - interface: ${iface}
         dhcp: true
-        routes:
-          - network: ${ipv4_local_network}
-            gateway: ${ipv4_local_gw}
+        routes: ${indent(10,routes)}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32

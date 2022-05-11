@@ -62,7 +62,7 @@ resource "openstack_compute_instance_v2" "worker" {
   }
 }
 
-resource "local_file" "controlplane" {
+resource "local_file" "worker" {
   count = var.instance_count
 
   content = templatefile("${path.module}/../../templates/worker.yaml.tpl",

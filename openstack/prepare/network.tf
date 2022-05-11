@@ -46,6 +46,18 @@ resource "openstack_networking_subnet_v2" "private" {
   dns_nameservers = ["1.1.1.1", "8.8.8.8"]
 }
 
+resource "openstack_networking_subnet_v2" "private_v6" {
+  for_each          = { for idx, name in var.regions : name => idx }
+  region            = each.key
+  name              = "private-v6"
+  network_id        = local.network_id[each.key].id
+  cidr              = cidrsubnet("fd60:${replace(cidrhost(var.network_cidr, 1), ".", ":")}::/56", 8, 4 * (var.network_shift + each.value))
+  no_gateway        = true
+  ipv6_address_mode = "slaac"
+  # ipv6_ra_mode      = ""
+  ip_version = 6
+}
+
 resource "openstack_networking_subnet_route_v2" "public" {
   for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
   subnet_id        = openstack_networking_subnet_v2.public[each.key].id

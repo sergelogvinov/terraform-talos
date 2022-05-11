@@ -16,9 +16,8 @@ module "controlplane" {
   instance_flavor      = lookup(try(var.controlplane[each.key], {}), "instance_type", "d2-2")
   instance_image       = data.openstack_images_image_v2.talos[each.key].id
   instance_params = merge(var.kubernetes, {
-    ipv4_local_network = local.network[each.key].cidr
-    ipv4_local_gw      = local.network_public[each.key].gateway
-    lbv4               = local.lbv4
+    lbv4   = local.lbv4
+    routes = "\n${join("\n", formatlist("- network: %s", flatten([for zone in local.regions : local.network_subnets[zone] if zone != each.key])))}"
 
     region              = each.key
     auth                = local.openstack_auth_url
