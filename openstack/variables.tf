@@ -16,6 +16,14 @@ locals {
   network_subnets = { for zone in local.regions : zone => [local.network_public[zone].cidr, local.network_private[zone].cidr] }
 }
 
+variable "ccm_username" {
+  default = ""
+}
+
+variable "ccm_password" {
+  default = ""
+}
+
 variable "kubernetes" {
   type = map(string)
   default = {

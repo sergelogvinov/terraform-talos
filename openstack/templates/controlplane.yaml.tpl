@@ -74,19 +74,13 @@ cluster:
     - name: openstack-cloud-controller-config
       contents: |-
         apiVersion: v1
-        kind: ConfigMap
+        kind: Secret
+        type: Opaque
         metadata:
           name: openstack-cloud-controller-manager
           namespace: kube-system
         data:
-          cloud.conf: |
-            [Global]
-            region=${region}
-            auth-url=${auth}v3/
-            tenant-id=${project_id}
-            domain-id=${project_domain_id}
-            [Networking]
-            public-network-name=${network_public_name}
+          cloud.conf: ${base64encode(occm)}
   externalCloudProvider:
     enabled: true
     manifests:

@@ -166,9 +166,6 @@ spec:
           env:
             - name: CLUSTER_NAME
               value: kubernetes
-          envFrom:
-            - secretRef:
-                name: openstack-cloud-controller-manager
           volumeMounts:
             - mountPath: /etc/config
               name: cloud-config
@@ -178,5 +175,5 @@ spec:
               cpu: 100m
       volumes:
       - name: cloud-config
-        configMap:
-          name: openstack-cloud-controller-manager
+        secret:
+          secretName: openstack-cloud-controller-manager
