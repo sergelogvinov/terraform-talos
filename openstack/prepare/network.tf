@@ -53,9 +53,9 @@ resource "openstack_networking_subnet_v2" "private_v6" {
   network_id        = local.network_id[each.key].id
   cidr              = cidrsubnet("fd60:${replace(cidrhost(var.network_cidr, 1), ".", ":")}::/56", 8, 4 * (var.network_shift + each.value))
   no_gateway        = true
-  ipv6_address_mode = "slaac"
-  # ipv6_ra_mode      = ""
-  ip_version = 6
+  ip_version        = 6
+  ipv6_address_mode = "slaac" # dhcpv6-stateless dhcpv6-stateful # slaac
+  # ipv6_ra_mode      = "slaac" # dhcpv6-stateless dhcpv6-stateful
 }
 
 resource "openstack_networking_subnet_route_v2" "public" {
