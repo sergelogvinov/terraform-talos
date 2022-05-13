@@ -88,3 +88,4 @@ cluster:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/local-path-storage.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/coredns-local.yaml

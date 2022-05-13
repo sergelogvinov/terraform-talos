@@ -1,0 +1,148 @@
+# This YAML defines all API objects to create RBAC roles for csi node plugin.
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csi-cinder-node-sa
+  namespace: kube-system
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-nodeplugin-role
+rules:
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-nodeplugin-binding
+subjects:
+  - kind: ServiceAccount
+    name: csi-cinder-node-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: csi-nodeplugin-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# This YAML file contains driver-registrar & csi driver nodeplugin API objects,
+# which are necessary to run csi nodeplugin for cinder.
+
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: csi-cinder-nodeplugin
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: csi-cinder-nodeplugin
+  template:
+    metadata:
+      labels:
+        app: csi-cinder-nodeplugin
+    spec:
+      nodeSelector:
+        topology.kubernetes.io/zone: nova
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Exists
+      serviceAccount: csi-cinder-node-sa
+      hostNetwork: true
+      containers:
+        - name: node-driver-registrar
+          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+            - name: DRIVER_REG_SOCK_PATH
+              value: /var/lib/kubelet/plugins/cinder.csi.openstack.org/csi.sock
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+            - name: registration-dir
+              mountPath: /registration
+        - name: liveness-probe
+          image: k8s.gcr.io/sig-storage/livenessprobe:v2.6.0
+          args:
+            - --csi-address=/csi/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+        - name: cinder-csi-plugin
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+          image: docker.io/k8scloudprovider/cinder-csi-plugin:latest
+          args:
+            - /bin/cinder-csi-plugin
+            - "--endpoint=$(CSI_ENDPOINT)"
+            - "--cloud-config=$(CLOUD_CONFIG)"
+          env:
+            - name: CSI_ENDPOINT
+              value: unix://csi/csi.sock
+            - name: CLOUD_CONFIG
+              value: /etc/config/cloud.conf
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 9808
+              name: healthz
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 10
+            timeoutSeconds: 3
+            periodSeconds: 10
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+            - name: kubelet-dir
+              mountPath: /var/lib/kubelet
+              mountPropagation: "Bidirectional"
+            - name: pods-probe-dir
+              mountPath: /dev
+              mountPropagation: "HostToContainer"
+            - name: secret-cinderplugin
+              mountPath: /etc/config
+              readOnly: true
+      volumes:
+        - name: socket-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/cinder.csi.openstack.org
+            type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry/
+            type: Directory
+        - name: kubelet-dir
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
+        - name: pods-probe-dir
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: secret-cinderplugin
+          secret:
+            secretName: openstack-cloud-controller-manager
