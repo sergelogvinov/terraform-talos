@@ -14,7 +14,8 @@ data "openstack_networking_network_v2" "main" {
 # }
 
 locals {
-  network_id = data.openstack_networking_network_v2.main
+  network_id      = data.openstack_networking_network_v2.main
+  network_cidr_v6 = "fd60:${replace(cidrhost(var.network_cidr, 1), ".", ":")}::/56"
 }
 
 resource "openstack_networking_subnet_v2" "public" {
@@ -51,7 +52,7 @@ resource "openstack_networking_subnet_v2" "private_v6" {
   region            = each.key
   name              = "private-v6"
   network_id        = local.network_id[each.key].id
-  cidr              = cidrsubnet("fd60:${replace(cidrhost(var.network_cidr, 1), ".", ":")}::/56", 8, 4 * (var.network_shift + each.value))
+  cidr              = cidrsubnet(local.network_cidr_v6, 8, 1 + 4 * (var.network_shift + each.value))
   no_gateway        = true
   ip_version        = 6
   ipv6_address_mode = "slaac" # dhcpv6-stateless dhcpv6-stateful # slaac

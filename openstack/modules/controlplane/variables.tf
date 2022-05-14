@@ -33,6 +33,12 @@ variable "instance_image" {
   type        = string
 }
 
+variable "instance_secgroups" {
+  description = "Instance network security groups"
+  type        = list(string)
+  default     = []
+}
+
 variable "instance_params" {
   description = "Instance template parameters"
   type        = map(string)

@@ -27,6 +27,11 @@ variable "network_cidr" {
   default     = "172.16.0.0/16"
 }
 
+variable "whitelist_admins" {
+  description = "Whitelist for administrators"
+  default     = ["0.0.0.0/0", "::/0"]
+}
+
 variable "network_shift" {
   description = "Network number shift"
   type        = number

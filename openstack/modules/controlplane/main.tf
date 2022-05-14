@@ -5,7 +5,6 @@ resource "openstack_networking_port_v2" "controlplane" {
   name           = "controlplane-${lower(var.region)}-${count.index + 1}"
   network_id     = var.network_internal.network_id
   admin_state_up = true
-  # port_security_enabled = false ### FIXME
 
   fixed_ip {
     subnet_id  = var.network_internal.subnet_id
@@ -18,11 +17,12 @@ resource "openstack_networking_port_v2" "controlplane" {
 }
 
 resource "openstack_networking_port_v2" "controlplane_public" {
-  count          = var.instance_count
-  region         = var.region
-  name           = "controlplane-${lower(var.region)}-${count.index + 1}"
-  network_id     = var.network_external.id
-  admin_state_up = "true"
+  count              = var.instance_count
+  region             = var.region
+  name               = "controlplane-${lower(var.region)}-${count.index + 1}"
+  network_id         = var.network_external.id
+  admin_state_up     = true
+  security_group_ids = var.instance_secgroups
 }
 
 resource "openstack_compute_instance_v2" "controlplane" {

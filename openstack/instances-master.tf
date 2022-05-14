@@ -15,6 +15,7 @@ module "controlplane" {
   instance_count       = lookup(try(var.controlplane[each.key], {}), "count", 0)
   instance_flavor      = lookup(try(var.controlplane[each.key], {}), "instance_type", "d2-2")
   instance_image       = data.openstack_images_image_v2.talos[each.key].id
+  instance_secgroups   = [local.network_secgroup[each.key].common.id, local.network_secgroup[each.key].controlplane.id]
   instance_params = merge(var.kubernetes, {
     lbv4   = local.lbv4
     routes = "\n${join("\n", formatlist("- network: %s", flatten([for zone in local.regions : local.network_subnets[zone] if zone != each.key])))}"
@@ -38,4 +39,8 @@ module "controlplane" {
 
   network_internal = local.network_public[each.key]
   network_external = local.network_external[each.key]
+}
+
+locals {
+  lbv4s = compact([for c in module.controlplane : c.controlplane_lb])
 }

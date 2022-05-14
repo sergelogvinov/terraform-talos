@@ -13,6 +13,12 @@ variable "network_external" {
   default     = {}
 }
 
+variable "instance_servergroup" {
+  description = "Server Group"
+  type        = string
+  default     = ""
+}
+
 variable "instance_count" {
   description = "Instances in region"
   type        = number
@@ -32,6 +38,12 @@ variable "instance_flavor" {
 variable "instance_image" {
   description = "Instance image"
   type        = string
+}
+
+variable "instance_secgroups" {
+  description = "Instance network security groups"
+  type        = list(string)
+  default     = []
 }
 
 variable "instance_params" {

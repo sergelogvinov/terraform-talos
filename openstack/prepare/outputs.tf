@@ -45,3 +45,12 @@ output "network_private" {
     mtu        = local.network_id[zone].mtu
   } }
 }
+
+output "network_secgroup" {
+  description = "The Network Security Groups"
+  value = { for idx, zone in var.regions : zone => {
+    common       = openstack_networking_secgroup_v2.common[zone]
+    controlplane = openstack_networking_secgroup_v2.controlplane[zone]
+    web          = openstack_networking_secgroup_v2.web[zone]
+  } }
+}

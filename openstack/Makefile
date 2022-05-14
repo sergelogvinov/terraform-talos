@@ -29,6 +29,7 @@ create-templates:
 
 create-kubeconfig:
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.132.11 kubeconfig .
+	kubectl --kubeconfig=kubeconfig get pods -owide -A
 
 create-deployments:
 	helm template --namespace=kube-system   --version=1.11.4 -f deployments/cilium.yaml cilium \

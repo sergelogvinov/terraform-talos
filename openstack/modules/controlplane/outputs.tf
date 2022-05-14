@@ -6,7 +6,7 @@ output "controlplane_lb" {
 
 output "controlplane_endpoints" {
   description = "Kubernetes controlplane endpoint"
-  value       = [for ip in try(openstack_networking_port_v2.controlplane_public[*].all_fixed_ips, []) : ip]
+  value       = flatten([for ip in try(openstack_networking_port_v2.controlplane_public[*].all_fixed_ips, []) : ip])
   depends_on  = [openstack_networking_port_v2.controlplane_public]
 }
 
