@@ -40,6 +40,12 @@ variable "instance_image" {
   type        = string
 }
 
+variable "instance_tags" {
+  description = "Instance tags"
+  type        = list(string)
+  default     = []
+}
+
 variable "instance_secgroups" {
   description = "Instance network security groups"
   type        = list(string)

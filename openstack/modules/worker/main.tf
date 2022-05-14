@@ -40,6 +40,7 @@ resource "openstack_compute_instance_v2" "worker" {
   region      = var.region
   name        = "${var.instance_name}-${lower(var.region)}-${count.index + 1}"
   flavor_name = var.instance_flavor
+  tags        = var.instance_tags
   image_id    = var.instance_image
 
   scheduler_hints {

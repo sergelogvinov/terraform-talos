@@ -15,6 +15,7 @@ module "controlplane" {
   instance_count       = lookup(try(var.controlplane[each.key], {}), "count", 0)
   instance_flavor      = lookup(try(var.controlplane[each.key], {}), "instance_type", "d2-2")
   instance_image       = data.openstack_images_image_v2.talos[each.key].id
+  instance_tags        = concat(var.tags, ["infra"])
   instance_secgroups   = [local.network_secgroup[each.key].common.id, local.network_secgroup[each.key].controlplane.id]
   instance_params = merge(var.kubernetes, {
     lbv4   = local.lbv4

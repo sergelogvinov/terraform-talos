@@ -8,6 +8,7 @@ module "worker" {
   instance_name      = "worker"
   instance_flavor    = lookup(try(var.instances[each.key], {}), "worker_instance_type", 0)
   instance_image     = data.openstack_images_image_v2.talos[each.key].id
+  instance_tags      = concat(var.tags, ["worker"])
   instance_secgroups = [local.network_secgroup[each.key].common.id]
   instance_params = merge(var.kubernetes, {
     ipv4_local_network = local.network[each.key].cidr

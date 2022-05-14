@@ -47,7 +47,7 @@ resource "openstack_networking_port_v2" "gw_public" {
 }
 
 resource "openstack_networking_port_v2" "gw_private" {
-  for_each       = { for idx, name in var.regions : name => idx }
+  for_each       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) == false }
   region         = each.key
   name           = "gw-${lower(each.key)}-${openstack_networking_subnet_v2.private[each.key].name}"
   network_id     = local.network_id[each.key].id
@@ -63,7 +63,7 @@ resource "openstack_networking_router_interface_v2" "private" {
   region    = each.key
   router_id = openstack_networking_router_v2.gw[each.key].id
   subnet_id = openstack_networking_subnet_v2.private[each.key].id
-  port_id   = openstack_networking_port_v2.gw_private[each.key].id
+  # port_id = openstack_networking_port_v2.gw_private[each.key].id
 }
 
 ### Soft gateway

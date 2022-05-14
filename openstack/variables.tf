@@ -26,6 +26,12 @@ variable "ccm_password" {
   default = ""
 }
 
+variable "tags" {
+  description = "Tags of resources"
+  type        = list(string)
+  default     = ["Develop"]
+}
+
 variable "kubernetes" {
   type = map(string)
   default = {

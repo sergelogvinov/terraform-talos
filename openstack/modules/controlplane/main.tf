@@ -30,6 +30,7 @@ resource "openstack_compute_instance_v2" "controlplane" {
   region      = var.region
   name        = "controlplane-${lower(var.region)}-${count.index + 1}"
   flavor_name = var.instance_flavor
+  tags        = var.instance_tags
   image_id    = var.instance_image
 
   scheduler_hints {
@@ -46,7 +47,7 @@ resource "openstack_compute_instance_v2" "controlplane" {
   }
 
   lifecycle {
-    ignore_changes = [flavor_name, image_id, user_data]
+    ignore_changes = [flavor_name, image_id, scheduler_hints, user_data]
   }
 }
 
