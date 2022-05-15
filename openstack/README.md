@@ -23,7 +23,14 @@ Local utilities
 * [rancher.io/local-path](https://github.com/rancher/local-path-provisioner) 0.0.19
 * [openstack-cloud-controller-manage](https://github.com/sergelogvinov/cloud-provider-openstack)
 
-## Prepare the base image
+## Upload the talos image
+
+Create the config file **images/terraform.tfvars** and add params.
+
+```hcl
+# Regions to use
+regions          = ["GRA7", "GRA9"]
+```
 
 ```sh
 cd images
@@ -35,11 +42,63 @@ terraform init && terraform apply
 
 ## Prepare network
 
-* folder prepare
-
-open config file **terraform.tfvars** and add params.
+Create the config file **prepare/terraform.tfvars** and add params.
 
 ```hcl
+# Regions to use
+regions          = ["GRA7", "GRA9"]
 ```
 
-## Install control plane
+```sh
+make create-network
+```
+
+## Prepare configs
+
+Generate the default talos config
+
+```shell
+make create-config create-templates
+```
+
+Create the config file **terraform.tfvars** and add params.
+
+```hcl
+ccm_username = "openstack-username"
+ccm_password = "openstack-password"
+
+controlplane = {
+  "GRA9" = {
+    count         = 1,
+    instance_type = "d2-4",
+  },
+}
+
+instances = {
+  "GRA9" = {
+    web_count            = 1,
+    web_instance_type    = "d2-2",
+    worker_count         = 1,
+    worker_instance_type = "d2-2"
+  },
+}
+
+```
+
+## Bootstrap controlplane
+
+```sh
+make create-controlplane
+```
+
+## Download configs
+
+```sh
+make create-kubeconfig
+```
+
+## Deploy all other instances
+
+```shell
+make create-infrastructure
+```

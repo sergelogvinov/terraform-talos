@@ -4,9 +4,6 @@ ENDPOINT:=${shell terraform output -raw controlplane_endpoint 2>/dev/null}
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-create-network: ## Create networks
-	cd prepare && terraform init && terraform apply -auto-approve
-
 create-config: ## Genereate talos configs
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-openstack https://${ENDPOINT}:6443
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
@@ -27,10 +24,19 @@ create-templates:
 
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
-create-kubeconfig:
-	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.132.11 kubeconfig .
-	kubectl --kubeconfig=kubeconfig get pods -owide -A
-
 create-deployments:
 	helm template --namespace=kube-system   --version=1.11.4 -f deployments/cilium.yaml cilium \
 		cilium/cilium > deployments/cilium_result.yaml
+
+create-network: ## Create networks
+	cd prepare && terraform init && terraform apply -auto-approve
+
+create-controlplane: ## Bootstrap controlplane
+	terraform apply -target=module.controlplane
+
+create-kubeconfig: ## Download kubeconfig
+	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} kubeconfig .
+	kubectl --kubeconfig=kubeconfig get pods -owide -A
+
+create-infrastructure: ## Bootstrap all nodes
+	terraform apply
