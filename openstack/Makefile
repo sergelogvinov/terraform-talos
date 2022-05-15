@@ -1,5 +1,5 @@
 
-ENDPOINT:=${shell terraform output -raw controlplane_endpoint 2>/dev/null}
+ENDPOINT:=${shell terraform output -raw controlplane_endpoint_public 2>/dev/null}
 
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -35,6 +35,8 @@ create-network: ## Create networks
 
 create-controlplane: ## Bootstrap controlplane
 	terraform apply -target=module.controlplane
+	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
+	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} bootstrap
 
 create-kubeconfig: ## Download kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} kubeconfig .

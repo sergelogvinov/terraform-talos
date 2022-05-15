@@ -4,6 +4,11 @@ output "controlplane_endpoint" {
   value       = module.controlplane
 }
 
+output "controlplane_endpoint_public" {
+  description = "Kubernetes controlplane endpoint public"
+  value       = local.endpoint
+}
+
 output "web_endpoint" {
   description = "Kubernetes controlplane endpoint"
   value       = module.web

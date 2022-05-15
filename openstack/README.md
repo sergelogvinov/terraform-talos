@@ -29,11 +29,13 @@ Local utilities
 Create the config file **images/terraform.tfvars** and add params.
 
 ```hcl
+# Body of images/terraform.tfvars
+
 # Regions to use
 regions          = ["GRA7", "GRA9"]
 ```
 
-```sh
+```shell
 cd images
 wget https://github.com/siderolabs/talos/releases/download/v1.0.5/openstack-amd64.tar.gz
 tar -xzf openstack-amd64.tar.gz
@@ -46,11 +48,13 @@ terraform init && terraform apply
 Create the config file **prepare/terraform.tfvars** and add params.
 
 ```hcl
+# Body of prepare/terraform.tfvars
+
 # Regions to use
 regions          = ["GRA7", "GRA9"]
 ```
 
-```sh
+```shell
 make create-network
 ```
 
@@ -65,9 +69,13 @@ make create-config create-templates
 Create the config file **terraform.tfvars** and add params.
 
 ```hcl
+# Body of terraform.tfvars
+
+# OCCM Credits
 ccm_username = "openstack-username"
 ccm_password = "openstack-password"
 
+# Number of kubernetes controlplane by zones
 controlplane = {
   "GRA9" = {
     count         = 1,
@@ -75,6 +83,7 @@ controlplane = {
   },
 }
 
+# Number of kubernetes nodes by zones
 instances = {
   "GRA9" = {
     web_count            = 1,
@@ -88,13 +97,13 @@ instances = {
 
 ## Bootstrap controlplane
 
-```sh
+```shell
 make create-controlplane
 ```
 
 ## Download configs
 
-```sh
+```shell
 make create-kubeconfig
 ```
 
