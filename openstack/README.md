@@ -22,6 +22,7 @@ Local utilities
 * [metrics-server](https://github.com/kubernetes-sigs/metrics-server) 0.5.0
 * [rancher.io/local-path](https://github.com/rancher/local-path-provisioner) 0.0.19
 * [openstack-cloud-controller-manage](https://github.com/sergelogvinov/cloud-provider-openstack)
+* [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) 4.1.1
 
 ## Upload the talos image
 
@@ -102,3 +103,12 @@ make create-kubeconfig
 ```shell
 make create-infrastructure
 ```
+
+# Known Issues
+
+* [OCCM](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md): Openstack cloud controller manage does not work well with zones.
+  It will delete nodes from another zone (because it cannot find the node in the cloud provider).
+* [CSI](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md): Openstack cinder cannot work in different zones.
+  You need to install two o more daemonsets for each zone.
+* [NodeAutoscaller](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/magnum) can work only with openstack magnum.
+  Unfortunately I do not have it.

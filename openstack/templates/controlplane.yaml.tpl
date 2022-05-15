@@ -53,7 +53,7 @@ cluster:
     cni:
       name: custom
       urls:
-        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/cilium_result.yaml
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/cilium-result.yaml
   proxy:
     disabled: true
   apiServer:
@@ -89,3 +89,5 @@ cluster:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/local-path-storage.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/coredns-local.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/openstack/deployments/ingress-result.yaml

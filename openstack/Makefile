@@ -26,7 +26,9 @@ create-templates:
 
 create-deployments:
 	helm template --namespace=kube-system   --version=1.11.4 -f deployments/cilium.yaml cilium \
-		cilium/cilium > deployments/cilium_result.yaml
+		cilium/cilium > deployments/cilium-result.yaml
+	helm template --namespace=ingress-nginx --version=4.1.1 -f deployments/ingress.yaml ingress-nginx \
+		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml
 
 create-network: ## Create networks
 	cd prepare && terraform init && terraform apply -auto-approve
