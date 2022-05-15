@@ -118,7 +118,7 @@ spec:
       hostNetwork: true
       containers:
       - name: coredns
-        image: coredns/coredns:1.8.7
+        image: coredns/coredns:1.9.2
         imagePullPolicy: IfNotPresent
         resources:
           limits:
