@@ -117,6 +117,17 @@ make create-infrastructure
 
 * [OCCM](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md): Openstack cloud controller manage does not work well with zones.
   It will delete nodes from another zone (because it cannot find the node in the cloud provider).
+  References:
+  * https://github.com/kubernetes/cloud-provider/issues/35
+  * https://github.com/kubernetes/kubernetes/pull/73171
+  * https://github.com/ovh/public-cloud-roadmap/issues/22
+
+  Solution:
+
+  Use [OCCM](https://github.com/sergelogvinov/cloud-provider-openstack/tree/multi-ccm) from my fork. You can run many **occm** with different key ```--leader-elect-resource-name=cloud-controller-manager-$region```
+
+  It creates the ProviderID with region name inside, such ```openstack://$region/$id```
+
 * [CSI](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md): Openstack cinder cannot work in different zones.
   You need to install two o more daemonsets for each zone.
 * [NodeAutoscaller](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/magnum) can work only with openstack magnum.
