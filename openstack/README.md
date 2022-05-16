@@ -19,6 +19,16 @@ Tested on openstack version - [Stein](https://docs.openstack.org/stein/index.htm
 
 <img src="/img/openstack.png" width="500px">
 
+* Public and private networks have one L2 layer network.
+So they can reach each other without a gateway.
+* Only public interface has firewall.
+* Virtual machines in public subnet have public interface with publick IPv4/IPv6, and local IPv4/IPv6.
+* Virtual machines in private subnet have public interface with only publick IPv6 and local IPv4/IPv6.
+It is not a classic private network, this network has NATv4, and they use one Public IP to make requests.
+* Talos controlplane use its own l2-loadbalancer (VIP).
+* Worker nodes make connections to the VIP address in each own region.
+If a current region does not have a control plane, workers will connect to another region VIP.
+
 ## Kubernetes addons
 
 * [cilium](https://github.com/cilium/cilium) 1.11.4
