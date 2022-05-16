@@ -8,12 +8,16 @@ Tested on openstack version - [Stein](https://docs.openstack.org/stein/index.htm
 * Neutron
 * Cinder
 
-Local utilities
+## Local utilities
 
 * terraform
 * talosctl
 * kubectl
 * yq
+
+# Network diagram
+
+<img src="/img/openstack.png" width="500px">
 
 ## Kubernetes addons
 
