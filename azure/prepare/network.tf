@@ -2,7 +2,7 @@
 resource "azurerm_virtual_network" "main" {
   for_each            = { for idx, name in var.regions : name => idx }
   location            = each.key
-  name                = "main-${each.value}"
+  name                = "main-${each.key}"
   address_space       = [cidrsubnet(var.network_cidr[0], 6, var.network_shift + each.value * 4), cidrsubnet(var.network_cidr[1], 6, var.network_shift + each.value * 4)]
   resource_group_name = azurerm_resource_group.kubernetes.name
 
@@ -15,6 +15,7 @@ resource "azurerm_subnet" "public" {
   resource_group_name  = azurerm_resource_group.kubernetes.name
   virtual_network_name = azurerm_virtual_network.main[each.key].name
   address_prefixes     = [cidrsubnet(azurerm_virtual_network.main[each.key].address_space[0], 2, 0), cidrsubnet(azurerm_virtual_network.main[each.key].address_space[1], 2, 0)]
+  service_endpoints    = ["Microsoft.ContainerRegistry", "Microsoft.Storage"]
 }
 
 resource "azurerm_subnet" "private" {
@@ -23,6 +24,7 @@ resource "azurerm_subnet" "private" {
   resource_group_name  = azurerm_resource_group.kubernetes.name
   virtual_network_name = azurerm_virtual_network.main[each.key].name
   address_prefixes     = [cidrsubnet(azurerm_virtual_network.main[each.key].address_space[0], 2, 1), cidrsubnet(azurerm_virtual_network.main[each.key].address_space[1], 2, 1)]
+  service_endpoints    = ["Microsoft.ContainerRegistry", "Microsoft.Storage"]
 }
 
 resource "azurerm_virtual_network_peering" "peering" {
@@ -39,7 +41,7 @@ resource "azurerm_virtual_network_peering" "peering" {
 resource "azurerm_route_table" "link" {
   for_each            = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_gw_enable, false) }
   location            = each.key
-  name                = "link-${each.value}"
+  name                = "link-${each.key}"
   resource_group_name = azurerm_resource_group.kubernetes.name
 
   dynamic "route" {

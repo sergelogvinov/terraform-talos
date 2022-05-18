@@ -63,11 +63,14 @@ variable "capabilities" {
   default = {
     "uksouth" = {
       network_nat_enable = false,
+      network_lb_type    = "Basic",
       network_gw_enable  = true,
       network_gw_type    = "Standard_B1s",
+
     },
     "ukwest" = {
       network_nat_enable = false,
+      network_lb_type    = "Basic",
       network_gw_enable  = true,
       network_gw_type    = "Standard_B1s",
     },
