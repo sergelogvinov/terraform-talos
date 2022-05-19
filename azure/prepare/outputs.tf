@@ -17,10 +17,12 @@ output "resource_group" {
 output "network_public" {
   description = "The public network"
   value = { for zone, subnet in azurerm_subnet.public : zone => {
-    network_id        = subnet.id
-    cidr              = subnet.address_prefixes
-    controlplane_pool = azurerm_lb_backend_address_pool.controlplane_v4[zone].id
-    controlplane_lb   = azurerm_lb.controlplane[zone].private_ip_addresses
+    network_id           = subnet.id
+    cidr                 = subnet.address_prefixes
+    sku                  = azurerm_lb.controlplane[zone].sku
+    controlplane_pool_v4 = try(azurerm_lb_backend_address_pool.controlplane_v4[zone].id, "")
+    controlplane_pool_v6 = try(azurerm_lb_backend_address_pool.controlplane_v6[zone].id, "")
+    controlplane_lb      = azurerm_lb.controlplane[zone].private_ip_addresses
   } }
 }
 
@@ -30,5 +32,12 @@ output "network_private" {
     network_id = subnet.id
     cidr       = subnet.address_prefixes
     nat        = try(azurerm_public_ip.nat[zone].ip_address, "")
+  } }
+}
+
+output "secgroups" {
+  description = "List of secgroups"
+  value = { for zone, subnet in azurerm_subnet.private : zone => {
+    controlplane = azurerm_network_security_group.controlplane[zone].id
   } }
 }

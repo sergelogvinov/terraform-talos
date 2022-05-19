@@ -11,8 +11,17 @@ locals {
   regions         = data.terraform_remote_state.prepare.outputs.regions
   resource_group  = data.terraform_remote_state.prepare.outputs.resource_group
 
-  network_public  = data.terraform_remote_state.prepare.outputs.network_public
-  network_private = data.terraform_remote_state.prepare.outputs.network_private
+  network_public   = data.terraform_remote_state.prepare.outputs.network_public
+  network_private  = data.terraform_remote_state.prepare.outputs.network_private
+  network_secgroup = data.terraform_remote_state.prepare.outputs.secgroups
+}
+
+variable "tags" {
+  description = "Tags of resources"
+  type        = map(string)
+  default = {
+    environment = "Develop"
+  }
 }
 
 variable "controlplane" {
@@ -30,10 +39,20 @@ variable "controlplane" {
   }
 }
 
-variable "tags" {
-  description = "Tags of resources"
-  type        = map(string)
+variable "kubernetes" {
+  type = map(string)
   default = {
-    environment = "Develop"
+    podSubnets     = "10.32.0.0/12,fd40:10:32::/102"
+    serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
+    domain         = "cluster.local"
+    apiDomain      = "api.cluster.local"
+    clusterName    = "talos-k8s-azure"
+    clusterID      = ""
+    clusterSecret  = ""
+    tokenMachine   = ""
+    caMachine      = ""
+    token          = ""
+    ca             = ""
   }
+  sensitive = true
 }

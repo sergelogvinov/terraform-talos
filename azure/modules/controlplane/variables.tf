@@ -53,10 +53,10 @@ variable "instance_secgroup" {
   default     = ""
 }
 
-# variable "instance_params" {
-#   description = "Instance template parameters"
-#   type        = map(string)
-# }
+variable "instance_params" {
+  description = "Instance template parameters"
+  type        = map(string)
+}
 
 variable "instance_ip_start" {
   description = "Instances ip begin from"

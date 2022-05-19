@@ -2,6 +2,7 @@
 output "controlplane_endpoints" {
   description = "Kubernetes controlplane endpoint"
   value       = local.ipv4_public
+  depends_on  = [azurerm_linux_virtual_machine.controlplane]
 }
 
 output "controlplane_bootstrap" {
