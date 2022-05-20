@@ -9,11 +9,7 @@ output "controlplane_endpoint_public" {
   value       = local.endpoint
 }
 
-# output "ipv4_local" {
-#   value = local.ipv4_local
-# }
-
-# output "web_endpoint" {
-#   description = "Kubernetes controlplane endpoint"
-#   value       = module.web
-# }
+output "web_endpoint" {
+  description = "Kubernetes controlplane endpoint"
+  value       = compact([for lb in azurerm_public_ip.web_v4 : lb.ip_address])
+}

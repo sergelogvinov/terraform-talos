@@ -58,6 +58,8 @@ resource "azurerm_network_interface_backend_address_pool_association" "controlpl
   network_interface_id    = azurerm_network_interface.controlplane[count.index].id
   ip_configuration_name   = "controlplane-${count.index}-v4"
   backend_address_pool_id = var.network_internal.controlplane_pool_v4
+
+  depends_on = [azurerm_linux_virtual_machine.controlplane]
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "controlplane_v6" {
@@ -65,12 +67,11 @@ resource "azurerm_network_interface_backend_address_pool_association" "controlpl
   network_interface_id    = azurerm_network_interface.controlplane[count.index].id
   ip_configuration_name   = "controlplane-${count.index}-v6"
   backend_address_pool_id = var.network_internal.controlplane_pool_v6
+
+  depends_on = [azurerm_linux_virtual_machine.controlplane]
 }
 
 locals {
-  ipv4_local  = var.instance_count > 0 ? azurerm_network_interface.controlplane[0].ip_configuration[0].private_ip_address : ""
-  ipv4_public = var.instance_count > 0 ? try([for ip in azurerm_public_ip.controlplane_v4 : ip.ip_address if ip.ip_address != ""], []) : []
-
   controlplane_labels = "topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=azure"
 }
 
@@ -87,22 +88,22 @@ resource "azurerm_linux_virtual_machine" "controlplane" {
   availability_set_id        = var.instance_availability_set
   network_interface_ids      = [azurerm_network_interface.controlplane[count.index].id]
 
-  custom_data = base64encode(templatefile("${path.module}/../../templates/controlplane.yaml",
-    merge(var.instance_params, {
-      name   = "controlplane-${lower(var.region)}-${1 + count.index}"
-      labels = local.controlplane_labels
+  # custom_data = base64encode(templatefile("${path.module}/../../templates/controlplane.yaml",
+  #   merge(var.instance_params, {
+  #     name        = "controlplane-${lower(var.region)}-${1 + count.index}"
+  #     labels      = local.controlplane_labels
+  #     nodeSubnets = [var.network_internal.cidr[0]]
 
-      certSANs = compact([
-        var.instance_params["apiDomain"],
-        var.instance_params["lbv4"],
-        var.instance_params["lbv6"],
-        azurerm_public_ip.controlplane_v4[count.index].ip_address,
-        try(azurerm_public_ip.controlplane_v6[count.index].ip_address, ""),
-      ])
-      ipAliases   = compact([var.instance_params["lbv4"], var.instance_params["lbv6"]])
-      nodeSubnets = [var.network_internal.cidr[0]]
-    })
-  ))
+  #     ipAliases = compact([var.instance_params["lbv4"], var.instance_params["lbv6"]])
+  #     certSANs = compact([
+  #       var.instance_params["apiDomain"],
+  #       var.instance_params["lbv4"],
+  #       var.instance_params["lbv6"],
+  #       azurerm_public_ip.controlplane_v4[count.index].ip_address,
+  #       try(azurerm_public_ip.controlplane_v6[count.index].ip_address, ""),
+  #     ])
+  #   })
+  # ))
 
   # vtpm_enabled               = false
   # encryption_at_host_enabled = true
@@ -159,4 +160,6 @@ resource "local_file" "controlplane" {
   )
   filename        = "_cfgs/controlplane-${lower(var.region)}-${1 + count.index}.yaml"
   file_permission = "0600"
+
+  depends_on = [azurerm_linux_virtual_machine.controlplane]
 }

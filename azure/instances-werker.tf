@@ -64,6 +64,11 @@
 
 #   tags = merge(var.tags, { type = "worker" })
 
+#   automatic_instance_repair {
+#       ~ enabled      = true
+#       ~ grace_period = "PT30M"
+#   }
+
 #   boot_diagnostics {}
 #   lifecycle {
 #     ignore_changes = [admin_username, admin_ssh_key, os_disk, source_image_id, tags]
