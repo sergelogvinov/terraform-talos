@@ -37,6 +37,8 @@ machine:
   install:
     wipe: false
 cluster:
+  id: ${clusterID}
+  secret: ${clusterSecret}
   controlPlane:
     endpoint: https://${lbv4}:6443
   clusterName: ${clusterName}

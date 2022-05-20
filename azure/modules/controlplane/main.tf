@@ -40,7 +40,7 @@ resource "azurerm_network_interface" "controlplane" {
       private_ip_address            = cidrhost(ip_configuration.value, var.instance_ip_start + count.index)
       private_ip_address_version    = length(split(".", ip_configuration.value)) > 1 ? "IPv4" : "IPv6"
       private_ip_address_allocation = "Static"
-      public_ip_address_id          = length(split(".", ip_configuration.value)) > 1 ? azurerm_public_ip.controlplane_v4[count.index].id : azurerm_public_ip.controlplane_v6[count.index].id
+      public_ip_address_id          = length(split(".", ip_configuration.value)) > 1 ? azurerm_public_ip.controlplane_v4[count.index].id : try(azurerm_public_ip.controlplane_v6[count.index].id, "")
     }
   }
 
@@ -99,10 +99,13 @@ resource "azurerm_linux_virtual_machine" "controlplane" {
         azurerm_public_ip.controlplane_v4[count.index].ip_address,
         try(azurerm_public_ip.controlplane_v6[count.index].ip_address, ""),
       ])
-      nodeSubnets = var.network_internal.cidr
+      ipAliases   = compact([var.instance_params["lbv4"], var.instance_params["lbv6"]])
+      nodeSubnets = [var.network_internal.cidr[0]]
     })
   ))
 
+  # vtpm_enabled               = false
+  # encryption_at_host_enabled = true
   os_disk {
     name                 = "controlplane-${lower(var.region)}-${1 + count.index}-boot"
     caching              = "ReadOnly"
@@ -150,7 +153,8 @@ resource "local_file" "controlplane" {
         azurerm_public_ip.controlplane_v4[count.index].ip_address,
         try(azurerm_public_ip.controlplane_v6[count.index].ip_address, ""),
       ])
-      nodeSubnets = var.network_internal.cidr
+      ipAliases   = compact([var.instance_params["lbv4"], var.instance_params["lbv6"]])
+      nodeSubnets = [var.network_internal.cidr[0]]
     })
   )
   filename        = "_cfgs/controlplane-${lower(var.region)}-${1 + count.index}.yaml"

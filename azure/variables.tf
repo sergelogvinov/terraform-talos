@@ -30,7 +30,7 @@ variable "controlplane" {
   default = {
     "uksouth" = {
       count         = 0,
-      instance_type = "Standard_D2as_v4",
+      instance_type = "Standard_B2s",
     },
     "ukwest" = {
       count         = 0,
@@ -55,4 +55,23 @@ variable "kubernetes" {
     ca             = ""
   }
   sensitive = true
+}
+
+variable "instances" {
+  description = "Map of region's properties"
+  type        = map(any)
+  default = {
+    "uksouth" = {
+      web_count            = 0,
+      web_instance_type    = "Standard_B2s",
+      worker_count         = 0,
+      worker_instance_type = "Standard_B4ms", # B4ms E2as_v4
+    },
+    "ukwest" = {
+      web_count            = 0,
+      web_instance_type    = "Standard_B2s",
+      worker_count         = 0,
+      worker_instance_type = "Standard_B4ms", # B4ms E2as_v4
+    },
+  }
 }

@@ -38,6 +38,8 @@ output "network_private" {
 output "secgroups" {
   description = "List of secgroups"
   value = { for zone, subnet in azurerm_subnet.private : zone => {
+    common       = azurerm_network_security_group.common[zone].id
     controlplane = azurerm_network_security_group.controlplane[zone].id
+    web          = azurerm_network_security_group.web[zone].id
   } }
 }

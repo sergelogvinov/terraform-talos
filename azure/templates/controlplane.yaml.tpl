@@ -17,6 +17,9 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
+      - interface: eth0
+        dhcp: true
+        addresses: ${format("%#v",ipAliases)}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -58,3 +61,5 @@ cluster:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/local-path-storage.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/coredns-local.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/ingress-result.yaml

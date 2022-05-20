@@ -1,10 +1,4 @@
 
-resource "azurerm_subnet_network_security_group_association" "public" {
-  for_each                  = { for idx, name in var.regions : name => idx }
-  subnet_id                 = azurerm_subnet.public[each.key].id
-  network_security_group_id = azurerm_network_security_group.common[each.key].id
-}
-
 resource "azurerm_subnet_network_security_group_association" "private" {
   for_each                  = { for idx, name in var.regions : name => idx }
   subnet_id                 = azurerm_subnet.private[each.key].id
