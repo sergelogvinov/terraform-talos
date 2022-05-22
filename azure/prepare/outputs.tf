@@ -4,6 +4,11 @@ output "subscription" {
   value       = var.subscription_id
 }
 
+output "project" {
+  description = "Azure project name"
+  value       = var.project
+}
+
 output "regions" {
   description = "Azure regions"
   value       = var.regions

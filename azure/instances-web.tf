@@ -49,11 +49,18 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
     public_key = file("~/.ssh/terraform.pub")
   }
 
-  source_image_id = data.azurerm_image.talos[each.key].id
   os_disk {
     caching              = "ReadOnly"
     storage_account_type = "StandardSSD_LRS"
     disk_size_gb         = 50
+  }
+
+  # source_image_id = data.azurerm_image.talos[each.key].id
+  source_image_reference {
+    publisher = "talos"
+    offer     = "Talos"
+    sku       = "1.0-dev"
+    version   = "latest"
   }
 
   tags = merge(var.tags, { type = "web" })

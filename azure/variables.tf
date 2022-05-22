@@ -8,6 +8,7 @@ data "terraform_remote_state" "prepare" {
 
 locals {
   subscription_id = data.terraform_remote_state.prepare.outputs.subscription
+  project         = data.terraform_remote_state.prepare.outputs.project
   regions         = data.terraform_remote_state.prepare.outputs.regions
   resource_group  = data.terraform_remote_state.prepare.outputs.resource_group
 

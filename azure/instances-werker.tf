@@ -44,6 +44,14 @@
 #     caching              = "ReadOnly"
 #     storage_account_type = "StandardSSD_LRS"
 #     disk_size_gb         = 50
+
+# dynamic "diff_disk_settings" {
+#   for_each = var.vm_os_ephemeral ? ["Local"] : []
+#   content {
+#     option = diff_disk_settings.value
+#     placement = "ResourceDisk"
+#   }
+# }
 #   }
 
 #   disable_password_authentication = false

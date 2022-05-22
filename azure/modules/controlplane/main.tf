@@ -122,11 +122,11 @@ resource "azurerm_linux_virtual_machine" "controlplane" {
 
   source_image_id = length(var.instance_image) > 0 ? var.instance_image : null
   dynamic "source_image_reference" {
-    for_each = length(var.instance_image) == 0 ? ["debian"] : []
+    for_each = length(var.instance_image) == 0 ? ["gallery"] : []
     content {
-      publisher = "Debian"
-      offer     = "debian-11"
-      sku       = "11-gen2"
+      publisher = "talos"
+      offer     = "Talos"
+      sku       = "1.0-dev"
       version   = "latest"
     }
   }
