@@ -21,9 +21,9 @@ module "controlplane" {
   instance_count            = lookup(try(var.controlplane[each.key], {}), "count", 0)
   instance_resource_group   = local.resource_group
   instance_type             = lookup(try(var.controlplane[each.key], {}), "instance_type", "Standard_B2s")
-  # instance_image            = data.azurerm_image.talos[each.key].id
-  instance_tags     = merge(var.tags, { type = "infra" })
-  instance_secgroup = local.network_secgroup[each.key].controlplane
+  instance_image            = data.azurerm_shared_image_version.talos.id
+  instance_tags             = merge(var.tags, { type = "infra" })
+  instance_secgroup         = local.network_secgroup[each.key].controlplane
   instance_params = merge(var.kubernetes, {
     lbv4   = local.network_public[each.key].controlplane_lb[0]
     lbv6   = try(local.network_public[each.key].controlplane_lb[1], "")

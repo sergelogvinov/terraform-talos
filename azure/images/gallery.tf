@@ -68,6 +68,9 @@ resource "azurerm_storage_blob" "talos" {
   storage_container_name = azurerm_storage_container.images.name
   type                   = "Page"
   source                 = "${path.module}/disk.vhd"
+  metadata = {
+    md5 = filemd5("${path.module}/disk.vhd")
+  }
 }
 
 resource "azurerm_image" "talos" {
@@ -88,16 +91,20 @@ resource "azurerm_image" "talos" {
 }
 
 resource "azurerm_shared_image_version" "talos" {
-  name                = "0.0.2"
+  name                = "0.0.3"
   location            = var.regions[0]
   resource_group_name = data.azurerm_resource_group.kubernetes.name
   gallery_name        = azurerm_shared_image.talos.gallery_name
   image_name          = azurerm_shared_image.talos.name
   managed_image_id    = azurerm_image.talos.id
 
-  target_region {
-    name                   = var.regions[0]
-    regional_replica_count = 1
-    storage_account_type   = "Standard_LRS"
+  dynamic "target_region" {
+    for_each = var.regions
+
+    content {
+      name                   = target_region.value
+      regional_replica_count = 1
+      storage_account_type   = "Standard_LRS"
+    }
   }
 }

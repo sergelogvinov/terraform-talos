@@ -1,84 +1,83 @@
 
-# locals {
-#   worker_labels = "topology.kubernetes.io/zone=azure,project.io/node-pool=worker"
-# }
+locals {
+  worker_labels = "topology.kubernetes.io/zone=azure,project.io/node-pool=worker"
+}
 
-# resource "azurerm_linux_virtual_machine_scale_set" "worker" {
-#   for_each = { for idx, name in local.regions : name => idx }
-#   location = each.key
+resource "azurerm_linux_virtual_machine_scale_set" "worker" {
+  for_each = { for idx, name in local.regions : name => idx }
+  location = each.key
 
-#   instances              = lookup(try(var.instances[each.key], {}), "worker_count", 0)
-#   name                   = "worker-${lower(each.key)}"
-#   computer_name_prefix   = "worker-${lower(each.key)}-"
-#   resource_group_name    = local.resource_group
-#   sku                    = lookup(try(var.instances[each.key], {}), "worker_instance_type", "Standard_B2s")
-#   extensions_time_budget = "PT30M"
-#   provision_vm_agent     = false
-#   # availability_set_id        = var.instance_availability_set
+  instances            = lookup(try(var.instances[each.key], {}), "worker_count", 0)
+  name                 = "worker-${lower(each.key)}"
+  computer_name_prefix = "worker-${lower(each.key)}-"
+  resource_group_name  = local.resource_group
+  sku                  = lookup(try(var.instances[each.key], {}), "worker_instance_type", "Standard_B2s")
+  provision_vm_agent   = false
+  overprovision        = false
 
-#   network_interface {
-#     name    = "worker-${lower(each.key)}"
-#     primary = true
-#     ip_configuration {
-#       name      = "worker-${lower(each.key)}-v4"
-#       primary   = true
-#       version   = "IPv4"
-#       subnet_id = local.network_private[each.key].network_id
-#     }
-#     ip_configuration {
-#       name      = "worker-${lower(each.key)}-v6"
-#       version   = "IPv6"
-#       subnet_id = local.network_private[each.key].network_id
-#     }
-#   }
+  # availability_set_id        = var.instance_availability_set
 
-#   custom_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
-#     merge(var.kubernetes, {
-#       lbv4        = local.network_public[each.key].controlplane_lb[0]
-#       labels      = "topology.kubernetes.io/region=${each.key},${local.worker_labels}"
-#       nodeSubnets = [local.network_private[each.key].cidr[0]]
-#     })
-#   ))
+  network_interface {
+    name    = "worker-${lower(each.key)}"
+    primary = true
+    ip_configuration {
+      name      = "worker-${lower(each.key)}-v4"
+      primary   = true
+      version   = "IPv4"
+      subnet_id = local.network_private[each.key].network_id
+    }
+    ip_configuration {
+      name      = "worker-${lower(each.key)}-v6"
+      version   = "IPv6"
+      subnet_id = local.network_private[each.key].network_id
+    }
+  }
 
-#   os_disk {
-#     caching              = "ReadOnly"
-#     storage_account_type = "StandardSSD_LRS"
-#     disk_size_gb         = 50
+  custom_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
+    merge(var.kubernetes, {
+      lbv4        = local.network_public[each.key].controlplane_lb[0]
+      labels      = "topology.kubernetes.io/region=${each.key},${local.worker_labels}"
+      nodeSubnets = [local.network_private[each.key].cidr[0]]
+    })
+  ))
 
-# dynamic "diff_disk_settings" {
-#   for_each = var.vm_os_ephemeral ? ["Local"] : []
-#   content {
-#     option = diff_disk_settings.value
-#     placement = "ResourceDisk"
-#   }
-# }
-#   }
+  admin_username = "talos"
+  admin_ssh_key {
+    username   = "talos"
+    public_key = file("~/.ssh/terraform.pub")
+  }
 
-#   disable_password_authentication = false
-#   admin_password                  = "talos4PWD"
-#   admin_username                  = "talos"
-#   admin_ssh_key {
-#     username   = "talos"
-#     public_key = file("~/.ssh/terraform.pub")
-#   }
+  os_disk {
+    caching              = "ReadOnly"
+    storage_account_type = "StandardSSD_LRS"
+    disk_size_gb         = 50
 
-#   source_image_id = data.azurerm_image.talos[each.key].id
-#   # source_image_reference {
-#   #   publisher = "Debian"
-#   #   offer     = "debian-11"
-#   #   sku       = "11-gen2"
-#   #   version   = "latest"
-#   # }
+    # dynamic "diff_disk_settings" {
+    #   for_each = lookup(try(var.instances[each.key], {}), "worker_instance_type", "Standard_B2s") var.vm_os_ephemeral ? ["Local"] : []
+    #   content {
+    #     option    = diff_disk_settings.value
+    #     placement = "ResourceDisk"
+    #   }
+    # }
+  }
 
-#   tags = merge(var.tags, { type = "worker" })
+  source_image_id = data.azurerm_shared_image_version.talos.id
+  #   source_image_reference {
+  #     publisher = "talos"
+  #     offer     = "Talos"
+  #     sku       = "1.0-dev"
+  #     version   = "latest"
+  #   }
 
-#   automatic_instance_repair {
-#       ~ enabled      = true
-#       ~ grace_period = "PT30M"
-#   }
+  tags = merge(var.tags, { type = "worker" })
 
-#   boot_diagnostics {}
-#   lifecycle {
-#     ignore_changes = [admin_username, admin_ssh_key, os_disk, source_image_id, tags]
-#   }
-# }
+  #   automatic_instance_repair {
+  #     enabled      = true
+  #     grace_period = "PT30M"
+  #   }
+
+  boot_diagnostics {}
+  lifecycle {
+    ignore_changes = [admin_username, admin_ssh_key, os_disk, source_image_id, tags]
+  }
+}
