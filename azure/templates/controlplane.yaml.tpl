@@ -62,7 +62,7 @@ cluster:
           name: azure-cloud-controller-manager
           namespace: kube-system
         data:
-          cloud-config: ${base64encode(ccm)}
+          azure.json: ${base64encode(ccm)}
   externalCloudProvider:
     enabled: true
     manifests:
