@@ -13,6 +13,7 @@ parameters:
   zoned: "true"
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
 # allowedTopologies:
 # - matchLabelExpressions:
 #   - key: topology.disk.csi.azure.com/zone
@@ -34,6 +35,7 @@ parameters:
   zoned: "true"
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
 # allowedTopologies:
 # - matchLabelExpressions:
 #   - key: topology.disk.csi.azure.com/zone
@@ -55,6 +57,7 @@ parameters:
   zoned: "true"
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
 # allowedTopologies:
 # - matchLabelExpressions:
 #   - key: topology.disk.csi.azure.com/zone

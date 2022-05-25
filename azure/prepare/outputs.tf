@@ -19,6 +19,13 @@ output "resource_group" {
   value       = azurerm_resource_group.kubernetes.name
 }
 
+output "network" {
+  description = "The network"
+  value = { for zone, net in azurerm_virtual_network.main : zone => {
+    name = net.name
+  } }
+}
+
 output "network_public" {
   description = "The public network"
   value = { for zone, subnet in azurerm_subnet.public : zone => {

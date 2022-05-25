@@ -1,4 +1,12 @@
 
+variable "ccm_username" {
+  default = ""
+}
+
+variable "ccm_password" {
+  default = ""
+}
+
 data "terraform_remote_state" "prepare" {
   backend = "local"
   config = {
@@ -12,6 +20,7 @@ locals {
   regions         = data.terraform_remote_state.prepare.outputs.regions
   resource_group  = data.terraform_remote_state.prepare.outputs.resource_group
 
+  network          = data.terraform_remote_state.prepare.outputs.network
   network_public   = data.terraform_remote_state.prepare.outputs.network_public
   network_private  = data.terraform_remote_state.prepare.outputs.network_private
   network_secgroup = data.terraform_remote_state.prepare.outputs.secgroups

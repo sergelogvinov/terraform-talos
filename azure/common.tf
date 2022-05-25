@@ -11,3 +11,5 @@ data "azurerm_shared_image_version" "talos" {
   gallery_name        = "293f5f4eea925204"
   resource_group_name = local.resource_group
 }
+
+data "azurerm_client_config" "terraform" {}

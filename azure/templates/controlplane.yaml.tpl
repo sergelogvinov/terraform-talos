@@ -52,6 +52,17 @@ cluster:
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd: {}
+  inlineManifests:
+    - name: azure-cloud-controller-config
+      contents: |-
+        apiVersion: v1
+        kind: Secret
+        type: Opaque
+        metadata:
+          name: azure-cloud-controller-manager
+          namespace: kube-system
+        data:
+          cloud-config: ${base64encode(ccm)}
   externalCloudProvider:
     enabled: true
     manifests:

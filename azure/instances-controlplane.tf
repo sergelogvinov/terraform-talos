@@ -28,6 +28,16 @@ module "controlplane" {
     lbv4   = local.network_public[each.key].controlplane_lb[0]
     lbv6   = try(local.network_public[each.key].controlplane_lb[1], "")
     region = each.key
+
+    ccm = templatefile("${path.module}/deployments/azure.json.tpl", {
+      subscriptionId = local.subscription_id
+      tenantId       = data.azurerm_client_config.terraform.tenant_id
+      clientId       = var.ccm_username
+      clientSecret   = var.ccm_password
+      region         = each.key
+      resourceGroup  = local.resource_group
+      vnetName       = local.network[each.key].name
+    })
   })
 
   network_internal = local.network_public[each.key]

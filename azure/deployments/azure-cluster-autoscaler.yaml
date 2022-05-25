@@ -162,41 +162,18 @@ spec:
             - ./cluster-autoscaler
             - --v=3
             - --logtostderr=true
+            - --cloud-config=/etc/azure/azure.json
             - --cloud-provider=azure
             # - --regional
             - --skip-nodes-with-local-storage=false
             - --ignore-daemonsets-utilization
             # - --nodes=0:3:web-uksouth
             - --node-group-auto-discovery=label:cluster-autoscaler-enabled=true,cluster-autoscaler-name=talos-uksouth
-          env:
-            - name: ARM_SUBSCRIPTION_ID
-              valueFrom:
-                secretKeyRef:
-                  key: SubscriptionID
-                  name: cluster-autoscaler-azure
-            - name: ARM_RESOURCE_GROUP
-              valueFrom:
-                secretKeyRef:
-                  key: ResourceGroup
-                  name: cluster-autoscaler-azure
-            - name: ARM_TENANT_ID
-              valueFrom:
-                secretKeyRef:
-                  key: TenantID
-                  name: cluster-autoscaler-azure
-            - name: ARM_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  key: ClientID
-                  name: cluster-autoscaler-azure
-            - name: ARM_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  key: ClientSecret
-                  name: cluster-autoscaler-azure
-            - name: ARM_VM_TYPE
-              valueFrom:
-                secretKeyRef:
-                  key: VMType
-                  name: cluster-autoscaler-azure
-      restartPolicy: Always
+          volumeMounts:
+            - name: cloud-config
+              mountPath: /etc/azure
+              readOnly: true
+      volumes:
+        - name: cloud-config
+          secret:
+            secretName: azure-cloud-controller-manager
