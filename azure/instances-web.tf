@@ -1,6 +1,6 @@
 
 locals {
-  web_labels = "topology.kubernetes.io/zone=azure,project.io/node-pool=web"
+  web_labels = "project.io/cloudprovider-type=azure,project.io/node-pool=web"
 }
 
 resource "azurerm_linux_virtual_machine_scale_set" "web" {
@@ -63,11 +63,19 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
   #     version   = "latest"
   #   }
 
-  tags = merge(var.tags, { type = "web" })
+  tags = merge(var.tags, {
+    type                         = "web",
+    "cluster-autoscaler-enabled" = "true",
+    "cluster-autoscaler-name"    = "${local.resource_group}-${lower(each.key)}",
+    "min"                        = 0,
+    "max"                        = 3,
+
+    "k8s.io_cluster-autoscaler_node-template_label_project.io_node-pool" = "web"
+  })
 
   boot_diagnostics {}
   lifecycle {
-    ignore_changes = [admin_username, admin_ssh_key, os_disk, source_image_id, tags]
+    ignore_changes = [instances, admin_username, admin_ssh_key, os_disk, source_image_id]
   }
 }
 

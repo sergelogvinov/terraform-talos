@@ -1,0 +1,62 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+  name: csi-azure-hdd-xfs
+provisioner: kubernetes.io/azure-disk
+parameters:
+  kind: Managed
+  cachingMode: ReadOnly
+  fsType: xfs
+  skuName: Standard_LRS
+  zoned: "true"
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowedTopologies:
+- matchLabelExpressions:
+  - key: project.io/cloudprovider-type
+    values:
+    - azure
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+  name: csi-azure-ssd-xfs
+provisioner: kubernetes.io/azure-disk
+parameters:
+  kind: Managed
+  cachingMode: ReadOnly
+  fsType: xfs
+  skuName: StandardSSD_LRS
+  zoned: "true"
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowedTopologies:
+- matchLabelExpressions:
+  - key: project.io/cloudprovider-type
+    values:
+    - azure
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+  name: csi-azure-premium-xfs
+provisioner: kubernetes.io/azure-disk
+parameters:
+  kind: Managed
+  cachingMode: ReadOnly
+  fsType: xfs
+  skuName: Premium_LRS # available values: Standard_LRS, Premium_LRS, StandardSSD_LRS and UltraSSD_LRS
+  zoned: "true"
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowedTopologies:
+- matchLabelExpressions:
+  - key: project.io/cloudprovider-type
+    values:
+    - azure

@@ -1,6 +1,6 @@
 
 locals {
-  worker_labels = "topology.kubernetes.io/zone=azure,project.io/node-pool=worker"
+  worker_labels = "project.io/cloudprovider-type=azure,project.io/node-pool=worker"
 }
 
 resource "azurerm_linux_virtual_machine_scale_set" "worker" {
@@ -16,6 +16,11 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
   overprovision        = false
 
   # availability_set_id        = var.instance_availability_set
+  # health_probe_id = ""
+  # automatic_instance_repair {
+  #   enabled      = true
+  #   grace_period = "PT30M"
+  # }
 
   network_interface {
     name    = "worker-${lower(each.key)}"
@@ -69,15 +74,18 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
   #     version   = "latest"
   #   }
 
-  tags = merge(var.tags, { type = "worker" })
+  tags = merge(var.tags, {
+    type                         = "worker",
+    "cluster-autoscaler-enabled" = "true",
+    "cluster-autoscaler-name"    = "${local.resource_group}-${lower(each.key)}",
+    "min"                        = 0,
+    "max"                        = 3,
 
-  #   automatic_instance_repair {
-  #     enabled      = true
-  #     grace_period = "PT30M"
-  #   }
+    "k8s.io_cluster-autoscaler_node-template_label_project.io_node-pool" = "worker"
+  })
 
   boot_diagnostics {}
   lifecycle {
-    ignore_changes = [admin_username, admin_ssh_key, os_disk, source_image_id, tags]
+    ignore_changes = [instances, admin_username, admin_ssh_key, os_disk, source_image_id]
   }
 }

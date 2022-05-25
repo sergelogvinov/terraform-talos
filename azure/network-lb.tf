@@ -54,6 +54,7 @@ resource "azurerm_lb_rule" "web_http_v4" {
   backend_port                   = 80
   idle_timeout_in_minutes        = 30
   enable_tcp_reset               = local.network_public[each.key].sku != "Basic"
+  disable_outbound_snat          = local.network_public[each.key].sku != "Basic"
 }
 
 resource "azurerm_lb_rule" "web_https_v4" {
@@ -69,4 +70,18 @@ resource "azurerm_lb_rule" "web_https_v4" {
   backend_port                   = 443
   idle_timeout_in_minutes        = 30
   enable_tcp_reset               = local.network_public[each.key].sku != "Basic"
+  disable_outbound_snat          = local.network_public[each.key].sku != "Basic"
+}
+
+resource "azurerm_lb_outbound_rule" "web" {
+  for_each                 = { for idx, name in local.regions : name => idx if local.network_public[name].sku != "Basic" }
+  name                     = "snat"
+  loadbalancer_id          = azurerm_lb.web[each.key].id
+  backend_address_pool_id  = azurerm_lb_backend_address_pool.web_v4[each.key].id
+  protocol                 = "All"
+  allocated_outbound_ports = 1024
+
+  frontend_ip_configuration {
+    name = "web-lb-v4"
+  }
 }

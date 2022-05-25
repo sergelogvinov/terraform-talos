@@ -1,0 +1,202 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: azure-cloud-controller-manager
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:cloud-controller-manager
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  labels:
+    k8s-app: azure-cloud-controller-manager
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - "*"
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/status
+    verbs:
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - services/status
+    verbs:
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumes
+    verbs:
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - create
+      - update
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: system:cloud-controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:cloud-controller-manager
+subjects:
+  - kind: ServiceAccount
+    name: azure-cloud-controller-manager
+    namespace: kube-system
+  - kind: User
+    name: azure-cloud-controller-manager
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: system:cloud-controller-manager:extension-apiserver-authentication-reader
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+  - kind: ServiceAccount
+    name: azure-cloud-controller-manager
+    namespace: kube-system
+  - apiGroup: ""
+    kind: User
+    name: azure-cloud-controller-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-cloud-controller-manager
+  namespace: kube-system
+  labels:
+    component: azure-cloud-controller-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: control-plane
+      component: azure-cloud-controller-manager
+  template:
+    metadata:
+      labels:
+        tier: control-plane
+        component: azure-cloud-controller-manager
+    spec:
+      priorityClassName: system-node-critical
+      hostNetwork: true
+      serviceAccountName: azure-cloud-controller-manager
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+      containers:
+        - name: azure-cloud-controller-manager
+          image: mcr.microsoft.com/oss/kubernetes/azure-cloud-controller-manager:v1.24.0
+          imagePullPolicy: IfNotPresent
+          command: ["cloud-controller-manager"]
+          args:
+            - --v=2
+            - --cluster-name=$(CLUSTER_NAME)
+            - --cloud-config=/etc/azure/azure.json
+            - --cloud-provider=azure
+            - --allocate-node-cidrs=false
+            - --controllers=cloud-node-lifecycle # disable cloud-node controller
+            - --use-service-account-credentials
+            - --bind-address=127.0.0.1
+            - --port=10267
+          env:
+            - name: CLUSTER_NAME
+              value: kubernetes
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 10267
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: cloud-config
+              mountPath: /etc/azure
+              readOnly: true
+      volumes:
+        - name: cloud-config
+          secret:
+            secretName: azure-cloud-controller-manager

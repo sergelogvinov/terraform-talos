@@ -12,7 +12,6 @@ machine:
       validSubnets: ${format("%#v",nodeSubnets)}
     clusterDNS:
       - 169.254.2.53
-      - fd00::169:254:2:53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
   network:
     hostname: "${name}"
@@ -23,7 +22,6 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
     extraHostEntries:
       - ip: ${lbv4}
         aliases:
@@ -57,6 +55,11 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-cloud-controller-manager.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-cloud-node-manager.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-csi-node.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-csi.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-storage.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/local-path-storage.yaml

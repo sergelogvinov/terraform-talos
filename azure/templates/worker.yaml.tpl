@@ -15,14 +15,12 @@ machine:
       validSubnets: ${format("%#v",nodeSubnets)}
     clusterDNS:
       - 169.254.2.53
-      - fd00::169:254:2:53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
   network:
     interfaces:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
     extraHostEntries:
       - ip: ${lbv4}
         aliases:

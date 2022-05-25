@@ -127,6 +127,9 @@ spec:
       labels:
         k8s-app: metrics-server
     spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        node-role.kubernetes.io/master: ""
       tolerations:
         - key: "CriticalAddonsOnly"
           operator: "Exists"
@@ -172,8 +175,6 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-dir
-      nodeSelector:
-        kubernetes.io/os: linux
       priorityClassName: system-cluster-critical
       serviceAccountName: metrics-server
       volumes:
