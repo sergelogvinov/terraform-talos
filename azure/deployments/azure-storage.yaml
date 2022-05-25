@@ -13,11 +13,11 @@ parameters:
   zoned: "true"
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
-allowedTopologies:
-- matchLabelExpressions:
-  - key: project.io/cloudprovider-type
-    values:
-    - azure
+# allowedTopologies:
+# - matchLabelExpressions:
+#   - key: topology.disk.csi.azure.com/zone
+#     values:
+#     - azure
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -34,11 +34,11 @@ parameters:
   zoned: "true"
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
-allowedTopologies:
-- matchLabelExpressions:
-  - key: project.io/cloudprovider-type
-    values:
-    - azure
+# allowedTopologies:
+# - matchLabelExpressions:
+#   - key: topology.disk.csi.azure.com/zone
+#     values:
+#     - azure
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -55,8 +55,8 @@ parameters:
   zoned: "true"
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
-allowedTopologies:
-- matchLabelExpressions:
-  - key: project.io/cloudprovider-type
-    values:
-    - azure
+# allowedTopologies:
+# - matchLabelExpressions:
+#   - key: topology.disk.csi.azure.com/zone
+#     values:
+#     - azure

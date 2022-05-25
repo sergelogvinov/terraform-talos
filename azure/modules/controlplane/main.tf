@@ -155,7 +155,7 @@ resource "local_file" "controlplane" {
         try(azurerm_public_ip.controlplane_v6[count.index].ip_address, ""),
       ])
       ipAliases   = compact([var.instance_params["lbv4"], var.instance_params["lbv6"]])
-      nodeSubnets = [var.network_internal.cidr[0]]
+      nodeSubnets = [var.network_internal.cidr[0], "!${var.instance_params["lbv4"]}"]
     })
   )
   filename        = "_cfgs/controlplane-${lower(var.region)}-${1 + count.index}.yaml"

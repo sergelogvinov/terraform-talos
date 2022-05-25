@@ -332,7 +332,7 @@ spec:
           image: mcr.microsoft.com/k8s/csi/azuredisk-csi:latest
           imagePullPolicy: IfNotPresent
           args:
-            - "--v=5"
+            - "--v=4"
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--metrics-address=0.0.0.0:29604"
             - "--user-agent-suffix=OSS-kubectl"

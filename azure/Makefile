@@ -26,9 +26,9 @@ create-templates:
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
 create-deployments:
-	helm template --namespace=kube-system   --version=1.11.4 -f deployments/cilium.yaml cilium \
+	helm template --namespace=kube-system   --version=1.11.5 -f deployments/cilium.yaml cilium \
 		cilium/cilium > deployments/cilium-result.yaml
-	helm template --namespace=ingress-nginx --version=4.1.1 -f deployments/ingress.yaml ingress-nginx \
+	helm template --namespace=ingress-nginx --version=4.1.2 -f deployments/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml
 
 create-network: ## Create networks

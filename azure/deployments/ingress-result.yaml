@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.2.0"
@@ -20,7 +20,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.2.0"
@@ -66,7 +66,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.2.0"
@@ -135,7 +135,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.2.0"
@@ -156,7 +156,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.2.0"
@@ -241,7 +241,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.2.0"
@@ -265,7 +265,7 @@ kind: Service
 metadata:
   annotations:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.2.0"
@@ -302,7 +302,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.2.0"
@@ -349,12 +349,12 @@ spec:
             - --controller-class=k8s.io/ingress-nginx
             - --ingress-class=nginx
             - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
-          securityContext:
+          securityContext: 
             capabilities:
-                drop:
-                - ALL
-                add:
-                - NET_BIND_SERVICE
+              drop:
+              - ALL
+              add:
+              - NET_BIND_SERVICE
             runAsUser: 101
             allowPrivilegeEscalation: true
           env:
@@ -428,7 +428,7 @@ apiVersion: networking.k8s.io/v1
 kind: IngressClass
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.2.0"

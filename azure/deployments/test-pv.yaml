@@ -18,11 +18,8 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: statefulset-azuredisk
-          image: mcr.microsoft.com/oss/nginx/nginx:1.19.5
-          command:
-            - "/bin/bash"
-            - "-c"
-            - set -euo pipefail; while true; do echo $(date) >> /mnt/azuredisk/outfile; sleep 1; done
+          image: ubuntu
+          command: ["sleep","6000"]
           volumeMounts:
             - name: persistent-storage
               mountPath: /mnt/azuredisk
