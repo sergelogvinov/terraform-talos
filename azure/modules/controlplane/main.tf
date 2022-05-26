@@ -81,7 +81,6 @@ resource "azurerm_linux_virtual_machine" "controlplane" {
   computer_name              = "controlplane-${lower(var.region)}-${1 + count.index}"
   resource_group_name        = var.instance_resource_group
   location                   = var.region
-  extensions_time_budget     = "PT1H30M"
   size                       = var.instance_type
   allow_extension_operations = false
   provision_vm_agent         = false
@@ -155,7 +154,7 @@ resource "local_file" "controlplane" {
         try(azurerm_public_ip.controlplane_v6[count.index].ip_address, ""),
       ])
       ipAliases   = compact([var.instance_params["lbv4"], var.instance_params["lbv6"]])
-      nodeSubnets = [var.network_internal.cidr[0], "!${var.instance_params["lbv4"]}"]
+      nodeSubnets = [cidrsubnet(var.network_internal.cidr[0], 1, 0), "!${var.instance_params["lbv4"]}"]
     })
   )
   filename        = "_cfgs/controlplane-${lower(var.region)}-${1 + count.index}.yaml"

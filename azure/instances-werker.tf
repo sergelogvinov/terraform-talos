@@ -51,8 +51,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
 
   os_disk {
     caching              = "ReadOnly"
-    storage_account_type = "StandardSSD_LRS"
-    disk_size_gb         = lookup(try(var.instances[each.key], {}), "worker_os_ephemeral", false) ? null : 50
+    storage_account_type = lookup(try(var.instances[each.key], {}), "worker_os_ephemeral", false) ? "Standard_LRS" : "StandardSSD_LRS"
+    disk_size_gb         = lookup(try(var.instances[each.key], {}), "worker_os_ephemeral", false) ? 50 : 50
 
     dynamic "diff_disk_settings" {
       for_each = lookup(try(var.instances[each.key], {}), "worker_os_ephemeral", false) ? ["Local"] : []
@@ -83,6 +83,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
 
   boot_diagnostics {}
   lifecycle {
-    ignore_changes = [instances, admin_username, admin_ssh_key, os_disk, source_image_id]
+    ignore_changes = [instances, admin_username, admin_ssh_key, source_image_id]
   }
 }

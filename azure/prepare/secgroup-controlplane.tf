@@ -30,22 +30,22 @@ resource "azurerm_network_security_group" "controlplane" {
       protocol                   = "Tcp"
       source_port_range          = "*"
       source_address_prefix      = security_rule.value
-      destination_port_ranges    = ["6443", "50000-50001", "22"]
+      destination_port_ranges    = ["6443", "50000-50001"]
       destination_address_prefix = "*"
     }
   }
 
-  security_rule {
-    name                       = "etcd"
-    priority                   = 1550
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    source_address_prefix      = "*"
-    destination_port_range     = "2379-2380"
-    destination_address_prefix = "*"
-  }
+  # security_rule {
+  #   name                       = "etcd"
+  #   priority                   = 1550
+  #   direction                  = "Inbound"
+  #   access                     = "Allow"
+  #   protocol                   = "Tcp"
+  #   source_port_range          = "*"
+  #   source_address_prefix      = "*"
+  #   destination_port_range     = "2379-2380"
+  #   destination_address_prefix = "*"
+  # }
 
   tags = merge(var.tags, { type = "infra" })
 }

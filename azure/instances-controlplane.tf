@@ -6,7 +6,7 @@ resource "azurerm_availability_set" "controlplane" {
   resource_group_name = local.resource_group
 
   platform_update_domain_count = 1
-  platform_fault_domain_count  = 1
+  platform_fault_domain_count  = 2
 
   tags = merge(var.tags, { type = "infra" })
 }

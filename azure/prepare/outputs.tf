@@ -18,6 +18,7 @@ output "network" {
   description = "The network"
   value = { for zone, net in azurerm_virtual_network.main : zone => {
     name = net.name
+    nat  = try(azurerm_public_ip.nat[zone].ip_address, "")
   } }
 }
 

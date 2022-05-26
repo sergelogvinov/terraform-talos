@@ -51,7 +51,8 @@ cluster:
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
-  etcd: {}
+  etcd:
+    subnet: ${nodeSubnets[0]}
   inlineManifests:
     - name: azure-cloud-controller-config
       contents: |-
