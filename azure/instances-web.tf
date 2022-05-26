@@ -7,15 +7,21 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
   for_each = { for idx, name in local.regions : name => idx }
   location = each.key
 
-  instances            = lookup(try(var.instances[each.key], {}), "web_count", 0)
-  name                 = "web-${lower(each.key)}"
-  computer_name_prefix = "web-${lower(each.key)}-"
-  resource_group_name  = local.resource_group
-  sku                  = lookup(try(var.instances[each.key], {}), "web_instance_type", "Standard_B2s")
-  provision_vm_agent   = false
-  overprovision        = false
+  instances                    = lookup(try(var.instances[each.key], {}), "web_count", 0)
+  name                         = "web-${lower(each.key)}"
+  computer_name_prefix         = "web-${lower(each.key)}-"
+  resource_group_name          = local.resource_group
+  sku                          = lookup(try(var.instances[each.key], {}), "web_type", "Standard_B2s")
+  provision_vm_agent           = false
+  overprovision                = false
+  platform_fault_domain_count  = 2
+  proximity_placement_group_id = azurerm_proximity_placement_group.common[each.key].id
+  health_probe_id              = local.network_public[each.key].sku != "Basic" ? azurerm_lb_probe.web[each.key].id : null
 
-  # availability_set_id        = var.instance_availability_set
+  automatic_instance_repair {
+    enabled      = local.network_public[each.key].sku != "Basic"
+    grace_period = "PT60M"
+  }
 
   network_interface {
     name                      = "web-${lower(each.key)}"
@@ -37,7 +43,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
 
   custom_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
     merge(var.kubernetes, {
-      lbv4        = local.network_public[each.key].controlplane_lb[0]
+      lbv4        = local.network_controlplane[each.key].controlplane_lb[0]
       labels      = "topology.kubernetes.io/region=${each.key},${local.web_labels}"
       nodeSubnets = [local.network_public[each.key].cidr[0]]
     })

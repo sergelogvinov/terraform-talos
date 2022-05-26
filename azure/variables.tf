@@ -7,6 +7,10 @@ variable "ccm_password" {
   default = ""
 }
 
+variable "gallery_name" {
+  default = ""
+}
+
 data "terraform_remote_state" "prepare" {
   backend = "local"
   config = {
@@ -16,14 +20,14 @@ data "terraform_remote_state" "prepare" {
 
 locals {
   subscription_id = data.terraform_remote_state.prepare.outputs.subscription
-  project         = data.terraform_remote_state.prepare.outputs.project
   regions         = data.terraform_remote_state.prepare.outputs.regions
   resource_group  = data.terraform_remote_state.prepare.outputs.resource_group
 
-  network          = data.terraform_remote_state.prepare.outputs.network
-  network_public   = data.terraform_remote_state.prepare.outputs.network_public
-  network_private  = data.terraform_remote_state.prepare.outputs.network_private
-  network_secgroup = data.terraform_remote_state.prepare.outputs.secgroups
+  network              = data.terraform_remote_state.prepare.outputs.network
+  network_controlplane = data.terraform_remote_state.prepare.outputs.network_controlplane
+  network_public       = data.terraform_remote_state.prepare.outputs.network_public
+  network_private      = data.terraform_remote_state.prepare.outputs.network_private
+  network_secgroup     = data.terraform_remote_state.prepare.outputs.secgroups
 }
 
 variable "tags" {
@@ -72,16 +76,16 @@ variable "instances" {
   type        = map(any)
   default = {
     "uksouth" = {
-      web_count            = 0,
-      web_instance_type    = "Standard_B2s",
-      worker_count         = 0,
-      worker_instance_type = "Standard_B4ms", # B4ms E2as_v4
+      web_count    = 0,
+      web_type     = "Standard_B2s",
+      worker_count = 0,
+      worker_type  = "Standard_B4ms", # B4ms E2as_v4
     },
     "ukwest" = {
-      web_count            = 0,
-      web_instance_type    = "Standard_B2s",
-      worker_count         = 0,
-      worker_instance_type = "Standard_B4ms", # B4ms E2as_v4
+      web_count    = 0,
+      web_type     = "Standard_B2s",
+      worker_count = 0,
+      worker_type  = "Standard_B4ms", # B4ms E2as_v4
     },
   }
 }

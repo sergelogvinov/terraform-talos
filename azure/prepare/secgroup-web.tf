@@ -3,7 +3,7 @@ resource "azurerm_network_security_group" "web" {
   for_each            = { for idx, name in var.regions : name => idx }
   location            = each.key
   name                = "web-${each.key}"
-  resource_group_name = azurerm_resource_group.kubernetes.name
+  resource_group_name = var.resource_group
 
   dynamic "security_rule" {
     for_each = var.whitelist_admin

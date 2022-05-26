@@ -3,7 +3,7 @@ resource "azurerm_public_ip" "nat" {
   for_each                = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_nat_enable, false) }
   location                = each.key
   name                    = "nat-${each.key}"
-  resource_group_name     = azurerm_resource_group.kubernetes.name
+  resource_group_name     = var.resource_group
   sku                     = "Standard"
   allocation_method       = "Static"
   idle_timeout_in_minutes = 30
@@ -15,7 +15,7 @@ resource "azurerm_nat_gateway" "nat" {
   for_each                = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_nat_enable, false) }
   location                = each.key
   name                    = "nat-${each.key}"
-  resource_group_name     = azurerm_resource_group.kubernetes.name
+  resource_group_name     = var.resource_group
   sku_name                = "Standard"
   idle_timeout_in_minutes = 30
 

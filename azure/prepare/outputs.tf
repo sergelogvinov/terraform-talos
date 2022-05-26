@@ -4,11 +4,6 @@ output "subscription" {
   value       = var.subscription_id
 }
 
-output "project" {
-  description = "Azure project name"
-  value       = var.project
-}
-
 output "regions" {
   description = "Azure regions"
   value       = var.regions
@@ -16,7 +11,7 @@ output "regions" {
 
 output "resource_group" {
   description = "Azure resource group"
-  value       = azurerm_resource_group.kubernetes.name
+  value       = var.resource_group
 }
 
 output "network" {
@@ -26,15 +21,24 @@ output "network" {
   } }
 }
 
-output "network_public" {
-  description = "The public network"
-  value = { for zone, subnet in azurerm_subnet.public : zone => {
+output "network_controlplane" {
+  description = "The controlplane network"
+  value = { for zone, subnet in azurerm_subnet.controlplane : zone => {
     network_id           = subnet.id
     cidr                 = subnet.address_prefixes
     sku                  = azurerm_lb.controlplane[zone].sku
     controlplane_pool_v4 = try(azurerm_lb_backend_address_pool.controlplane_v4[zone].id, "")
     controlplane_pool_v6 = try(azurerm_lb_backend_address_pool.controlplane_v6[zone].id, "")
     controlplane_lb      = azurerm_lb.controlplane[zone].private_ip_addresses
+  } }
+}
+
+output "network_public" {
+  description = "The public network"
+  value = { for zone, subnet in azurerm_subnet.public : zone => {
+    network_id = subnet.id
+    cidr       = subnet.address_prefixes
+    sku        = azurerm_lb.controlplane[zone].sku
   } }
 }
 

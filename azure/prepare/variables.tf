@@ -4,8 +4,8 @@ variable "subscription_id" {
   type        = string
 }
 
-variable "project" {
-  description = "The project name"
+variable "resource_group" {
+  description = "The resource group name"
   type        = string
 }
 
