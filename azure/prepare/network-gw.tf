@@ -50,7 +50,7 @@ resource "azurerm_network_interface" "router" {
 resource "azurerm_network_interface_security_group_association" "router" {
   for_each                  = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_gw_enable, false) }
   network_interface_id      = azurerm_network_interface.router[each.key].id
-  network_security_group_id = azurerm_network_security_group.gateway[each.key].id
+  network_security_group_id = azurerm_network_security_group.router[each.key].id
 }
 
 resource "azurerm_linux_virtual_machine" "router" {

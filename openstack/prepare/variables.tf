@@ -43,9 +43,11 @@ variable "capabilities" {
   default = {
     "GRA7" = {
       gateway = false
+      peering = false
     },
     "GRA9" = {
-      gateway = true
+      gateway = false
+      peering = true
     },
   }
 }

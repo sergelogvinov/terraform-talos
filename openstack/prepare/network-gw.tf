@@ -66,58 +66,58 @@ resource "openstack_networking_router_interface_v2" "private" {
   # port_id = openstack_networking_port_v2.gw_private[each.key].id
 }
 
-### Soft gateway
+### Soft gateway, peering networks
 
-# resource "openstack_compute_instance_v2" "gw" {
-#   for_each    = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) == false }
-#   region      = each.key
-#   name        = "gw-${lower(each.key)}"
-#   image_id    = data.openstack_images_image_v2.debian[each.key].id
-#   flavor_name = "d2-2"
-#   key_pair    = openstack_compute_keypair_v2.keypair[each.key].name
+resource "openstack_compute_instance_v2" "gw" {
+  for_each    = { for idx, name in var.regions : name => idx if try(var.capabilities[name].peering, false) }
+  region      = each.key
+  name        = "gw-${lower(each.key)}"
+  image_id    = data.openstack_images_image_v2.debian[each.key].id
+  flavor_name = "d2-2"
+  key_pair    = openstack_compute_keypair_v2.keypair[each.key].name
 
-#   network {
-#     port           = openstack_networking_port_v2.gw_external[each.key].id
-#     uuid           = data.openstack_networking_network_v2.external[each.key].id
-#     access_network = true
-#   }
-#   network {
-#     port = openstack_networking_port_v2.gw[each.key].id
-#   }
+  network {
+    port           = openstack_networking_port_v2.gw_external[each.key].id
+    uuid           = data.openstack_networking_network_v2.external[each.key].id
+    access_network = true
+  }
+  network {
+    port = openstack_networking_port_v2.gw_private[each.key].id
+  }
 
-#   user_data = <<EOF
-# #cloud-config
-# apt_update: true
-# apt_upgrade: true
-# disable_root: false
-# write_files:
-#   - path: /etc/network/interfaces
-#     permissions: '0644'
-#     content: |
-#       auto lo
-#       iface lo inet loopback
-#         dns-nameservers 1.1.1.1 8.8.8.8
-#       iface lo inet6 loopback
+  user_data = <<EOF
+#cloud-config
+apt_update: true
+apt_upgrade: true
+disable_root: false
+write_files:
+  - path: /etc/network/interfaces
+    permissions: '0644'
+    content: |
+      auto lo
+      iface lo inet loopback
+      iface lo inet6 loopback
 
-#       allow-hotplug ens3
-#       iface ens3 inet dhcp
-#         mtu 1500
-#       iface ens3 inet6 static
-#         address ${[for ip in openstack_networking_port_v2.gw_external[each.key].all_fixed_ips : ip if length(regexall("[0-9a-z]+:[0-9a-z:]+", ip)) > 0][0]}
-#         gateway ${cidrhost("${[for ip in openstack_networking_port_v2.gw_external[each.key].all_fixed_ips : ip if length(regexall("[0-9a-z]+:[0-9a-z:]+", ip)) > 0][0]}/56", 1)}
-#         netmask 56
+      allow-hotplug ens3
+      iface ens3 inet dhcp
+        mtu 1500
+      iface ens3 inet6 static
+        address ${[for ip in openstack_networking_port_v2.gw_external[each.key].all_fixed_ips : ip if length(split(":", ip)) > 1][0]}
+        gateway ${cidrhost("${[for ip in openstack_networking_port_v2.gw_external[each.key].all_fixed_ips : ip if length(split(":", ip)) > 1][0]}/56", 1)}
+        netmask 56
 
-#       allow-hotplug ens4
-#       iface ens4 inet static
-#         address ${openstack_networking_port_v2.gw[each.key].all_fixed_ips[0]}
-#         netmask 24
-#         mtu ${local.network_id[each.key].mtu}
+      allow-hotplug ens4
+      iface ens4 inet static
+        address ${[for ip in openstack_networking_port_v2.gw_private[each.key].all_fixed_ips : ip if length(split(".", ip)) > 1][0]}
+        netmask 24
+        mtu ${local.network_id[each.key].mtu}
+        post-up ip ro add ${openstack_networking_subnet_v2.public[each.key].cidr} dev ens4
 
-# runcmd:
-#   - rm -f /etc/network/interfaces.d/50-cloud-init
-# EOF
+runcmd:
+  - rm -f /etc/network/interfaces.d/50-cloud-init
+EOF
 
-#   lifecycle {
-#     ignore_changes = [key_pair, user_data, image_id]
-#   }
-# }
+  lifecycle {
+    ignore_changes = [key_pair, user_data, image_id]
+  }
+}

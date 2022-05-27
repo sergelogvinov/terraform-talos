@@ -73,7 +73,7 @@ resource "local_file" "controlplane" {
       ipv4 = [for k in openstack_networking_port_v2.controlplane_public[count.index].all_fixed_ips : k if length(regexall("[0-9]+.[0-9.]+", k)) > 0][0]
       ipv6 = [for k in openstack_networking_port_v2.controlplane_public[count.index].all_fixed_ips : k if length(regexall("[0-9a-z]+:[0-9a-z:]+", k)) > 0][0]
 
-      nodeSubnets = var.network_internal.cidr
+      nodeSubnets = split(",", var.network_internal.cidr)
     })
   )
   filename        = "_cfgs/controlplane-${lower(var.region)}-${count.index + 1}.yaml"

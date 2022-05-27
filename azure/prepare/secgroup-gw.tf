@@ -1,8 +1,8 @@
 
-resource "azurerm_network_security_group" "gateway" {
+resource "azurerm_network_security_group" "router" {
   for_each            = { for idx, name in var.regions : name => idx }
   location            = each.key
-  name                = "gateway-${each.key}"
+  name                = "router-${each.key}"
   resource_group_name = var.resource_group
 
   dynamic "security_rule" {
@@ -45,6 +45,21 @@ resource "azurerm_network_security_group" "gateway" {
     source_address_prefix      = "*"
     destination_port_range     = "443"
     destination_address_prefix = "*"
+  }
+
+  dynamic "security_rule" {
+    for_each = var.network_cidr
+    content {
+      name                       = "Peering-${security_rule.key}"
+      priority                   = 1700 + security_rule.key
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      source_address_prefix      = security_rule.value
+      destination_port_range     = "*"
+      destination_address_prefix = security_rule.value
+    }
   }
 
   tags = merge(var.tags, { type = "infra" })

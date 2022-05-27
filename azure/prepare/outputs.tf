@@ -17,8 +17,9 @@ output "resource_group" {
 output "network" {
   description = "The network"
   value = { for zone, net in azurerm_virtual_network.main : zone => {
-    name = net.name
-    nat  = try(azurerm_public_ip.nat[zone].ip_address, "")
+    name    = net.name
+    nat     = try(azurerm_public_ip.nat[zone].ip_address, "")
+    peering = try(azurerm_linux_virtual_machine.router[zone].private_ip_addresses, [])
   } }
 }
 

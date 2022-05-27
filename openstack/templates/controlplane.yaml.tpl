@@ -16,10 +16,9 @@ machine:
       node-labels: "${labels}"
       rotate-server-certificates: true
     nodeIP:
-      validSubnets: ${format("%#v",split(",",nodeSubnets))}
+      validSubnets: ${format("%#v",nodeSubnets)}
     clusterDNS:
       - 169.254.2.53
-      - fd00::169:254:2:53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
   network:
     hostname: "${name}"
@@ -33,7 +32,6 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
     extraHostEntries:
       - ip: ${ipv4_local_vip}
         aliases:
@@ -69,7 +67,8 @@ cluster:
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
-  etcd: {}
+  etcd:
+    subnet: ${nodeSubnets[0]}
   inlineManifests:
     - name: openstack-cloud-controller-config
       contents: |-

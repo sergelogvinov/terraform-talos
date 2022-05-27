@@ -76,15 +76,18 @@ resource "azurerm_route_table" "link" {
       name                   = "link-${each.key}-v${length(split(".", var.network_cidr[route.value])) > 1 ? "4" : "6"}"
       address_prefix         = var.network_cidr[route.value]
       next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = cidrhost(azurerm_subnet.public[each.key].address_prefixes[route.value], -2)
+      next_hop_in_ip_address = azurerm_network_interface.router[each.key].private_ip_addresses[route.value]
     }
   }
+  dynamic "route" {
+    for_each = [for ip in azurerm_network_interface.router[each.key].private_ip_addresses : ip if length(split(".", ip)) == 1]
 
-  route {
-    name                   = "link-${each.key}-default-v6"
-    address_prefix         = "::/0"
-    next_hop_type          = "VirtualAppliance"
-    next_hop_in_ip_address = cidrhost([for ip in azurerm_subnet.public[each.key].address_prefixes : ip if length(split(".", ip)) == 1][0], -2)
+    content {
+      name                   = "link-${each.key}-default-v6"
+      address_prefix         = "::/0"
+      next_hop_type          = "VirtualAppliance"
+      next_hop_in_ip_address = route.value
+    }
   }
 
   tags = merge(var.tags, { type = "infra" })
