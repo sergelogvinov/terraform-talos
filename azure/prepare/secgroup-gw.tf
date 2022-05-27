@@ -35,5 +35,17 @@ resource "azurerm_network_security_group" "gateway" {
     }
   }
 
+  security_rule {
+    name                       = "Wireguard"
+    priority                   = 1600
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Udp"
+    source_port_range          = "*"
+    source_address_prefix      = "*"
+    destination_port_range     = "443"
+    destination_address_prefix = "*"
+  }
+
   tags = merge(var.tags, { type = "infra" })
 }

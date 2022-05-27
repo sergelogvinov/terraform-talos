@@ -91,7 +91,7 @@ resource "azurerm_image" "talos" {
 }
 
 resource "azurerm_shared_image_version" "talos" {
-  name                = "0.0.5"
+  name                = "0.0.6"
   location            = var.regions[0]
   resource_group_name = data.azurerm_resource_group.kubernetes.name
   gallery_name        = azurerm_shared_image.talos.gallery_name

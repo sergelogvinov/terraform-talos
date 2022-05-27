@@ -16,12 +16,12 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
   overprovision                = false
   platform_fault_domain_count  = 2
   proximity_placement_group_id = azurerm_proximity_placement_group.common[each.key].id
-  health_probe_id              = local.network_public[each.key].sku != "Basic" ? azurerm_lb_probe.web[each.key].id : null
 
-  automatic_instance_repair {
-    enabled      = local.network_public[each.key].sku != "Basic"
-    grace_period = "PT60M"
-  }
+  # health_probe_id = local.network_public[each.key].sku != "Basic" ? azurerm_lb_probe.web[each.key].id : null
+  # automatic_instance_repair {
+  #   enabled      = local.network_public[each.key].sku != "Basic"
+  #   grace_period = "PT60M"
+  # }
 
   network_interface {
     name                      = "web-${lower(each.key)}"
