@@ -159,6 +159,15 @@ spec:
       serviceAccountName: azure-cloud-controller-manager
       nodeSelector:
         node-role.kubernetes.io/master: ""
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: project.io/cloudprovider-type
+                    operator: In
+                    values:
+                      - azure
       tolerations:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
@@ -179,6 +188,7 @@ spec:
             - --allocate-node-cidrs=false
             - --controllers=cloud-node-lifecycle # disable cloud-node controller
             - --use-service-account-credentials
+            - --leader-elect-resource-name=cloud-controller-manager-azure
             - --bind-address=127.0.0.1
             - --port=10267
           env:

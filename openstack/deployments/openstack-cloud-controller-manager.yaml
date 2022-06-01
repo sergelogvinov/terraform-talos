@@ -131,6 +131,15 @@ spec:
     spec:
       nodeSelector:
         node-role.kubernetes.io/master: ""
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: project.io/cloudprovider-type
+                    operator: In
+                    values:
+                      - openstack
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
@@ -161,6 +170,7 @@ spec:
             - --cloud-provider=openstack
             - --allocate-node-cidrs=false
             - --controllers=cloud-node,cloud-node-lifecycle
+            - --leader-elect-resource-name=cloud-controller-manager-openstack
             - --use-service-account-credentials
             - --bind-address=127.0.0.1
           env:

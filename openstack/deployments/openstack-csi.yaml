@@ -208,6 +208,15 @@ spec:
     spec:
       nodeSelector:
         node-role.kubernetes.io/master: ""
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: project.io/cloudprovider-type
+                    operator: In
+                    values:
+                      - openstack
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master

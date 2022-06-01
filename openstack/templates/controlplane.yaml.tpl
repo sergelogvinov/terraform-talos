@@ -69,6 +69,9 @@ cluster:
   scheduler: {}
   etcd:
     subnet: ${nodeSubnets[0]}
+    extraArgs:
+      election-timeout: "5000"
+      heartbeat-interval: "1000"
   inlineManifests:
     - name: openstack-cloud-controller-config
       contents: |-

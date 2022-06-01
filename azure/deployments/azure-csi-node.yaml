@@ -64,6 +64,10 @@ spec:
                     operator: NotIn
                     values:
                       - virtual-kubelet
+                  - key: project.io/cloudprovider-type
+                    operator: In
+                    values:
+                      - azure
       priorityClassName: system-node-critical
       tolerations:
         - operator: "Exists"

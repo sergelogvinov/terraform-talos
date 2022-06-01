@@ -48,6 +48,15 @@ spec:
     spec:
       nodeSelector:
         topology.kubernetes.io/zone: nova
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: project.io/cloudprovider-type
+                    operator: In
+                    values:
+                      - openstack
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master

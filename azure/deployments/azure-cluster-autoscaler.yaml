@@ -139,6 +139,15 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
         node-role.kubernetes.io/master: ""
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: project.io/cloudprovider-type
+                    operator: In
+                    values:
+                      - azure
       tolerations:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master

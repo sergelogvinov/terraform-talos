@@ -18,6 +18,7 @@ machine:
     interfaces:
       - interface: eth0
         dhcp: true
+      - interface: lo
         addresses: ${format("%#v",ipAliases)}
       - interface: dummy0
         addresses:
@@ -33,7 +34,7 @@ machine:
     net.core.netdev_max_backlog: 4096
 cluster:
   controlPlane:
-    endpoint: https://${lbv4}:6443
+    endpoint: https://${apiDomain}:6443
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
@@ -53,6 +54,9 @@ cluster:
   scheduler: {}
   etcd:
     subnet: ${nodeSubnets[0]}
+    extraArgs:
+      election-timeout: "5000"
+      heartbeat-interval: "1000"
   inlineManifests:
     - name: azure-cloud-controller-config
       contents: |-
