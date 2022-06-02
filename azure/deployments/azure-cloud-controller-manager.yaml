@@ -7,11 +7,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: system:cloud-controller-manager
-  annotations:
-    rbac.authorization.kubernetes.io/autoupdate: "true"
-  labels:
-    k8s-app: azure-cloud-controller-manager
+  name: system:azure-cloud-controller-manager
 rules:
   - apiGroups:
       - ""
@@ -103,25 +99,23 @@ rules:
       - create
       - update
 ---
-kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
-  name: system:cloud-controller-manager
+  name: system:azure-cloud-controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: system:cloud-controller-manager
+  name: system:azure-cloud-controller-manager
 subjects:
   - kind: ServiceAccount
     name: azure-cloud-controller-manager
     namespace: kube-system
-  - kind: User
-    name: azure-cloud-controller-manager
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: system:cloud-controller-manager:extension-apiserver-authentication-reader
+  name: system:azure-cloud-controller-manager:extension-apiserver-authentication-reader
   namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -131,9 +125,6 @@ subjects:
   - kind: ServiceAccount
     name: azure-cloud-controller-manager
     namespace: kube-system
-  - apiGroup: ""
-    kind: User
-    name: azure-cloud-controller-manager
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -154,7 +145,7 @@ spec:
         tier: control-plane
         component: azure-cloud-controller-manager
     spec:
-      priorityClassName: system-node-critical
+      priorityClassName: system-cluster-critical
       hostNetwork: true
       serviceAccountName: azure-cloud-controller-manager
       nodeSelector:
@@ -187,10 +178,10 @@ spec:
             - --cloud-provider=azure
             - --allocate-node-cidrs=false
             - --controllers=cloud-node-lifecycle # disable cloud-node controller
-            - --use-service-account-credentials
             - --leader-elect-resource-name=cloud-controller-manager-azure
+            - --use-service-account-credentials
             - --bind-address=127.0.0.1
-            - --port=10267
+            - --secure-port=10267
           env:
             - name: CLUSTER_NAME
               value: kubernetes
