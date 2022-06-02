@@ -17,7 +17,7 @@ module "web" {
   instance_flavor      = lookup(try(var.instances[each.key], {}), "web_instance_type", 0)
   instance_image       = data.openstack_images_image_v2.talos[each.key].id
   instance_tags        = concat(var.tags, ["web"])
-  instance_secgroups   = [local.network_secgroup[each.key].common.id, local.network_secgroup[each.key].web.id]
+  instance_secgroups   = [local.network_secgroup[each.key].common, local.network_secgroup[each.key].web]
   instance_params = merge(var.kubernetes, {
     ipv4_local_network = local.network[each.key].cidr
     ipv4_local_gw      = local.network_public[each.key].gateway

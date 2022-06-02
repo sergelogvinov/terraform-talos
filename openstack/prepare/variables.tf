@@ -47,7 +47,7 @@ variable "capabilities" {
     },
     "GRA9" = {
       gateway = false
-      peering = true
+      peering = false
     },
   }
 }

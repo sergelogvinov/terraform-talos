@@ -160,7 +160,7 @@ spec:
       serviceAccountName: openstack-cloud-controller-manager
       containers:
         - name: cloud-controller-manager
-          image: ghcr.io/sergelogvinov/openstack-cloud-controller-manager-amd64:v1.17.0-465-gc47f994
+          image: ghcr.io/sergelogvinov/openstack-cloud-controller-manager:v1.17.0-465-gc47f994
           command:
             - /bin/openstack-cloud-controller-manager
           args:

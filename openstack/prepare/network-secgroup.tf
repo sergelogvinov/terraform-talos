@@ -206,3 +206,45 @@ resource "openstack_networking_secgroup_rule_v2" "web_https_v4" {
   port_range_min    = 443
   port_range_max    = 443
 }
+
+###
+
+resource "openstack_networking_secgroup_v2" "router" {
+  for_each    = { for idx, name in var.regions : name => idx }
+  region      = each.key
+  name        = "router"
+  description = "Security group for router/peering node"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "router_ssh_v4" {
+  for_each          = { for idx, name in var.regions : name => idx }
+  region            = each.key
+  security_group_id = openstack_networking_secgroup_v2.router[each.key].id
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+}
+
+resource "openstack_networking_secgroup_rule_v2" "router_ssh_v6" {
+  for_each          = { for idx, name in var.regions : name => idx }
+  region            = each.key
+  security_group_id = openstack_networking_secgroup_v2.router[each.key].id
+  direction         = "ingress"
+  ethertype         = "IPv6"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+}
+
+resource "openstack_networking_secgroup_rule_v2" "router_wireguard" {
+  for_each          = { for idx, name in var.regions : name => idx }
+  region            = each.key
+  security_group_id = openstack_networking_secgroup_v2.router[each.key].id
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "udp"
+  port_range_min    = 443
+  port_range_max    = 443
+}

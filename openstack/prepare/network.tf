@@ -15,7 +15,7 @@ data "openstack_networking_network_v2" "main" {
 
 locals {
   network_id      = data.openstack_networking_network_v2.main
-  network_cidr_v6 = "fd60:${replace(cidrhost(var.network_cidr, 1), ".", ":")}::/56"
+  network_cidr_v6 = cidrsubnet("fd60:${replace(cidrhost(var.network_cidr, 0), ".", ":")}::/56", 0, 0)
 }
 
 resource "openstack_networking_subnet_v2" "public" {
@@ -59,16 +59,23 @@ resource "openstack_networking_subnet_v2" "private_v6" {
   # ipv6_ra_mode      = "slaac" # dhcpv6-stateless dhcpv6-stateful
 }
 
-resource "openstack_networking_subnet_route_v2" "public" {
-  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
+resource "openstack_networking_subnet_route_v2" "public_v4" {
+  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].peering, false) }
   subnet_id        = openstack_networking_subnet_v2.public[each.key].id
   destination_cidr = var.network_cidr
-  next_hop         = cidrhost(openstack_networking_subnet_v2.public[each.key].cidr, 1)
+  next_hop         = try(var.capabilities[each.key].gateway, false) ? cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, 2) : cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, 1)
 }
 
-resource "openstack_networking_subnet_route_v2" "private" {
-  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
+resource "openstack_networking_subnet_route_v2" "private_v4" {
+  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].peering, false) }
   subnet_id        = openstack_networking_subnet_v2.private[each.key].id
   destination_cidr = var.network_cidr
-  next_hop         = openstack_networking_subnet_v2.private[each.key].gateway_ip
+  next_hop         = try(var.capabilities[each.key].gateway, false) ? cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, 2) : cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, 1)
+}
+
+resource "openstack_networking_subnet_route_v2" "private_v6" {
+  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].peering, false) }
+  subnet_id        = openstack_networking_subnet_v2.private_v6[each.key].id
+  destination_cidr = local.network_cidr_v6
+  next_hop         = cidrhost(openstack_networking_subnet_v2.private_v6[each.key].cidr, 1)
 }
