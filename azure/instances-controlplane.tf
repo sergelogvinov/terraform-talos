@@ -44,6 +44,40 @@ module "controlplane" {
 }
 
 locals {
-  lbv4s    = [for c in local.network_controlplane : c.controlplane_lb]
+  lbv4s    = [for ip in flatten([for c in local.network_controlplane : c.controlplane_lb]) : ip if length(split(".", ip)) > 1]
+  lbv6s    = [for ip in flatten([for c in local.network_controlplane : c.controlplane_lb]) : ip if length(split(":", ip)) > 1]
   endpoint = try(flatten([for c in module.controlplane : c.controlplane_endpoints])[0], "")
+}
+
+resource "azurerm_private_dns_a_record" "controlplane" {
+  for_each            = toset(values({ for zone, name in local.network : zone => name.dns if name.dns != "" }))
+  name                = "controlplane"
+  resource_group_name = local.resource_group
+  zone_name           = each.key
+  ttl                 = 300
+  records             = local.lbv4s
+
+  tags = merge(var.tags, { type = "infra" })
+}
+
+resource "azurerm_private_dns_aaaa_record" "controlplane" {
+  for_each            = toset(values({ for zone, name in local.network : zone => name.dns if name.dns != "" && length(local.lbv6s) > 0 }))
+  name                = "controlplane"
+  resource_group_name = local.resource_group
+  zone_name           = each.key
+  ttl                 = 300
+  records             = local.lbv6s
+
+  tags = merge(var.tags, { type = "infra" })
+}
+
+resource "azurerm_private_dns_a_record" "controlplane_zonal" {
+  for_each            = { for idx, name in local.regions : name => idx if lookup(try(var.controlplane[name], {}), "count", 0) > 1 }
+  name                = "controlplane-${each.key}"
+  resource_group_name = local.resource_group
+  zone_name           = local.network[each.key].dns
+  ttl                 = 300
+  records             = flatten(module.controlplane[each.key].controlplane_endpoints)
+
+  tags = merge(var.tags, { type = "infra" })
 }

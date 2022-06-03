@@ -19,6 +19,7 @@ output "network" {
   value = { for zone, net in azurerm_virtual_network.main : zone => {
     name    = net.name
     nat     = try(azurerm_public_ip.nat[zone].ip_address, "")
+    dns     = try(azurerm_private_dns_zone.main[0].name, "")
     peering = try(azurerm_linux_virtual_machine.router[zone].private_ip_addresses, [])
   } }
 }

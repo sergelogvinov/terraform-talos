@@ -20,6 +20,12 @@ variable "regions" {
   }
 }
 
+variable "domain" {
+  description = "The cluster domain name"
+  type        = string
+  default     = "cluster.local"
+}
+
 variable "tags" {
   description = "Tags to set on resources"
   type        = map(string)
@@ -61,12 +67,14 @@ variable "whitelist_web" {
 variable "capabilities" {
   type = map(any)
   default = {
+    "all" = {
+      network_dns_enable = false
+    },
     "uksouth" = {
       network_nat_enable = false,
       network_lb_type    = "Basic", # Standard
       network_gw_enable  = false,
       network_gw_type    = "Standard_B1s",
-
     },
     "ukwest" = {
       network_nat_enable = false,
