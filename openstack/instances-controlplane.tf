@@ -44,5 +44,5 @@ module "controlplane" {
 
 locals {
   lbv4s    = compact([for c in module.controlplane : c.controlplane_lb])
-  endpoint = try(flatten([for c in module.controlplane : c.controlplane_endpoints])[0], "")
+  endpoint = [for ip in try(flatten([for c in module.controlplane : c.controlplane_endpoints]), []) : ip if length(split(".", ip)) > 1]
 }

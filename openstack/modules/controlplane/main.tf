@@ -52,7 +52,7 @@ resource "openstack_compute_instance_v2" "controlplane" {
 }
 
 locals {
-  ipv4_local     = var.instance_count > 0 ? [for k in try(openstack_networking_port_v2.controlplane_public[0].all_fixed_ips, []) : k if length(regexall("[0-9]+.[0-9.]+", k)) > 0][0] : ""
+  ipv4_local     = var.instance_count > 0 ? [for ip in try(openstack_networking_port_v2.controlplane_public[0].all_fixed_ips, []) : ip if length(split(".", ip)) > 1][0] : ""
   ipv4_local_vip = var.instance_count > 0 ? cidrhost(var.network_internal.cidr, 5) : ""
 
   controlplane_labels = "project.io/cloudprovider-type=openstack,topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=nova"

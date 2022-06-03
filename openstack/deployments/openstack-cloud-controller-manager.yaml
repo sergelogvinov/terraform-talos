@@ -107,9 +107,9 @@ roleRef:
   kind: ClusterRole
   name: system:openstack-cloud-controller-manager
 subjects:
-  - kind: ServiceAccount
-    name: openstack-cloud-controller-manager
-    namespace: kube-system
+- kind: ServiceAccount
+  name: openstack-cloud-controller-manager
+  namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -187,7 +187,6 @@ spec:
             - --leader-elect-resource-name=cloud-controller-manager-openstack
             - --use-service-account-credentials
             - --bind-address=127.0.0.1
-            - --secure-port=10267
           env:
             - name: CLUSTER_NAME
               value: kubernetes

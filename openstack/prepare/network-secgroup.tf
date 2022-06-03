@@ -93,7 +93,7 @@ resource "openstack_networking_secgroup_rule_v2" "common_cilium_health_ipv6" {
   protocol          = "tcp"
   port_range_min    = 4240
   port_range_max    = 4240
-  remote_ip_prefix  = local.network_cidr_v6
+  remote_ip_prefix  = "::/0" # cilium uses sometimes public ipv6
 }
 
 resource "openstack_networking_secgroup_rule_v2" "common_cilium_vxvlan" {
@@ -138,6 +138,7 @@ resource "openstack_networking_secgroup_rule_v2" "controlplane_etcd_ipv4" {
   protocol          = "tcp"
   port_range_min    = 2379
   port_range_max    = 2380
+  remote_ip_prefix  = var.network_cidr
 }
 
 resource "openstack_networking_secgroup_rule_v2" "controlplane_kubernetes_ipv4" {

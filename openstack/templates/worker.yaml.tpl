@@ -40,7 +40,7 @@ cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
   controlPlane:
-    endpoint: https://${lbv4}:6443
+    endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
   network:
     dnsDomain: ${domain}

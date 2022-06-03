@@ -43,7 +43,7 @@ machine:
     net.core.netdev_max_backlog: 4096
 cluster:
   controlPlane:
-    endpoint: https://${ipv4_local_vip}:6443
+    endpoint: https://${apiDomain}:6443
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
