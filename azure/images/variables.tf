@@ -4,8 +4,8 @@ variable "subscription_id" {
   type        = string
 }
 
-variable "project" {
-  description = "The project name"
+variable "resource_group" {
+  description = "The existed resource group"
   type        = string
 }
 
@@ -13,6 +13,12 @@ variable "regions" {
   description = "The region name list"
   type        = list(string)
   default     = ["uksouth", "ukwest"]
+}
+
+variable "name" {
+  description = "The image name"
+  type        = string
+  default     = "talos"
 }
 
 variable "arch" {

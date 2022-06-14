@@ -1,6 +1,6 @@
 
 data "azurerm_resource_group" "kubernetes" {
-  name = var.project
+  name = var.resource_group
 }
 
 resource "random_id" "images" {
@@ -31,7 +31,7 @@ resource "azurerm_shared_image" "talos" {
   # specialized                         = true
 
   identifier {
-    publisher = var.project
+    publisher = var.name
     offer     = "Talos-${lower(each.key)}"
     sku       = "1.0-dev"
   }
@@ -61,7 +61,7 @@ resource "azurerm_storage_account" "images" {
 }
 
 resource "azurerm_storage_container" "images" {
-  name                  = lower(var.project)
+  name                  = lower(var.name)
   storage_account_name  = azurerm_storage_account.images.name
   container_access_type = "private"
 }
