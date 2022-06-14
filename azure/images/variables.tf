@@ -15,6 +15,12 @@ variable "regions" {
   default     = ["uksouth", "ukwest"]
 }
 
+variable "arch" {
+  description = "The Talos architecture list"
+  type        = list(string)
+  default     = ["x64", "Arm64"]
+}
+
 variable "tags" {
   description = "Tags to set on resources"
   type        = map(string)

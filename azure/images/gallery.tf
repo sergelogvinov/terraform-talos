@@ -17,7 +17,8 @@ resource "azurerm_shared_image_gallery" "talos" {
 }
 
 resource "azurerm_shared_image" "talos" {
-  name                = "talos"
+  for_each            = toset(var.arch)
+  name                = "talos-${lower(each.key)}"
   gallery_name        = azurerm_shared_image_gallery.talos.name
   resource_group_name = data.azurerm_resource_group.kubernetes.name
   location            = var.regions[0]
@@ -25,14 +26,17 @@ resource "azurerm_shared_image" "talos" {
   os_type             = "Linux"
 
   hyper_v_generation                  = "V2"
-  accelerated_network_support_enabled = true
+  architecture                        = each.key
+  accelerated_network_support_enabled = lower(each.key) == "x64"
   # specialized                         = true
 
   identifier {
     publisher = var.project
-    offer     = "Talos"
+    offer     = "Talos-${lower(each.key)}"
     sku       = "1.0-dev"
   }
+
+  tags = merge(var.tags, { type = "infra" })
 }
 
 resource "azurerm_storage_account" "images" {
@@ -63,26 +67,28 @@ resource "azurerm_storage_container" "images" {
 }
 
 resource "azurerm_storage_blob" "talos" {
-  name                   = "talos-amd64.vhd"
+  for_each               = toset(var.arch)
+  name                   = "talos-${lower(each.key)}.vhd"
   storage_account_name   = azurerm_storage_account.images.name
   storage_container_name = azurerm_storage_container.images.name
   type                   = "Page"
-  source                 = "${path.module}/disk.vhd"
+  source                 = "${path.module}/disk-${lower(each.key)}.vhd"
   metadata = {
-    md5 = filemd5("${path.module}/disk.vhd")
+    md5 = filemd5("${path.module}/disk-${lower(each.key)}.vhd")
   }
 }
 
 resource "azurerm_image" "talos" {
+  for_each            = { for name, k in azurerm_storage_blob.talos : name => k.url }
   location            = var.regions[0]
-  name                = "talos-amd64"
+  name                = "talos-${lower(each.key)}"
   resource_group_name = data.azurerm_resource_group.kubernetes.name
   hyper_v_generation  = "V2"
 
   os_disk {
-    os_type  = "Linux"
-    os_state = "Generalized" # Specialized
-    blob_uri = azurerm_storage_blob.talos.url
+    os_type = "Linux"
+    # os_state = "Specialized" # Specialized/Generalized
+    blob_uri = azurerm_storage_blob.talos[each.key].url
     caching  = "ReadOnly"
     size_gb  = 8
   }
@@ -91,12 +97,13 @@ resource "azurerm_image" "talos" {
 }
 
 resource "azurerm_shared_image_version" "talos" {
-  name                = "0.0.7"
+  for_each            = { for name, k in azurerm_storage_blob.talos : name => k.url }
+  name                = "0.0.1"
   location            = var.regions[0]
   resource_group_name = data.azurerm_resource_group.kubernetes.name
-  gallery_name        = azurerm_shared_image.talos.gallery_name
-  image_name          = azurerm_shared_image.talos.name
-  managed_image_id    = azurerm_image.talos.id
+  gallery_name        = azurerm_shared_image.talos[each.key].gallery_name
+  image_name          = azurerm_shared_image.talos[each.key].name
+  managed_image_id    = azurerm_image.talos[each.key].id
 
   dynamic "target_region" {
     for_each = var.regions
