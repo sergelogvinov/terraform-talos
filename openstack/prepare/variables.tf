@@ -1,4 +1,10 @@
 
+variable "clouds" {
+  type        = string
+  description = "The config section in clouds.yaml"
+  default     = "openstack"
+}
+
 variable "project_id" {
   type        = string
   description = "The project_id of the openstack"
@@ -42,12 +48,14 @@ variable "capabilities" {
   type = map(any)
   default = {
     "GRA7" = {
-      gateway = false
-      peering = false
+      gateway      = false
+      peering      = false
+      peering_type = "d2-2"
     },
     "GRA9" = {
-      gateway = false
-      peering = false
+      gateway      = false
+      peering      = false
+      peering_type = "d2-2"
     },
   }
 }

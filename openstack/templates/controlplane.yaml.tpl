@@ -42,8 +42,11 @@ machine:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
 cluster:
+  id: ${clusterID}
+  secret: ${clusterSecret}
   controlPlane:
     endpoint: https://${apiDomain}:6443
+  clusterName: ${clusterName}
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}

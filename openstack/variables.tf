@@ -1,4 +1,10 @@
 
+variable "clouds" {
+  type        = string
+  description = "The config section in clouds.yaml"
+  default     = "openstack"
+}
+
 data "terraform_remote_state" "prepare" {
   backend = "local"
   config = {
@@ -55,12 +61,12 @@ variable "controlplane" {
   type        = map(any)
   default = {
     "GRA7" = {
-      count         = 0,
-      instance_type = "d2-2",
+      count = 0,
+      type  = "d2-2",
     },
     "GRA9" = {
-      count         = 0,
-      instance_type = "d2-2",
+      count = 0,
+      type  = "d2-2",
     },
   }
 }

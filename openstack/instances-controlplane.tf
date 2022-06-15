@@ -13,7 +13,7 @@ module "controlplane" {
 
   instance_servergroup = openstack_compute_servergroup_v2.controlplane[each.key].id
   instance_count       = lookup(try(var.controlplane[each.key], {}), "count", 0)
-  instance_flavor      = lookup(try(var.controlplane[each.key], {}), "instance_type", "d2-2")
+  instance_flavor      = lookup(try(var.controlplane[each.key], {}), "type", "d2-2")
   instance_image       = data.openstack_images_image_v2.talos[each.key].id
   instance_tags        = concat(var.tags, ["infra"])
   instance_secgroups   = [local.network_secgroup[each.key].common, local.network_secgroup[each.key].controlplane]

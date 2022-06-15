@@ -6,7 +6,7 @@ output "controlplane_endpoint" {
 
 output "controlplane_endpoint_public" {
   description = "Kubernetes controlplane endpoint public"
-  value       = local.endpoint
+  value       = try(local.endpoint[0], "127.0.0.1")
 }
 
 output "web_endpoint" {

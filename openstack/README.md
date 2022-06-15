@@ -77,7 +77,7 @@ make create-network
 Generate the default talos config
 
 ```shell
-make create-config create-templates
+make create-templates
 ```
 
 Create the config file **terraform.tfvars** and add params.
@@ -92,8 +92,8 @@ ccm_password = "openstack-password"
 # Number of kubernetes controlplane by zones
 controlplane = {
   "GRA9" = {
-    count         = 1,
-    instance_type = "d2-4",
+    count = 1,
+    type  = "d2-4",
   },
 }
 

@@ -4,10 +4,10 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.4
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -20,10 +20,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.4
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -66,10 +66,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.4
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/managed-by: Helm
   name: ingress-nginx
@@ -135,10 +135,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.4
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/managed-by: Helm
   name: ingress-nginx
@@ -156,10 +156,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.4
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -241,10 +241,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.4
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -265,10 +265,10 @@ kind: Service
 metadata:
   annotations:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.4
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -302,10 +302,10 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.4
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -336,7 +336,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: controller
-          image: "k8s.gcr.io/ingress-nginx/controller:v1.2.0@sha256:d8196e3bc1e72547c5dec66d6556c0ff92a23f6d0919b206be170bc90d5f9185"
+          image: "registry.k8s.io/ingress-nginx/controller:v1.2.1@sha256:5516d103a9c2ecc4f026efbd4b40662ce22dc1f824fb129ed121460aaa5c47f8"
           imagePullPolicy: IfNotPresent
           lifecycle: 
             preStop:
@@ -349,12 +349,12 @@ spec:
             - --controller-class=k8s.io/ingress-nginx
             - --ingress-class=nginx
             - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
-          securityContext:
+          securityContext: 
             capabilities:
-                drop:
-                - ALL
-                add:
-                - NET_BIND_SERVICE
+              drop:
+              - ALL
+              add:
+              - NET_BIND_SERVICE
             runAsUser: 101
             allowPrivilegeEscalation: true
           env:
@@ -428,10 +428,10 @@ apiVersion: networking.k8s.io/v1
 kind: IngressClass
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.1.1
+    helm.sh/chart: ingress-nginx-4.1.4
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller

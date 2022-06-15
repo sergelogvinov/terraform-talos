@@ -217,6 +217,15 @@ resource "openstack_networking_secgroup_v2" "router" {
   description = "Security group for router/peering node"
 }
 
+resource "openstack_networking_secgroup_rule_v2" "router_icmp_ipv4" {
+  for_each          = { for idx, name in var.regions : name => idx }
+  region            = each.key
+  security_group_id = openstack_networking_secgroup_v2.router[each.key].id
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "icmp"
+}
+
 resource "openstack_networking_secgroup_rule_v2" "router_ssh_v4" {
   for_each          = { for idx, name in var.regions : name => idx }
   region            = each.key

@@ -82,7 +82,7 @@ resource "openstack_compute_instance_v2" "router" {
   region      = each.key
   name        = "router-${lower(each.key)}"
   image_id    = data.openstack_images_image_v2.debian[each.key].id
-  flavor_name = "d2-2"
+  flavor_name = try(var.capabilities[each.key].peering_type, "d2-2")
   key_pair    = openstack_compute_keypair_v2.keypair[each.key].name
 
   network {

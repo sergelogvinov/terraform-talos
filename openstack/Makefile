@@ -4,6 +4,10 @@ ENDPOINT:=${shell terraform output -raw controlplane_endpoint_public 2>/dev/null
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+create-lb: ## Create load balancer
+	terraform init
+	terraform apply -target=output.controlplane_endpoint_public --refresh -auto-approve
+
 create-config: ## Genereate talos configs
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-openstack https://${ENDPOINT}:6443
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
@@ -27,7 +31,7 @@ create-templates:
 create-deployments:
 	helm template --namespace=kube-system   --version=1.11.5 -f deployments/cilium.yaml cilium \
 		cilium/cilium > deployments/cilium-result.yaml
-	helm template --namespace=ingress-nginx --version=4.1.1 -f deployments/ingress.yaml ingress-nginx \
+	helm template --namespace=ingress-nginx --version=4.1.4 -f deployments/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml
 
 create-network: ## Create networks
