@@ -86,8 +86,8 @@ resource "azurerm_image" "talos" {
   hyper_v_generation  = "V2"
 
   os_disk {
-    os_type = "Linux"
-    # os_state = "Specialized" # Specialized/Generalized
+    os_type  = "Linux"
+    os_state = "Generalized" # Specialized/Generalized
     blob_uri = azurerm_storage_blob.talos[each.key].url
     caching  = "ReadOnly"
     size_gb  = 8
