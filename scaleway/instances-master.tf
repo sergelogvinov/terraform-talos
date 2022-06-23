@@ -3,6 +3,10 @@ resource "scaleway_instance_ip" "controlplane" {
   count = lookup(var.controlplane, "count", 0)
 }
 
+locals {
+  controlplane_labels = "topology.kubernetes.io/region=fr-par,topology.kubernetes.io/zone=${var.regions[0]}"
+}
+
 resource "scaleway_instance_server" "controlplane" {
   count              = lookup(var.controlplane, "count", 0)
   name               = "master-${count.index + 1}"
@@ -27,7 +31,7 @@ resource "scaleway_instance_server" "controlplane" {
         ipv4_local = cidrhost(local.main_subnet, 11 + count.index)
         lbv4       = local.lbv4
         ipv4       = scaleway_instance_ip.controlplane[count.index].address
-        labels     = "topology.kubernetes.io/region=fr-par"
+        labels     = "${local.controlplane_labels},node.kubernetes.io/instance-type=${lookup(var.controlplane, "type", "DEV1-M")}"
         access     = var.scaleway_access
         secret     = var.scaleway_secret
         project_id = var.scaleway_project_id

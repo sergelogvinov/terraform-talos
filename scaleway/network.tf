@@ -22,7 +22,7 @@ resource "scaleway_vpc_public_gateway_dhcp" "main" {
 
   lifecycle {
     ignore_changes = [
-      dns_server_override
+      dns_servers_override
     ]
   }
 }

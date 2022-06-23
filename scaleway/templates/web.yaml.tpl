@@ -31,18 +31,18 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
     kubespan:
       enabled: false
       allowDownPeerBypass: true
+    extraHostEntries:
+      - ip: ${ipv4_vip}
+        aliases:
+          - ${apiDomain}
   install:
     wipe: true
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
-    net.ipv4.tcp_keepalive_time: 600
-    net.ipv4.tcp_keepalive_intvl: 60
-    fs.inotify.max_user_instances: 256
   systemDiskEncryption:
     state:
       provider: luks2
@@ -56,7 +56,7 @@ cluster:
     endpoint: https://${ipv4_vip}:6443
   clusterName: ${clusterName}
   discovery:
-    enabled: true
+    enabled: false
     registries:
       service:
         disabled: true

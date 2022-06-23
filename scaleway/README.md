@@ -23,7 +23,7 @@ Use [packer](../system_os/scaleway) to upload the Talos image.
 Generate the default talos config
 
 ```shell
-make create-config create-templates
+make create-lb create-config create-templates
 ```
 
 open config file **terraform.tfvars** and add params

@@ -7,6 +7,7 @@ help:
 create-lb: ## Create load balancer
 	terraform init
 	terraform apply -auto-approve -target=scaleway_vpc_public_gateway_ip.main -target=output.controlplane_endpoint
+	terraform refresh
 
 create-config: ## Genereate talos configs
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-scaleway https://${ENDPOINT}:6443
@@ -39,4 +40,7 @@ create-kubeconfig: ## Prepare kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 kubeconfig .
 
 create-deployments:
-	helm template --namespace=kube-system   --version=1.11.1 -f deployments/cilium.yaml cilium cilium/cilium > deployments/cilium_result.yaml
+	helm template --namespace=kube-system   --version=1.11.6 -f deployments/cilium.yaml cilium \
+		cilium/cilium > deployments/cilium-result.yaml
+	helm template --namespace=ingress-nginx --version=4.1.4 -f deployments/ingress.yaml ingress-nginx \
+		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml

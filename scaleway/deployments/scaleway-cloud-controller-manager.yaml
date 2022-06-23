@@ -135,6 +135,8 @@ spec:
           effect: "NoSchedule"
         - key: "node-role.kubernetes.io/master"
           effect: NoSchedule
+        - key: "node-role.kubernetes.io/control-plane"
+          effect: NoSchedule
       containers:
         - name: scaleway-cloud-controller-manager
           image: scaleway/scaleway-cloud-controller-manager:v0.21.4

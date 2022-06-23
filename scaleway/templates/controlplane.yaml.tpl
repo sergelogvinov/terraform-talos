@@ -29,13 +29,16 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
     nameservers:
       - 1.1.1.1
       - 8.8.8.8
     kubespan:
       enabled: false
       allowDownPeerBypass: true
+    extraHostEntries:
+      - ip: ${ipv4_vip}
+        aliases:
+          - ${apiDomain}
   install:
     wipe: false
   sysctls:
@@ -56,8 +59,11 @@ machine:
         - no_read_workqueue
         - no_write_workqueue
 cluster:
+  id: ${clusterID}
+  secret: ${clusterSecret}
   controlPlane:
     endpoint: https://${ipv4_vip}:6443
+  clusterName: ${clusterName}
   discovery:
     enabled: true
     registries:
@@ -70,7 +76,7 @@ cluster:
     cni:
       name: custom
       urls:
-        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/cilium_result.yaml
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/cilium-result.yaml
   proxy:
     disabled: true
   apiServer:
@@ -82,7 +88,8 @@ cluster:
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
-  etcd: {}
+  etcd:
+    subnet: ${nodeSubnets}
   inlineManifests:
     - name: scaleway-secret
       contents: |-
@@ -103,3 +110,6 @@ cluster:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/local-path-storage.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/coredns-local.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/ingress-result.yaml

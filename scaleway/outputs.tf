@@ -1,7 +1,7 @@
 
 output "controlplane_endpoint" {
   description = "Kubernetes controlplane endpoint"
-  value       = local.lbv4
+  value       = try(local.lbv4, "127.0.0.1")
 }
 
 output "controlplane_firstnode" {
