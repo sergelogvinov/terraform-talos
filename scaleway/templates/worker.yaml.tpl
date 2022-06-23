@@ -18,6 +18,7 @@ machine:
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
+    hostname: "${name}"
     interfaces:
       - interface: eth0
         dhcp: true
@@ -27,7 +28,12 @@ machine:
           - network: 169.254.42.42/32
             metric: 1024
       - interface: eth1
-        dhcp: true
+        addresses:
+          - ${ipv4}/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: ${ipv4_gw}
+            metric: 512
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -53,7 +59,7 @@ cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
   controlPlane:
-    endpoint: https://${ipv4_vip}:6443
+    endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
   discovery:
     enabled: false

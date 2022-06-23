@@ -145,6 +145,7 @@ spec:
             - --cloud-provider=scaleway
             - --leader-elect=true
             - --allow-untagged-cloud
+            - --controllers=cloud-node,cloud-node-lifecycle
           resources:
             requests:
               cpu: 100m

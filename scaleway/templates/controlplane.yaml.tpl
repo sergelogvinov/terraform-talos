@@ -2,12 +2,11 @@ version: v1alpha1
 debug: false
 persist: true
 machine:
-  type: ${type}
+  type: controlplane
   certSANs:
     - "${lbv4}"
     - "${ipv4}"
-    - "${ipv4_local}"
-    - "${ipv4_vip}"
+    - "${apiDomain}"
   kubelet:
     extraArgs:
       node-ip: "${ipv4_local}"
@@ -62,7 +61,7 @@ cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
   controlPlane:
-    endpoint: https://${ipv4_vip}:6443
+    endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
   discovery:
     enabled: true
@@ -83,6 +82,7 @@ cluster:
     certSANs:
       - "${lbv4}"
       - "${ipv4}"
+      - "${apiDomain}"
   controllerManager:
     extraArgs:
         node-cidr-mask-size-ipv4: 24
@@ -103,7 +103,7 @@ cluster:
           SCW_ACCESS_KEY: ${base64encode(access)}
           SCW_SECRET_KEY: ${base64encode(secret)}
           SCW_DEFAULT_PROJECT_ID:  ${base64encode(project_id)}
-          SCW_DEFAULT_REGION: ${base64encode("fr-par")}
+          SCW_DEFAULT_REGION: ${base64encode(region)}
   externalCloudProvider:
     enabled: true
     manifests:

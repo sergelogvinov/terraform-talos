@@ -4,37 +4,47 @@ resource "scaleway_instance_security_group" "controlplane" {
   inbound_default_policy  = "drop"
   outbound_default_policy = "accept"
 
-  dynamic "inbound_rule" {
-    for_each = ["50000", "6443", "2379", "2380"]
-
-    content {
-      action   = "accept"
-      protocol = "TCP"
-      port     = inbound_rule.value
-    }
+  inbound_rule {
+    action   = "accept"
+    protocol = "ANY"
+    ip_range = local.main_subnet
   }
-
-  dynamic "inbound_rule" {
-    for_each = ["50000", "6443"]
-
-    content {
-      action   = "accept"
-      protocol = "TCP"
-      port     = inbound_rule.value
-      ip_range = "::/0"
-    }
-  }
-
   inbound_rule {
     action   = "accept"
     protocol = "TCP"
     port     = 4240
     ip_range = "::/0"
   }
-  inbound_rule {
-    action   = "accept"
-    protocol = "ANY"
-    ip_range = local.main_subnet
+
+  dynamic "inbound_rule" {
+    for_each = var.whitelist_admins
+
+    content {
+      action   = "accept"
+      protocol = "TCP"
+      port     = "6443"
+      ip_range = length(split("/", inbound_rule.value)) == 2 ? inbound_rule.value : "${inbound_rule.value}/32"
+    }
+  }
+  dynamic "inbound_rule" {
+    for_each = var.whitelist_admins
+
+    content {
+      action   = "accept"
+      protocol = "TCP"
+      port     = "50000"
+      ip_range = length(split("/", inbound_rule.value)) == 2 ? inbound_rule.value : "${inbound_rule.value}/32"
+    }
+  }
+
+  dynamic "inbound_rule" {
+    for_each = ["2379", "2380"]
+
+    content {
+      action   = "accept"
+      protocol = "TCP"
+      port     = inbound_rule.value
+    }
   }
 
   # KubeSpan
@@ -74,12 +84,6 @@ resource "scaleway_instance_security_group" "web" {
 
   inbound_rule {
     action   = "accept"
-    protocol = "TCP"
-    port     = 4240
-    ip_range = "::/0"
-  }
-  inbound_rule {
-    action   = "accept"
     protocol = "ANY"
     ip_range = local.main_subnet
   }
@@ -97,6 +101,12 @@ resource "scaleway_instance_security_group" "web" {
     ip_range = "::/0"
   }
 
+  inbound_rule {
+    action   = "accept"
+    protocol = "TCP"
+    port     = 4240
+    ip_range = "::/0"
+  }
   inbound_rule {
     action   = "accept"
     protocol = "ICMP"
@@ -125,6 +135,18 @@ resource "scaleway_instance_security_group" "worker" {
     action   = "accept"
     protocol = "UDP"
     port     = 51820
+    ip_range = "::/0"
+  }
+
+  inbound_rule {
+    action   = "accept"
+    protocol = "TCP"
+    port     = 4240
+    ip_range = "::/0"
+  }
+  inbound_rule {
+    action   = "accept"
+    protocol = "ICMP"
     ip_range = "::/0"
   }
 }

@@ -61,10 +61,10 @@ variable "instances" {
   description = "Map of instance properties"
   type        = map(any)
   default = {
-    web_count            = 0,
-    web_instance_type    = "DEV1-L",
-    worker_count         = 0,
-    worker_instance_type = "DEV1-L",
+    web_count    = 0,
+    web_type     = "DEV1-L",
+    worker_count = 0,
+    worker_type  = "DEV1-L",
   }
 }
 

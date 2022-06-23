@@ -176,9 +176,9 @@ spec:
       tolerations:
         - key: "node.cloudprovider.kubernetes.io/uninitialized"
           value: "true"
-          effect: "NoSchedule"
+          effect: NoSchedule
         - key: "CriticalAddonsOnly"
-          operator: "Exists"
+          operator: Exists
         - key: "node-role.kubernetes.io/master"
           effect: NoSchedule
       affinity:
@@ -223,7 +223,7 @@ spec:
             memory: 32Mi
           requests:
             cpu: 10m
-            memory: 12Mi
+            memory: 16Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -245,46 +245,6 @@ spec:
       - effect: NoSchedule
         key: node-role.kubernetes.io/control-plane
         operator: Exists
----
-apiVersion: policy/v1beta1
-kind: PodSecurityPolicy
-metadata:
-  annotations:
-    seccomp.security.alpha.kubernetes.io/allowedProfileNames: runtime/default
-    seccomp.security.alpha.kubernetes.io/defaultProfileName: runtime/default
-  labels:
-    app.kubernetes.io/instance: kubelet-serving-cert-approver
-    app.kubernetes.io/name: kubelet-serving-cert-approver
-  name: kubelet-serving-cert-approver
-  namespace: kubelet-serving-cert-approver
-spec:
-  allowPrivilegeEscalation: false
-  forbiddenSysctls:
-  - '*'
-  fsGroup:
-    ranges:
-    - max: 65534
-      min: 65534
-    rule: MustRunAs
-  hostIPC: false
-  hostNetwork: false
-  hostPID: false
-  privileged: false
-  readOnlyRootFilesystem: true
-  requiredDropCapabilities:
-  - ALL
-  runAsUser:
-    ranges:
-    - max: 65534
-      min: 65534
-    rule: MustRunAs
-  seLinux:
-    rule: RunAsAny
-  supplementalGroups:
-    ranges:
-    - max: 65534
-      min: 65534
-    rule: MustRunAs
-  volumes:
-  - downwardAPI
-  - secret
+      - effect: NoSchedule
+        key: node.cloudprovider.kubernetes.io/uninitialized
+        operator: Exists

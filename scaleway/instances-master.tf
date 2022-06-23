@@ -26,7 +26,6 @@ resource "scaleway_instance_server" "controlplane" {
     cloud-init = templatefile("${path.module}/templates/controlplane.yaml",
       merge(var.kubernetes, {
         name       = "master-${count.index + 1}"
-        type       = "controlplane"
         ipv4_vip   = local.ipv4_vip
         ipv4_local = cidrhost(local.main_subnet, 11 + count.index)
         lbv4       = local.lbv4
@@ -34,6 +33,7 @@ resource "scaleway_instance_server" "controlplane" {
         labels     = "${local.controlplane_labels},node.kubernetes.io/instance-type=${lookup(var.controlplane, "type", "DEV1-M")}"
         access     = var.scaleway_access
         secret     = var.scaleway_secret
+        region     = "fr-par"
         project_id = var.scaleway_project_id
       })
     )
@@ -46,6 +46,13 @@ resource "scaleway_instance_server" "controlplane" {
       user_data,
     ]
   }
+}
+
+resource "scaleway_vpc_public_gateway_dhcp_reservation" "controlplane" {
+  count              = lookup(var.controlplane, "count", 0)
+  gateway_network_id = scaleway_vpc_gateway_network.main.id
+  mac_address        = scaleway_instance_server.controlplane[count.index].private_network.0.mac_address
+  ip_address         = cidrhost(local.main_subnet, 11 + count.index)
 }
 
 resource "scaleway_instance_placement_group" "controlplane" {
