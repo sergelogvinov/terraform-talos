@@ -35,6 +35,7 @@ resource "scaleway_instance_server" "controlplane" {
         secret     = var.scaleway_secret
         project_id = var.scaleway_project_id
         region     = "fr-par"
+        zone       = var.regions[0]
         vpc_id     = split("/", scaleway_vpc_private_network.main.id)[1]
       })
     )

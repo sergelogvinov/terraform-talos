@@ -18,9 +18,9 @@ Well tested with talos 1.1.x.
 Platform addons: CCM,CSI
 * [Oracle](oracle) - many regions, many zones.
 Well tested with talos 1.0.0.
-* [Scaleway](scaleway) - many regions.
-Well tested with talos 1.0.0.
-Platform addons: CCM
+* [Scaleway](scaleway) - one region.
+Well tested with talos 1.1.0.
+Platform addons: CCM,CSI
 
 ## Common
 

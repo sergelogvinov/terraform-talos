@@ -1,0 +1,22 @@
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: csi.scaleway.com
+spec:
+  attachRequired: true
+  podInfoOnMount: true
+  fsGroupPolicy: File
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+  name: scw-bssd
+provisioner: csi.scaleway.com
+# parameters:
+#   kind: Managed
+#   fsType: xfs
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
