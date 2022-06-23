@@ -33,8 +33,9 @@ resource "scaleway_instance_server" "controlplane" {
         labels     = "${local.controlplane_labels},node.kubernetes.io/instance-type=${lookup(var.controlplane, "type", "DEV1-M")}"
         access     = var.scaleway_access
         secret     = var.scaleway_secret
-        region     = "fr-par"
         project_id = var.scaleway_project_id
+        region     = "fr-par"
+        vpc_id     = split("/", scaleway_vpc_private_network.main.id)[1]
       })
     )
   }

@@ -129,6 +129,8 @@ spec:
       dnsPolicy: Default
       hostNetwork: true
       serviceAccountName: cloud-controller-manager
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
       tolerations:
         - key: "node.cloudprovider.kubernetes.io/uninitialized"
           value: "true"
@@ -139,17 +141,20 @@ spec:
           effect: NoSchedule
       containers:
         - name: scaleway-cloud-controller-manager
-          image: scaleway/scaleway-cloud-controller-manager:v0.21.4
-          imagePullPolicy: Always
+          image: ghcr.io/sergelogvinov/scaleway-cloud-controller-manager:1fa94b15f6d87e1f951331a7dca148302fe7318b
+          imagePullPolicy: IfNotPresent
           args:
             - --cloud-provider=scaleway
             - --leader-elect=true
             - --allow-untagged-cloud
             - --controllers=cloud-node,cloud-node-lifecycle
           resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
             requests:
               cpu: 100m
-              memory: 50Mi
+              memory: 64Mi
           envFrom:
             - secretRef:
                 name: scaleway-secret

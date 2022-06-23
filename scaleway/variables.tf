@@ -39,6 +39,7 @@ variable "kubernetes" {
     token          = ""
     ca             = ""
   }
+  sensitive = true
 }
 
 variable "vpc_main_cidr" {

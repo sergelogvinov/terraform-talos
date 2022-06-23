@@ -104,9 +104,11 @@ cluster:
           SCW_SECRET_KEY: ${base64encode(secret)}
           SCW_DEFAULT_PROJECT_ID:  ${base64encode(project_id)}
           SCW_DEFAULT_REGION: ${base64encode(region)}
+          SCW_VPC_ID: ${base64encode(vpc_id)}
   externalCloudProvider:
     enabled: true
     manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/scaleway-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/local-path-storage.yaml
