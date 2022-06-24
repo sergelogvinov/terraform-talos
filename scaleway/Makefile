@@ -1,12 +1,15 @@
 
 ENDPOINT:=${shell terraform output -raw controlplane_endpoint 2>/dev/null}
+ifeq ($(ENDPOINT),)
+ENDPOINT := 127.0.0.1
+endif
 
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 create-lb: ## Create load balancer
 	terraform init
-	terraform apply -auto-approve -target=scaleway_vpc_public_gateway_ip.main -target=output.controlplane_endpoint
+	terraform apply -auto-approve -target=output.controlplane_endpoint
 	terraform refresh
 
 create-config: ## Genereate talos configs

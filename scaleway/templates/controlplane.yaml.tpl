@@ -103,8 +103,8 @@ cluster:
           SCW_ACCESS_KEY: ${base64encode(access)}
           SCW_SECRET_KEY: ${base64encode(secret)}
           SCW_DEFAULT_PROJECT_ID:  ${base64encode(project_id)}
-          SCW_DEFAULT_ZONE: ${base64encode(zone)}
           SCW_DEFAULT_REGION: ${base64encode(region)}
+          SCW_DEFAULT_ZONE: ${base64encode(zone)}
           SCW_VPC_ID: ${base64encode(vpc_id)}
   externalCloudProvider:
     enabled: true
