@@ -5,9 +5,15 @@
 #   resource_group_name = local.resource_group
 # }
 
+# data "azurerm_shared_image" "talos" {
+#   name                = "talos-arm64"
+#   gallery_name        = var.gallery_name
+#   resource_group_name = local.resource_group
+# }
+
 data "azurerm_shared_image_version" "talos" {
   name                = "latest"
-  image_name          = "talos"
+  image_name          = "talos-x64"
   gallery_name        = var.gallery_name
   resource_group_name = local.resource_group
 }
