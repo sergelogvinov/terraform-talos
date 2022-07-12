@@ -33,7 +33,7 @@ resource "azurerm_shared_image" "talos" {
   identifier {
     publisher = var.name
     offer     = "Talos-${lower(each.key)}"
-    sku       = "1.0-dev"
+    sku       = "1.2-dev"
   }
 
   tags = merge(var.tags, { type = "infra" })
@@ -98,7 +98,7 @@ resource "azurerm_image" "talos" {
 
 resource "azurerm_shared_image_version" "talos" {
   for_each            = { for name, k in azurerm_storage_blob.talos : name => k.url }
-  name                = "0.0.1"
+  name                = "1.2.0"
   location            = var.regions[0]
   resource_group_name = data.azurerm_resource_group.kubernetes.name
   gallery_name        = azurerm_shared_image.talos[each.key].gallery_name
