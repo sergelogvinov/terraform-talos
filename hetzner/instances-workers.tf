@@ -10,13 +10,13 @@ module "worker" {
 
   vm_name           = "worker-${each.key}-"
   vm_items          = lookup(each.value, "worker_count", 0)
-  vm_type           = lookup(each.value, "worker_instance_type", "cx11")
+  vm_type           = lookup(each.value, "worker_type", "cx11")
   vm_image          = data.hcloud_image.talos.id
-  vm_ip_start       = (6 + index(var.regions, each.key)) * 10
+  vm_ip_start       = (6 + try(index(var.regions, each.key), 0)) * 10
   vm_security_group = [hcloud_firewall.worker.id]
 
   vm_params = merge(var.kubernetes, {
     lbv4   = local.ipv4_vip
-    labels = "node.kubernetes.io/role=worker,node.kubernetes.io/disktype=ssd,topology.kubernetes.io/region=${each.key}"
+    labels = "project.io/node-pool=web,node.kubernetes.io/disktype=ssd,topology.kubernetes.io/region=${each.key}"
   })
 }

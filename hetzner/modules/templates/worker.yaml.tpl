@@ -24,13 +24,13 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
+    extraHostEntries:
+      - ip: ${lbv4}
+        aliases:
+          - ${apiDomain}
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
-    net.ipv4.tcp_keepalive_time: 600
-    net.ipv4.tcp_keepalive_intvl: 60
-    fs.inotify.max_user_instances: 256
   install:
     wipe: false
   systemDiskEncryption:
@@ -53,8 +53,10 @@ machine:
         endpoints:
           - https://registry-1.docker.io
 cluster:
+  id: ${clusterID}
+  secret: ${clusterSecret}
   controlPlane:
-    endpoint: https://${lbv4}:6443
+    endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
   network:
     dnsDomain: ${domain}

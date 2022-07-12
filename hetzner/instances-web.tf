@@ -10,13 +10,13 @@ module "web" {
 
   vm_name           = "web-${each.key}-"
   vm_items          = lookup(each.value, "web_count", 0)
-  vm_type           = lookup(each.value, "web_instance_type", "cx11")
+  vm_type           = lookup(each.value, "web_type", "cx11")
   vm_image          = data.hcloud_image.talos.id
-  vm_ip_start       = (3 + index(var.regions, each.key)) * 10
+  vm_ip_start       = (3 + try(index(var.regions, each.key), 0)) * 10
   vm_security_group = [hcloud_firewall.web.id]
 
   vm_params = merge(var.kubernetes, {
     lbv4   = local.ipv4_vip
-    labels = "node.kubernetes.io/role=web,node.kubernetes.io/disktype=ssd,topology.kubernetes.io/region=${each.key}"
+    labels = "project.io/node-pool=web,node.kubernetes.io/disktype=ssd,topology.kubernetes.io/region=${each.key}"
   })
 }

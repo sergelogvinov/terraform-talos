@@ -60,6 +60,8 @@ spec:
         app: local-path-provisioner
     spec:
       tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: "Exists"
         - key: "node-role.kubernetes.io/master"
           effect: NoSchedule
       serviceAccountName: local-path-provisioner-service-account
@@ -106,12 +108,12 @@ metadata:
 data:
   config.json: |-
     {
-      "nodePathMap":[
-        {
-          "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
-          "paths":["/var/local-path-provisioner"]
-        }
-      ]
+            "nodePathMap":[
+            {
+                    "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
+                    "paths":["/var/local-path-provisioner"]
+            }
+            ]
     }
   setup: |-
     #!/bin/sh

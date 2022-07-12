@@ -62,7 +62,7 @@ spec:
                   - key: node-role.kubernetes.io/control-plane
                     operator: Exists
       containers:
-        - image: hetznercloud/hcloud-cloud-controller-manager:v1.12.0
+        - image: hetznercloud/hcloud-cloud-controller-manager:v1.12.1
           name: hcloud-cloud-controller-manager
           command:
             - "/bin/hcloud-cloud-controller-manager"

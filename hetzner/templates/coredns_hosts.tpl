@@ -2,7 +2,6 @@ data:
   hosts: |
     # static hosts
     169.254.2.53        dns.local
-    fd00::169:254:2:53  dns.local
     # terraform
 %{ for node in masters ~}
     ${format("%-24s",node.ipv4_address)} ${node.name}

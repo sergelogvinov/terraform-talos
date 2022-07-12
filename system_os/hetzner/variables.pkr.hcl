@@ -7,7 +7,7 @@ variable "hcloud_token" {
 
 variable "talos_version" {
   type    = string
-  default = "v1.0.3"
+  default = "v1.2.0"
 }
 
 locals {

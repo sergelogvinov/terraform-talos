@@ -54,22 +54,22 @@ variable "instances" {
   type        = map(any)
   default = {
     "nbg1" = {
-      web_count            = 0,
-      web_instance_type    = "cx11",
-      worker_count         = 0,
-      worker_instance_type = "cx11",
+      web_count    = 0,
+      web_type     = "cx11",
+      worker_count = 0,
+      worker_type  = "cx11",
     },
     "fsn1" = {
-      web_count            = 0,
-      web_instance_type    = "cx11",
-      worker_count         = 0,
-      worker_instance_type = "cx11",
+      web_count    = 0,
+      web_type     = "cx11",
+      worker_count = 0,
+      worker_type  = "cx11",
     }
     "hel1" = {
-      web_count            = 0,
-      web_instance_type    = "cx11",
-      worker_count         = 0,
-      worker_instance_type = "cx11",
+      web_count    = 0,
+      web_type     = "cx11",
+      worker_count = 0,
+      worker_type  = "cx11",
     }
   }
 }

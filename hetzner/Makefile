@@ -13,6 +13,7 @@ create-lb: ## Create load balancer
 
 create-config: ## Genereate talos configs
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-hetzner https://${ENDPOINT}:6443
+	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 
 create-templates:
 	@yq ea -P '. as $$item ireduce ({}; . * $$item )' _cfgs/controlplane.yaml templates/controlplane.yaml.tpl > templates/controlplane.yaml
@@ -22,6 +23,8 @@ create-templates:
 	@echo 'apiDomain: api.cluster.local'                       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.network.dnsDomain' _cfgs/controlplane.yaml | awk '{ print "domain: "$$1}'       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.clusterName' _cfgs/controlplane.yaml       | awk '{ print "clusterName: "$$1}'  >> _cfgs/tfstate.vars
+	@yq eval '.cluster.id' _cfgs/controlplane.yaml                | awk '{ print "clusterID: "$$1}'    >> _cfgs/tfstate.vars
+	@yq eval '.cluster.secret' _cfgs/controlplane.yaml            | awk '{ print "clusterSecret: "$$1}'>> _cfgs/tfstate.vars
 	@yq eval '.machine.token'  _cfgs/controlplane.yaml            | awk '{ print "tokenMachine: "$$1}' >> _cfgs/tfstate.vars
 	@yq eval '.machine.ca.crt' _cfgs/controlplane.yaml            | awk '{ print "caMachine: "$$1}'    >> _cfgs/tfstate.vars
 	@yq eval '.cluster.token'  _cfgs/controlplane.yaml            | awk '{ print "token: "$$1}'        >> _cfgs/tfstate.vars
@@ -37,7 +40,10 @@ create-infrastructure: ## Bootstrap all nodes
 	terraform apply
 
 create-kubeconfig: ## Prepare kubeconfig
-	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 kubeconfig
+	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 kubeconfig .
 
 create-deployments:
-	helm template --namespace=kube-system   --version=1.11.0 -f deployments/cilium.yaml cilium cilium/cilium > deployments/cilium_result.yaml
+	helm template --namespace=kube-system   --version=1.11.6 -f deployments/cilium.yaml cilium \
+		cilium/cilium > deployments/cilium-result.yaml
+	helm template --namespace=ingress-nginx --version=4.1.4 -f deployments/ingress.yaml ingress-nginx \
+		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml

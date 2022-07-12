@@ -2,7 +2,7 @@ version: v1alpha1
 debug: false
 persist: true
 machine:
-  type: ${type}
+  type: controlplane
   certSANs:
     - "${lbv4}"
     - "${lbv6}"
@@ -38,7 +38,13 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
+    kubespan:
+      enabled: false
+      allowDownPeerBypass: true
+    extraHostEntries:
+      - ip: ${ipv4_vip}
+        aliases:
+          - ${apiDomain}
   install:
     wipe: false
   sysctls:
@@ -59,8 +65,16 @@ machine:
         - no_read_workqueue
         - no_write_workqueue
 cluster:
+  id: ${clusterID}
+  secret: ${clusterSecret}
   controlPlane:
-    endpoint: https://${ipv4_vip}:6443
+    endpoint: https://${apiDomain}:6443
+  clusterName: ${clusterName}
+  discovery:
+    enabled: true
+    registries:
+      service:
+        disabled: true
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
@@ -68,7 +82,7 @@ cluster:
     cni:
       name: custom
       urls:
-        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/cilium_result.yaml
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/cilium-result.yaml
   proxy:
     disabled: true
     mode: ipvs
@@ -85,7 +99,8 @@ cluster:
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
-  etcd: {}
+  etcd:
+    subnet: ${nodeSubnets}
   inlineManifests:
     - name: hcloud-secret
       contents: |-
@@ -101,8 +116,11 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/coredns-local.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-cloud-controller-manager.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-csi.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/local-path-storage.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/coredns-local.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/ingress-result.yaml

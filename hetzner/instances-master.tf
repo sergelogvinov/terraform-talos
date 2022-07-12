@@ -18,7 +18,6 @@ resource "hcloud_server" "controlplane" {
   user_data = templatefile("${path.module}/templates/controlplane.yaml",
     merge(var.kubernetes, {
       name           = "master-${count.index + 1}"
-      type           = "controlplane"
       ipv4_vip       = local.ipv4_vip
       ipv4_local     = cidrhost(hcloud_network_subnet.core.ip_range, 11 + count.index)
       lbv4_local     = local.lbv4_local
