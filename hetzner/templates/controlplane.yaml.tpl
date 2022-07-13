@@ -94,6 +94,25 @@ cluster:
       - "${ipv4_local}"
       - "${ipv4_vip}"
       - "${apiDomain}"
+    admissionControl:
+      - name: PodSecurity
+        configuration:
+          apiVersion: pod-security.admission.config.k8s.io/v1alpha1
+          defaults:
+            audit: restricted
+            audit-version: latest
+            enforce: baseline
+            enforce-version: latest
+            warn: restricted
+            warn-version: latest
+          exemptions:
+            namespaces:
+              - kube-system
+              - ingress-nginx
+              - local-path-provisioner
+            runtimeClasses: []
+            usernames: []
+          kind: PodSecurityConfiguration
   controllerManager:
     extraArgs:
         node-cidr-mask-size-ipv4: 24
