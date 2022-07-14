@@ -240,6 +240,10 @@ spec:
                     operator: NotIn
                     values:
                       - "true"
+                  - key: "topology.kubernetes.io/zone"
+                    operator: NotIn
+                    values:
+                      - eu-central
       serviceAccount: hcloud-csi
       containers:
         - name: csi-node-driver-registrar
