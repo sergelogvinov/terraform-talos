@@ -5,6 +5,20 @@ variable "hcloud_token" {
   sensitive   = true
 }
 
+variable "robot_user" {
+  description = "The hezner cloud token (export TF_VAR_robot_user=$USER)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "robot_password" {
+  description = "The hezner cloud token (export TF_VAR_robot_password=$PASSWORD)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "regions" {
   description = "The id of the hezner region (oreder is important)"
   type        = list(string)

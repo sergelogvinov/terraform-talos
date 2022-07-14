@@ -132,6 +132,8 @@ cluster:
         data:
           network: ${base64encode(hcloud_network)}
           token: ${base64encode(hcloud_token)}
+          user: ${base64encode(robot_user)}
+          password: ${base64encode(robot_password)}
   externalCloudProvider:
     enabled: true
     manifests:

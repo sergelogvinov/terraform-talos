@@ -88,3 +88,13 @@ spec:
                   key: network
             - name: HCLOUD_INSTANCES_ADDRESS_FAMILY
               value: dualstack
+            - name: ROBOT_USER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: hcloud
+                  key: user
+            - name: ROBOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hcloud
+                  key: password
