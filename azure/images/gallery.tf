@@ -25,6 +25,9 @@ resource "azurerm_shared_image" "talos" {
   description         = "https://www.talos.dev"
   os_type             = "Linux"
 
+  min_recommended_vcpu_count   = 1
+  min_recommended_memory_in_gb = 1
+
   hyper_v_generation                  = "V2"
   architecture                        = each.key
   accelerated_network_support_enabled = lower(each.key) == "x64"
