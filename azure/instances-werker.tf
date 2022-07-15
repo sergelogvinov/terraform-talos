@@ -57,8 +57,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
     dynamic "diff_disk_settings" {
       for_each = lookup(try(var.instances[each.key], {}), "worker_os_ephemeral", false) ? ["Local"] : []
       content {
-        option = diff_disk_settings.value
-        # placement = "ResourceDisk"
+        option    = diff_disk_settings.value
+        placement = "ResourceDisk"
       }
     }
   }
