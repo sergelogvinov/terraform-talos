@@ -30,8 +30,8 @@ master-3       Ready    control-plane,master   26h     v1.24.2   172.16.0.13   6
 ```
 
 Where:
-* master-X - talos contil plane
-* store-X - debian bare metal server
+* master-X - talos control plane nodes
+* store-X - debian bare metal worker servers
 
 ## Prepare the base image
 
