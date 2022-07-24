@@ -110,6 +110,7 @@ cluster:
               - kube-system
               - ingress-nginx
               - local-path-provisioner
+              - local-lvm
             runtimeClasses: []
             usernames: []
           kind: PodSecurityConfiguration

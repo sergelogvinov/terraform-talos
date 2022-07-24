@@ -19,7 +19,19 @@ This terraform example install Talos on [HCloud](https://www.hetzner.com/cloud) 
 * [kubelet-serving-cert-approver](https://github.com/alex1989hu/kubelet-serving-cert-approver)
 * [metrics-server](https://github.com/kubernetes-sigs/metrics-server) 0.5.0
 * [rancher.io/local-path](https://github.com/rancher/local-path-provisioner) 0.0.19
-* [hcloud-cloud-controller-manage](https://github.com/hetznercloud/hcloud-cloud-controller-manager) v1.10.0
+* [hcloud-cloud-controller-manage](https://github.com/sergelogvinov/hetzner-cloud-controller-manager) fork of [syself](https://github.com/syself/hetzner-cloud-controller-manager) with few changes
+
+```sh
+NAME           STATUS   ROLES                  AGE     VERSION   INTERNAL-IP   EXTERNAL-IP       OS-IMAGE                         KERNEL-VERSION    CONTAINER-RUNTIME     ZONE         REGION
+store-1        Ready    storage                206d    v1.24.3   172.16.2.51   65.21.XX.XX       Debian GNU/Linux 11 (bullseye)   5.10.0-15-amd64   containerd://1.4.13   hel1-dc1     hel1
+master-1       Ready    control-plane,master   207d    v1.24.2   172.16.0.11   65.108.XX.XX      Talos (v1.1.1)                   5.15.54-talos     containerd://1.6.6    hel1-dc2     hel1
+master-2       Ready    control-plane,master   206d    v1.24.2   172.16.0.12   159.69.XX.XX      Talos (v1.1.1)                   5.15.54-talos     containerd://1.6.6    fsn1-dc14    fsn1
+master-3       Ready    control-plane,master   26h     v1.24.2   172.16.0.13   65.108.XX.XX      Talos (v1.1.1)                   5.15.54-talos     containerd://1.6.6    hel1-dc2     hel1
+```
+
+Where:
+* master-X - talos contil plane
+* store-X - debian bare metal server
 
 ## Prepare the base image
 
