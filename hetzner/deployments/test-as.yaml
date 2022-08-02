@@ -28,6 +28,12 @@ spec:
               - matchExpressions:
                   - key: node.kubernetes.io/instance-type
                     operator: Exists
+                  # - key: instance.hetzner.cloud/is-root-server
+                  #   operator: NotIn
+                  #   values:
+                  #     - "true"
+                  - key: hcloud/node-group
+                    operator: Exists
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - topologyKey: kubernetes.io/hostname

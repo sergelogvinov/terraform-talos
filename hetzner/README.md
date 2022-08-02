@@ -109,3 +109,15 @@ make create-kubeconfig
 ```shell
 make create-infrastructure
 ```
+
+## Node Autoscaler
+
+Cluster Autoscaler for [Hetzner Cloud](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/hetzner)
+
+Create/deploy autoscaler:
+
+```shell
+kubectl -n kube-system create secret generic hcloud-init --from-file=worker=worker.yaml.base64 --from-file=ssh-key=/path/to/.ssh/terraform.pub --from-literal=image=${IMAGEID}
+
+kubectl apply -f deployments/hcloud-autoscaler.yaml
+```
