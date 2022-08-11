@@ -3,7 +3,7 @@ locals {
   lb_enable = lookup(var.controlplane, "type_lb", "") == "" ? false : true
 
   ipv4_vip = cidrhost(local.main_subnet, 5)
-  lbv4     = local.lb_enable ? scaleway_lb_ip.lb[0].ip_address : scaleway_vpc_public_gateway_ip.main.address
+  lbv4     = local.lb_enable ? scaleway_lb_ip.lb[0].ip_address : try(scaleway_vpc_public_gateway_ip.main.address, "127.0.0.1")
 }
 
 resource "scaleway_lb_ip" "lb" {

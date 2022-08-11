@@ -9,14 +9,14 @@ locals {
 
 resource "scaleway_instance_server" "controlplane" {
   count              = lookup(var.controlplane, "count", 0)
-  name               = "master-${count.index + 1}"
+  name               = "controlplane-${count.index + 1}"
   image              = data.scaleway_instance_image.talos.id
   type               = lookup(var.controlplane, "type", "DEV1-M")
   enable_ipv6        = true
   ip_id              = scaleway_instance_ip.controlplane[count.index].id
   security_group_id  = scaleway_instance_security_group.controlplane.id
   placement_group_id = scaleway_instance_placement_group.controlplane.id
-  tags               = concat(var.tags, ["infra", "master"])
+  tags               = concat(var.tags, ["infra", "controlplane"])
 
   private_network {
     pn_id = scaleway_vpc_private_network.main.id
@@ -25,7 +25,7 @@ resource "scaleway_instance_server" "controlplane" {
   user_data = {
     cloud-init = templatefile("${path.module}/templates/controlplane.yaml",
       merge(var.kubernetes, {
-        name       = "master-${count.index + 1}"
+        name       = "controlplane-${count.index + 1}"
         ipv4_vip   = local.ipv4_vip
         ipv4_local = cidrhost(local.main_subnet, 11 + count.index)
         lbv4       = local.lbv4

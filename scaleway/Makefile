@@ -34,7 +34,12 @@ create-templates:
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
 create-controlplane: ## Bootstrap first controlplane node
-	terraform apply -target=scaleway_instance_private_nic.controlplane
+	terraform refresh
+	terraform apply -target=scaleway_instance_server.controlplane -target=scaleway_vpc_public_gateway_dhcp_reservation.controlplane
+
+	sleep 5
+	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
+	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} bootstrap
 
 create-infrastructure: ## Bootstrap all nodes
 	terraform apply
