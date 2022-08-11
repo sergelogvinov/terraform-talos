@@ -117,7 +117,7 @@ Cluster Autoscaler for [Hetzner Cloud](https://github.com/kubernetes/autoscaler/
 Create/deploy autoscaler:
 
 ```shell
-kubectl -n kube-system create secret generic hcloud-init --from-file=worker=worker.yaml.base64 --from-file=ssh-key=/path/to/.ssh/terraform.pub --from-literal=image=${IMAGEID}
+kubectl -n kube-system create secret generic hcloud-init --from-file=worker=worker.yaml.base64 --from-literal=ssh-key=${SSHID} --from-literal=image=${IMAGEID}
 
 kubectl apply -f deployments/hcloud-autoscaler.yaml
 ```
