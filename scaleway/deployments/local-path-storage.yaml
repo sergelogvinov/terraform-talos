@@ -60,9 +60,9 @@ spec:
         app: local-path-provisioner
     spec:
       tolerations:
-        - key: "CriticalAddonsOnly"
-          operator: "Exists"
         - key: "node-role.kubernetes.io/master"
+          effect: NoSchedule
+        - key: "node-role.kubernetes.io/control-plane"
           effect: NoSchedule
       serviceAccountName: local-path-provisioner-service-account
       containers:

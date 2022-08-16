@@ -41,7 +41,7 @@ create-controlplane: ## Bootstrap first controlplane node
 	terraform refresh
 	terraform apply -target=scaleway_instance_server.controlplane -target=scaleway_vpc_public_gateway_dhcp_reservation.controlplane
 
-	sleep 10
+	sleep 30
 	@$(MAKE) create-controlplane-bootstrap
 
 create-infrastructure: ## Bootstrap all nodes

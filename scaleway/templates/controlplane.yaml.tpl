@@ -89,7 +89,10 @@ cluster:
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd:
-    subnet: ${nodeSubnets}
+    advertisedSubnets:
+      - ${nodeSubnets}
+    listenSubnets:
+      - ${nodeSubnets}
   inlineManifests:
     - name: scaleway-secret
       contents: |-
