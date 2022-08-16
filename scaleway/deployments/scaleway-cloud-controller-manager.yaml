@@ -130,7 +130,7 @@ spec:
       hostNetwork: true
       serviceAccountName: cloud-controller-manager
       nodeSelector:
-        node-role.kubernetes.io/master: ""
+        node-role.kubernetes.io/control-plane: ""
       tolerations:
         - key: "node.cloudprovider.kubernetes.io/uninitialized"
           value: "true"

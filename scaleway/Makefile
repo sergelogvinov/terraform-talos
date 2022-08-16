@@ -33,22 +33,27 @@ create-templates:
 
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
+create-controlplane-bootstrap:
+	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
+	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 bootstrap
+
 create-controlplane: ## Bootstrap first controlplane node
 	terraform refresh
 	terraform apply -target=scaleway_instance_server.controlplane -target=scaleway_vpc_public_gateway_dhcp_reservation.controlplane
 
-	sleep 5
-	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
-	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} bootstrap
+	sleep 10
+	@$(MAKE) create-controlplane-bootstrap
 
 create-infrastructure: ## Bootstrap all nodes
 	terraform apply
 
 create-kubeconfig: ## Prepare kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 kubeconfig .
+	kubectl --kubeconfig=kubeconfig config set clusters.talos-k8s-scaleway.server https://${ENDPOINT}:6443
+	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
 
 create-deployments:
 	helm template --namespace=kube-system   --version=1.11.6 -f deployments/cilium.yaml cilium \
 		cilium/cilium > deployments/cilium-result.yaml
-	helm template --namespace=ingress-nginx --version=4.1.4 -f deployments/ingress.yaml ingress-nginx \
+	helm template --namespace=ingress-nginx --version=4.2.1 -f deployments/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml

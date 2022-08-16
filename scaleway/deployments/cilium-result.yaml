@@ -126,7 +126,7 @@ data:
   #   - disabled
   #   - vxlan (default)
   #   - geneve
-  tunnel: vxlan
+  tunnel: "vxlan"
   # Enables L7 proxy for L7 policy enforcement and visibility
   enable-l7-proxy: "true"
 
@@ -464,7 +464,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: cilium-agent
-        image: "quay.io/cilium/cilium:v1.11.6@sha256:f7f93c26739b6641a3fa3d76b1e1605b15989f25d06625260099e01c8243f54c"
+        image: "quay.io/cilium/cilium:v1.11.7@sha256:66a6f72a49e55e21278d07a99ff2cffa7565ed07f2578d54b5a92c1a492a6597"
         imagePullPolicy: IfNotPresent
         command:
         - cilium-agent
@@ -593,8 +593,33 @@ spec:
           mountPath: /run/xtables.lock
       hostNetwork: true
       initContainers:
+      - name: apply-sysctl-overwrites
+        image: "quay.io/cilium/cilium:v1.11.7@sha256:66a6f72a49e55e21278d07a99ff2cffa7565ed07f2578d54b5a92c1a492a6597"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: BIN_PATH
+          value: /opt/cni/bin
+        command:
+        - sh
+        - -ec
+        # The statically linked Go program binary is invoked to avoid any
+        # dependency on utilities like sh that can be missing on certain
+        # distros installed on the underlying host. Copy the binary to the
+        # same directory where we install cilium cni plugin so that exec permissions
+        # are available.
+        - |
+          cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;
+          nsenter --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-sysctlfix";
+          rm /hostbin/cilium-sysctlfix
+        volumeMounts:
+        - name: hostproc
+          mountPath: /hostproc
+        - name: cni-path
+          mountPath: /hostbin
+        securityContext:
+          privileged: true
       - name: clean-cilium-state
-        image: "quay.io/cilium/cilium:v1.11.6@sha256:f7f93c26739b6641a3fa3d76b1e1605b15989f25d06625260099e01c8243f54c"
+        image: "quay.io/cilium/cilium:v1.11.7@sha256:66a6f72a49e55e21278d07a99ff2cffa7565ed07f2578d54b5a92c1a492a6597"
         imagePullPolicy: IfNotPresent
         command:
         - /init-container.sh
@@ -648,6 +673,10 @@ spec:
         hostPath:
           path: /sys/fs/bpf
           type: DirectoryOrCreate
+      - name: hostproc
+        hostPath:
+          path: /proc
+          type: Directory
       # To keep state between restarts / upgrades for cgroup2 filesystem
       - name: cilium-cgroup
         hostPath:
@@ -727,7 +756,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: cilium-operator
-        image: quay.io/cilium/operator-generic:v1.11.6@sha256:9f6063c7bcaede801a39315ec7c166309f6a6783e98665f6693939cf1701bc17
+        image: quay.io/cilium/operator-generic:v1.11.7@sha256:0f8ed5d815873d20848a360df3f2ebbd4116481ff817d3f295557801e0b45900
         imagePullPolicy: IfNotPresent
         command:
         - cilium-operator-generic
