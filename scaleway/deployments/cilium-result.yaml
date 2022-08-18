@@ -816,6 +816,8 @@ spec:
   template:
     metadata:
       annotations:
+        # ensure pods roll when configmap updates
+        cilium.io/cilium-configmap-checksum: "10bcfd4171cc8219b04f7404f8c9add742e0de9272cd864272e80f23ec406384"
       labels:
         io.cilium/app: operator
         name: cilium-operator
