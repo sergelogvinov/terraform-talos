@@ -148,7 +148,7 @@ data:
   kube-proxy-replacement: "strict"
   kube-proxy-replacement-healthz-bind-address: ""
   bpf-lb-sock: "false"
-  host-reachable-services-protos: 
+  host-reachable-services-protos:
   enable-health-check-nodeport: "true"
   node-port-bind-protection: "true"
   enable-auto-protect-node-port-range: "true"
@@ -552,7 +552,6 @@ spec:
         container.apparmor.security.beta.kubernetes.io/cilium-agent: "unconfined"
         container.apparmor.security.beta.kubernetes.io/clean-cilium-state: "unconfined"
         container.apparmor.security.beta.kubernetes.io/mount-cgroup: "unconfined"
-        container.apparmor.security.beta.kubernetes.io/apply-sysctl-overwrites: "unconfined"
       labels:
         k8s-app: cilium
     spec:
