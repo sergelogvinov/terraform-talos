@@ -19,6 +19,7 @@ autoDirectNodeRoutes: false
 devices: [eth+]
 
 healthChecking: true
+annotateK8sNode: true
 
 # l7Proxy: false
 # encryption:
@@ -40,8 +41,6 @@ ipv4:
   enabled: true
 ipv6:
   enabled: true
-hostServices:
-  enabled: true
 hostPort:
   enabled: true
 nodePort:
@@ -50,6 +49,9 @@ externalIPs:
   enabled: true
 hostFirewall:
   enabled: true
+
+securityContext:
+  privileged: true
 
 hubble:
   enabled: false

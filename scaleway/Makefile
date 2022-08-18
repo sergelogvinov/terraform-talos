@@ -53,7 +53,7 @@ create-kubeconfig: ## Prepare kubeconfig
 	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
 
 create-deployments:
-	helm template --namespace=kube-system   --version=1.11.6 -f deployments/cilium.yaml cilium \
+	helm template --namespace=kube-system   --version=1.12.1 -f deployments/cilium.yaml cilium \
 		cilium/cilium > deployments/cilium-result.yaml
 	helm template --namespace=ingress-nginx --version=4.2.1 -f deployments/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml
