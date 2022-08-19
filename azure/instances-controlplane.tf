@@ -72,7 +72,7 @@ resource "azurerm_private_dns_aaaa_record" "controlplane" {
 }
 
 resource "azurerm_private_dns_a_record" "controlplane_zonal" {
-  for_each            = { for idx, name in local.regions : name => idx if lookup(try(var.controlplane[name], {}), "count", 0) > 1 }
+  for_each            = { for idx, name in local.regions : name => idx if lookup(try(var.controlplane[name], {}), "count", 0) > 1 && local.network[name].dns != "" }
   name                = "controlplane-${each.key}"
   resource_group_name = local.resource_group
   zone_name           = local.network[each.key].dns

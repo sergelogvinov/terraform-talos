@@ -135,6 +135,8 @@ metadata:
     component: azure-cloud-controller-manager
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       tier: control-plane
@@ -168,7 +170,7 @@ spec:
           operator: Exists
       containers:
         - name: azure-cloud-controller-manager
-          image: mcr.microsoft.com/oss/kubernetes/azure-cloud-controller-manager:v1.24.0
+          image: mcr.microsoft.com/oss/kubernetes/azure-cloud-controller-manager:v1.24.4
           imagePullPolicy: IfNotPresent
           command: ["cloud-controller-manager"]
           args:
@@ -178,9 +180,10 @@ spec:
             - --cloud-provider=azure
             - --allocate-node-cidrs=false
             - --controllers=cloud-node-lifecycle # disable cloud-node controller
+            - --configure-cloud-routes=false
             - --leader-elect-resource-name=cloud-controller-manager-azure
             - --use-service-account-credentials
-            - --bind-address=127.0.0.1
+            # - --bind-address=127.0.0.1
             - --secure-port=10267
           env:
             - name: CLUSTER_NAME
@@ -196,6 +199,7 @@ spec:
             httpGet:
               path: /healthz
               port: 10267
+              scheme: HTTPS
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
