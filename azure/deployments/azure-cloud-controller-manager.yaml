@@ -149,7 +149,7 @@ spec:
       hostNetwork: true
       serviceAccountName: azure-cloud-controller-manager
       nodeSelector:
-        node-role.kubernetes.io/master: ""
+        node-role.kubernetes.io/control-plane: ""
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

@@ -37,10 +37,10 @@ create-network: ## Create networks
 create-controlplane: ## Bootstrap controlplane
 	terraform apply -target=module.controlplane
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
-	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} bootstrap
+	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.136.11 bootstrap
 
 create-kubeconfig: ## Download kubeconfig
-	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} kubeconfig .
+	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.136.11 kubeconfig .
 	kubectl --kubeconfig=kubeconfig config set clusters.talos-k8s-azure.server https://${ENDPOINT}:6443
 	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
 	kubectl --kubeconfig=kubeconfig get pods -owide -A
