@@ -53,7 +53,10 @@ cluster:
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd:
-    subnet: ${nodeSubnets[0]}
+    advertisedSubnets:
+      - ${nodeSubnets[0]}
+    listenSubnets:
+      - ${nodeSubnets[0]}
     extraArgs:
       election-timeout: "5000"
       heartbeat-interval: "1000"

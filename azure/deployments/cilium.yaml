@@ -5,6 +5,7 @@ k8sServicePort: "6443"
 
 operator:
   enabled: true
+  rollOutPods: true
   replicas: 1
   prometheus:
     enabled: false
@@ -19,6 +20,7 @@ autoDirectNodeRoutes: false
 devices: [eth+]
 
 healthChecking: true
+annotateK8sNode: true
 
 cni:
   install: true
@@ -35,8 +37,6 @@ ipv4:
   enabled: true
 ipv6:
   enabled: true
-hostServices:
-  enabled: true
 hostPort:
   enabled: true
 nodePort:
@@ -45,6 +45,9 @@ externalIPs:
   enabled: true
 hostFirewall:
   enabled: true
+
+securityContext:
+  privileged: true
 
 hubble:
   enabled: false
