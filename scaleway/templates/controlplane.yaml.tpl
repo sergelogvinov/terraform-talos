@@ -32,7 +32,7 @@ machine:
       - 1.1.1.1
       - 8.8.8.8
     kubespan:
-      enabled: false
+      enabled: true
       allowDownPeerBypass: true
     extraHostEntries:
       - ip: ${ipv4_vip}
@@ -83,6 +83,26 @@ cluster:
       - "${lbv4}"
       - "${ipv4}"
       - "${apiDomain}"
+    admissionControl:
+      - name: PodSecurity
+        configuration:
+          apiVersion: pod-security.admission.config.k8s.io/v1alpha1
+          defaults:
+            audit: restricted
+            audit-version: latest
+            enforce: baseline
+            enforce-version: latest
+            warn: restricted
+            warn-version: latest
+          exemptions:
+            namespaces:
+              - kube-system
+              - ingress-nginx
+              - local-path-provisioner
+              - local-lvm
+            runtimeClasses: []
+            usernames: []
+          kind: PodSecurityConfiguration
   controllerManager:
     extraArgs:
         node-cidr-mask-size-ipv4: 24

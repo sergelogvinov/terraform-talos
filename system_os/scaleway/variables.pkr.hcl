@@ -18,12 +18,12 @@ variable "scaleway_secret_key" {
 
 variable "scaleway_zone" {
   type    = string
-  default = "fr-par-1"
+  default = "fr-par-2"
 }
 
 variable "talos_version" {
   type    = string
-  default = "v1.1.2"
+  default = "v1.2.0"
 }
 
 locals {

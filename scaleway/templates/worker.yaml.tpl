@@ -38,7 +38,7 @@ machine:
         addresses:
           - 169.254.2.53/32
     kubespan:
-      enabled: false
+      enabled: true
       allowDownPeerBypass: true
     extraHostEntries:
       - ip: ${ipv4_vip}
@@ -55,6 +55,14 @@ machine:
       keys:
         - nodeID: {}
           slot: 0
+    ephemeral:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
+      options:
+        - no_read_workqueue
+        - no_write_workqueue
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
@@ -62,7 +70,7 @@ cluster:
     endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
   discovery:
-    enabled: false
+    enabled: true
     registries:
       service:
         disabled: true
