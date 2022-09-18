@@ -1,8 +1,13 @@
 
 ENDPOINT:=${shell terraform output -raw controlplane_endpoint 2>/dev/null}
+CLUSTERNAME:="talos-k8s-hetzner"
 
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+clean: ## Clean all
+	rm -rf _cfgs
+	rm -f kubeconfig
 
 prepare:
 	@[ -f ~/.ssh/terraform ] || ssh-keygen -f ~/.ssh/terraform -N '' -t rsa
@@ -10,6 +15,7 @@ prepare:
 create-lb: ## Create load balancer
 	terraform init
 	terraform apply -auto-approve -target=hcloud_floating_ip.api -target=hcloud_load_balancer.api
+	terraform refresh
 
 create-config: ## Genereate talos configs
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-hetzner https://${ENDPOINT}:6443
@@ -32,6 +38,10 @@ create-templates:
 
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
+create-controlplane-bootstrap:
+	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
+	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 bootstrap
+
 create-controlplane: ## Bootstrap first controlplane node
 	terraform apply -auto-approve -target=hcloud_server.controlplane
 
@@ -41,6 +51,9 @@ create-infrastructure: ## Bootstrap all nodes
 
 create-kubeconfig: ## Prepare kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 kubeconfig .
+	chmod 0600 kubeconfig
+	kubectl --kubeconfig=kubeconfig config set clusters.${CLUSTERNAME}.server https://${ENDPOINT}:6443
+	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
 
 create-deployments:
 	helm template --namespace=kube-system   --version=1.11.6 -f deployments/cilium.yaml cilium \

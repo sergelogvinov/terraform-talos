@@ -18,6 +18,13 @@ data "azurerm_shared_image_version" "talos" {
   resource_group_name = local.resource_group
 }
 
+# data "azurerm_shared_image_version" "talos_arm" {
+#   name                = "latest"
+#   image_name          = "talos-arm64"
+#   gallery_name        = var.gallery_name
+#   resource_group_name = local.resource_group
+# }
+
 data "azurerm_client_config" "terraform" {}
 
 resource "azurerm_proximity_placement_group" "common" {

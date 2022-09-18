@@ -109,7 +109,8 @@ cluster:
             namespaces:
               - kube-system
               - ingress-nginx
-              - local-path-provisioner
+              - monitoring
+              - local-path-storage
               - local-lvm
             runtimeClasses: []
             usernames: []
@@ -120,7 +121,10 @@ cluster:
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
   etcd:
-    subnet: ${nodeSubnets}
+    advertisedSubnets:
+      - ${nodeSubnets}
+    listenSubnets:
+      - ${nodeSubnets}
   inlineManifests:
     - name: hcloud-secret
       contents: |-
@@ -135,6 +139,7 @@ cluster:
           token: ${base64encode(hcloud_token)}
           user: ${base64encode(robot_user)}
           password: ${base64encode(robot_password)}
+          image: ${base64encode(hcloud_image)}
   externalCloudProvider:
     enabled: true
     manifests:
