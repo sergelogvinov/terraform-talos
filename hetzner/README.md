@@ -110,6 +110,44 @@ make create-kubeconfig
 make create-infrastructure
 ```
 
+## Add barematal (robot) servers
+
+Run server in [Rescue mode](https://docs.hetzner.com/robot/dedicated-server/troubleshooting/hetzner-rescue-system/).
+
+```shell
+wget -O /tmp/metal-amd64.tar.gz https://github.com/siderolabs/talos/releases/download/v1.2.2/metal-amd64.tar.gz
+tar -Oxzf /tmp/talos-amd64.tar.gz > /dev/sda
+```
+
+Part of Talos machineconfig:
+
+```yaml
+  network:
+    hostname: server-name
+    interfaces:
+      - interface: eth0
+        addresses:
+          - IPv4/mask
+          - IPv6/64
+        routes:
+          - network: 0.0.0.0/0
+            gateway: IPv4.GW
+          - network: ::/0
+            gateway: fe80::1
+        vlans:
+          - vlanId: VLAN-ID
+            dhcp: false
+            mtu: 1400
+            addresses:
+              - 172.16.2.XXX/24
+            routes:
+              - network: 172.16.0.0/16
+                gateway: 172.16.2.1
+  install:
+    disk: /dev/sda
+    wipe: false
+```
+
 ## Node Autoscaler
 
 Cluster Autoscaler for [Hetzner Cloud](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/hetzner)
