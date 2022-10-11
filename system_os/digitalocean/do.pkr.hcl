@@ -2,7 +2,7 @@
 packer {
   required_plugins {
     digitalocean = {
-      version = ">= 1.0.0"
+      version = ">= 1.0.4"
       source  = "github.com/hashicorp/digitalocean"
     }
   }
@@ -10,14 +10,12 @@ packer {
 
 source "digitalocean" "talos" {
   api_token    = var.do_api_token
-  image        = "debian-10-x64"
+  image        = "debian-11-x64"
   region       = var.do_region
-  size         = "s-1vcpu-1gb"
+  size         = "s-1vcpu-512mb-10gb"
   monitoring   = false
-  rescue       = true
-
-  ipv6               = true
-  private_networking = false
+  # rescue       = true
+  ipv6         = true
 
   ssh_username = "root"
 
@@ -25,6 +23,7 @@ source "digitalocean" "talos" {
   snapshot_regions = [var.do_region]
 }
 
+# FIXME
 build {
   name    = "release"
   sources = ["source.digitalocean.talos"]
@@ -32,8 +31,24 @@ build {
   provisioner "shell" {
     inline = [
       "apt-get install -y wget",
-      "wget -O /tmp/digital-ocean.tar.gz https://github.com/talos-systems/talos/releases/download/${var.talos_version}/digital-ocean-amd64.tar.gz",
-      "cd /tmp && tar xzf /tmp/digital-ocean.tar.gz && dd if=/tmp/disk.raw of=/dev/vda",
+      "wget -O /tmp/talos.raw.gz https://github.com/talos-systems/talos/releases/download/${var.talos_version}/digital-ocean-amd64.raw.gz",
+      "gzip -d -c /tmp/talos.raw.gz | dd of=/dev/vda && sync",
+    ]
+  }
+}
+
+build {
+  name    = "develop"
+  sources = ["source.digitalocean.talos"]
+
+  provisioner "file" {
+    source      = "digital-ocean-amd64.raw.gz"
+    destination = "/tmp/talos.raw.gz"
+  }
+  provisioner "shell" {
+    inline = [
+      "sync",
+      "gzip -d -c /tmp/talos.raw.gz | dd of=/dev/vda && sync ||:",
     ]
   }
 }

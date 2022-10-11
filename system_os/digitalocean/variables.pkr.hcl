@@ -7,10 +7,10 @@ variable "do_api_token" {
 
 variable "do_region" {
   type      = string
-  default   = "lon1"
+  default   = "ams3"
 }
 
 variable "talos_version" {
   type    = string
-  default = "v1.0.3"
+  default = "v1.2.4"
 }

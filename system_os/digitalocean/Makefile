@@ -4,3 +4,6 @@ init:
 
 release:
 	packer build -only=release.digitalocean.talos .
+
+develop:
+	packer build -only=develop.digitalocean.talos .
