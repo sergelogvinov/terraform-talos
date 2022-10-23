@@ -68,7 +68,6 @@ cluster:
             warn-version: latest
           exemptions:
             namespaces:
-              - kube-system
               - ingress-nginx
               - local-path-provisioner
             runtimeClasses: []
@@ -99,6 +98,8 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/exoscale-cloud-controller-manager.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/exoscale-cluster-autoscaler.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/local-path-storage.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/coredns-local.yaml

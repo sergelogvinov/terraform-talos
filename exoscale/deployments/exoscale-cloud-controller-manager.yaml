@@ -82,24 +82,55 @@ rules:
   - list
   - watch
   - update
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests/approval
+  verbs:
+  - update
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - signers
+  resourceNames:
+  - kubernetes.io/kubelet-serving
+  verbs:
+  - approve
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: system:cloud-controller-manager
+  name: system:exoscale-cloud-controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: system:cloud-controller-manager
 subjects:
 - kind: ServiceAccount
-  name: cloud-controller-manager
+  name: exoscale-cloud-controller-manager
   namespace: kube-system
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: system:cloud-controller-manager
+  name: system:exoscale-cloud-controller-manager
   namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -107,7 +138,7 @@ roleRef:
   name: extension-apiserver-authentication-reader
 subjects:
 - kind: ServiceAccount
-  name: cloud-controller-manager
+  name: exoscale-cloud-controller-manager
   namespace: kube-system
 ---
 apiVersion: apps/v1
@@ -126,9 +157,7 @@ spec:
       labels:
         app: exoscale-cloud-controller-manager
     spec:
-      dnsPolicy: Default
-      hostNetwork: true
-      serviceAccountName: cloud-controller-manager
+      serviceAccountName: exoscale-cloud-controller-manager
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
       tolerations:
@@ -146,6 +175,12 @@ spec:
             - --leader-elect=true
             - --allow-untagged-cloud
             - --controllers=cloud-node,cloud-node-lifecycle
+          # env:
+          #   - name: EXOSCALE_SKS_AGENT_RUNNERS
+          #     value: node-csr-validation
+          envFrom:
+            - secretRef:
+                name: exoscale-secret
           resources:
             limits:
               cpu: 500m
@@ -153,6 +188,3 @@ spec:
             requests:
               cpu: 100m
               memory: 64Mi
-          envFrom:
-            - secretRef:
-                name: exoscale-secret

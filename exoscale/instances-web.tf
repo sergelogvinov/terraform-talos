@@ -25,6 +25,6 @@ resource "exoscale_instance_pool" "web" {
   labels = merge(var.tags, { type = "web" })
 
   lifecycle {
-    ignore_changes = [user_data, labels]
+    ignore_changes = [size, user_data, labels]
   }
 }
