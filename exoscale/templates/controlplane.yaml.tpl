@@ -54,6 +54,26 @@ cluster:
         - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/cilium-result.yaml
   proxy:
     disabled: true
+  apiServer:
+    admissionControl:
+      - name: PodSecurity
+        configuration:
+          apiVersion: pod-security.admission.config.k8s.io/v1alpha1
+          defaults:
+            audit: restricted
+            audit-version: latest
+            enforce: baseline
+            enforce-version: latest
+            warn: restricted
+            warn-version: latest
+          exemptions:
+            namespaces:
+              - kube-system
+              - ingress-nginx
+              - local-path-provisioner
+            runtimeClasses: []
+            usernames: []
+          kind: PodSecurityConfiguration
   controllerManager:
     extraArgs:
         node-cidr-mask-size-ipv4: 24
@@ -63,6 +83,19 @@ cluster:
       - ${nodeSubnets}
     listenSubnets:
       - ${nodeSubnets}
+  inlineManifests:
+    - name: exoscale-secret
+      contents: |-
+        apiVersion: v1
+        kind: Secret
+        type: Opaque
+        metadata:
+          name: exoscale-secret
+          namespace: kube-system
+        data:
+          EXOSCALE_API_KEY: ${base64encode(key)}
+          EXOSCALE_API_SECRET: ${base64encode(secret)}
+          EXOSCALE_ZONE: ${base64encode(zone)}
   externalCloudProvider:
     enabled: true
     manifests:

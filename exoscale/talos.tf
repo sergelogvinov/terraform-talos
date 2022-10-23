@@ -14,7 +14,10 @@ resource "talos_machine_configuration_controlplane" "controlplane" {
     templatefile("${path.module}/templates/controlplane.yaml.tpl", merge(var.kubernetes, {
       nodeSubnets    = local.network[each.key].cidr
       ipv4_local_vip = cidrhost(local.network[each.key].cidr, 5)
-      labels         = "topology.kubernetes.io/region=${each.key},topology.kubernetes.io/zone=${each.key},node.kubernetes.io/instance-type=${try(var.controlplane[each.key].type, "standard.tiny")}"
+      labels         = "topology.kubernetes.io/region=${each.key},topology.kubernetes.io/zone=${each.key}"
+      key            = var.exoscale_api_key
+      secret         = var.exoscale_api_secret
+      zone           = each.key
     }))
   ]
 }
@@ -51,16 +54,16 @@ resource "local_sensitive_file" "talosconfig" {
   file_permission = "0600"
 }
 
-resource "talos_cluster_kubeconfig" "kubeconfig" {
-  count        = length(local.endpoints) > 0 ? 1 : 0
-  talos_config = talos_client_configuration.talosconfig.talos_config
-  endpoint     = local.endpoints[0]
-  node         = local.endpoints[0]
-}
+# resource "talos_cluster_kubeconfig" "kubeconfig" {
+#   count        = length(local.endpoints) > 0 ? 1 : 0
+#   talos_config = talos_client_configuration.talosconfig.talos_config
+#   endpoint     = local.endpoints[0]
+#   node         = local.endpoints[0]
+# }
 
-resource "local_sensitive_file" "kubeconfig" {
-  count           = length(local.endpoints) > 0 ? 1 : 0
-  content         = talos_cluster_kubeconfig.kubeconfig[0].kube_config
-  filename        = "_cfgs/kubeconfig"
-  file_permission = "0600"
-}
+# resource "local_sensitive_file" "kubeconfig" {
+#   count           = length(local.endpoints) > 0 ? 1 : 0
+#   content         = talos_cluster_kubeconfig.kubeconfig[0].kube_config
+#   filename        = "_cfgs/kubeconfig"
+#   file_permission = "0600"
+# }

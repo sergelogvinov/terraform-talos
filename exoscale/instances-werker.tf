@@ -14,14 +14,18 @@ resource "exoscale_instance_pool" "worker" {
 
   key_pair      = exoscale_ssh_key.terraform.name
   instance_type = try(var.instances[each.key].worker_type, "standard.tiny")
-  disk_size     = 10
+  disk_size     = 16
 
   labels = merge(var.tags, { type = "worker" })
+
+  lifecycle {
+    ignore_changes = [user_data, labels]
+  }
 }
 
-resource "local_sensitive_file" "worker" {
-  for_each        = { for idx, name in local.regions : name => idx }
-  content         = talos_machine_configuration_worker.web[each.key].machine_config
-  filename        = "_cfgs/worker-${each.key}.yaml"
-  file_permission = "0600"
-}
+# resource "local_sensitive_file" "worker" {
+#   for_each        = { for idx, name in local.regions : name => idx }
+#   content         = talos_machine_configuration_worker.web[each.key].machine_config
+#   filename        = "_cfgs/worker-${each.key}.yaml"
+#   file_permission = "0600"
+# }
