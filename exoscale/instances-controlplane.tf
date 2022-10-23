@@ -20,7 +20,7 @@ resource "exoscale_instance_pool" "controlplane" {
 
   key_pair      = exoscale_ssh_key.terraform.name
   instance_type = try(var.controlplane[each.key].type, "standard.tiny")
-  disk_size     = 10
+  disk_size     = 16
 
   labels = merge(var.tags, { type = "infra" })
 

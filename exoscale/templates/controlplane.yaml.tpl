@@ -63,3 +63,11 @@ cluster:
       - ${nodeSubnets}
     listenSubnets:
       - ${nodeSubnets}
+  externalCloudProvider:
+    enabled: true
+    manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/metrics-server.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/local-path-storage.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/coredns-local.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/ingress-result.yaml

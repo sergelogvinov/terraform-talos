@@ -19,7 +19,7 @@ resource "talos_machine_configuration_controlplane" "controlplane" {
   ]
 }
 
-resource "talos_machine_configuration_worker" "worker" {
+resource "talos_machine_configuration_worker" "web" {
   for_each         = { for idx, name in local.regions : name => idx }
   cluster_name     = var.kubernetes["clusterName"]
   cluster_endpoint = "https://${var.kubernetes["apiDomain"]}:6443"
@@ -30,7 +30,7 @@ resource "talos_machine_configuration_worker" "worker" {
     templatefile("${path.module}/templates/worker.yaml.tpl", merge(var.kubernetes, {
       nodeSubnets    = local.network[each.key].cidr
       ipv4_local_vip = cidrhost(local.network[each.key].cidr, 5)
-      labels         = "topology.kubernetes.io/region=${each.key},topology.kubernetes.io/zone=${each.key}"
+      labels         = "topology.kubernetes.io/region=${each.key},topology.kubernetes.io/zone=${each.key},project.io/node-pool=web"
     }))
   ]
 }

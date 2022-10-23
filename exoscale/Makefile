@@ -9,10 +9,7 @@ help:
 
 create-controlplane: ## Bootstrap first controlplane node
 	terraform refresh
-	terraform apply -target=scaleway_instance_server.controlplane -target=scaleway_vpc_public_gateway_dhcp_reservation.controlplane
-
-	sleep 30
-	@$(MAKE) create-controlplane-bootstrap
+	terraform apply -target=exoscale_instance_pool.controlplane
 
 create-infrastructure: ## Bootstrap all nodes
 	terraform apply
@@ -25,3 +22,5 @@ create-kubeconfig: ## Prepare kubeconfig
 create-deployments:
 	helm template --namespace=kube-system   --version=1.12.3 -f deployments/cilium.yaml cilium \
 		cilium/cilium > deployments/cilium-result.yaml
+	helm template --namespace=ingress-nginx --version=4.3.0  -f deployments/ingress.yaml ingress-nginx \
+		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml

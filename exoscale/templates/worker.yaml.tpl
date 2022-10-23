@@ -38,6 +38,8 @@ machine:
         - no_read_workqueue
         - no_write_workqueue
 cluster:
+  discovery:
+    enabled: false
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
