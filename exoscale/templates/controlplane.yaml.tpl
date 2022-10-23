@@ -44,6 +44,10 @@ machine:
 cluster:
   network:
     dnsDomain: ${domain}
+    cni:
+      name: custom
+      urls:
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/exoscale/deployments/cilium-result.yaml
   proxy:
     disabled: true
   controllerManager:

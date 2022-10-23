@@ -77,6 +77,16 @@ resource "exoscale_security_group_rule" "controlplane_api" {
   end_port          = 6443
 }
 
+resource "exoscale_security_group_rule" "controlplane_api_health" {
+  security_group_id = exoscale_security_group.controlplane.id
+  description       = "controlplane api"
+  type              = "INGRESS"
+  protocol          = "TCP"
+  cidr              = "0.0.0.0/0"
+  start_port        = 6443
+  end_port          = 6443
+}
+
 resource "exoscale_security_group_rule" "controlplane_talos" {
   for_each          = { for idx, ip in var.whitelist_admin : ip => idx }
   security_group_id = exoscale_security_group.controlplane.id

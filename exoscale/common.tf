@@ -1,8 +1,9 @@
 
 data "exoscale_compute_template" "debian" {
-  for_each = { for idx, name in local.regions : name => idx }
+  for_each = { for idx, name in local.regions : name => idx if try(var.controlplane[name].count, 0) > 0 }
   zone     = each.key
-  name     = "Linux Debian 11 (Bullseye) 64-bit"
+  name     = "talos"
+  filter   = "mine"
 }
 
 resource "exoscale_ssh_key" "terraform" {
