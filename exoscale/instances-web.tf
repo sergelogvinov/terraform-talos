@@ -11,6 +11,7 @@ resource "exoscale_instance_pool" "web" {
   instance_prefix = "web"
   size            = var.instances[each.key].web_count
   template_id     = data.exoscale_compute_template.debian[each.key].id
+  user_data       = base64encode(talos_machine_configuration_worker.worker[each.key].machine_config)
 
   ipv6               = true
   security_group_ids = [local.network_secgroup[each.key].web, local.network_secgroup[each.key].common]
