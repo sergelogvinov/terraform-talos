@@ -37,3 +37,8 @@ machine:
       options:
         - no_read_workqueue
         - no_write_workqueue
+cluster:
+  network:
+    dnsDomain: ${domain}
+    podSubnets: ${format("%#v",split(",",podSubnets))}
+    serviceSubnets: ${format("%#v",split(",",serviceSubnets))}

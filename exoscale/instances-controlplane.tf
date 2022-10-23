@@ -29,12 +29,6 @@ resource "exoscale_instance_pool" "controlplane" {
   }
 }
 
-# resource "talos_machine_bootstrap" "controlplane" {
-#   talos_config = talos_client_configuration.talosconfig.talos_config
-#   endpoint     = [for k, v in var.node_data.controlplanes : k][0]
-#   node         = [for k, v in var.node_data.controlplanes : k][0]
-# }
-
 resource "local_sensitive_file" "controlplane" {
   for_each        = { for idx, name in local.regions : name => idx }
   content         = talos_machine_configuration_controlplane.controlplane[each.key].machine_config

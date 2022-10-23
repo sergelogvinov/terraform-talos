@@ -35,30 +35,32 @@ resource "talos_machine_configuration_worker" "worker" {
   ]
 }
 
+locals {
+  endpoints = try(flatten([for ip in flatten([for c in exoscale_instance_pool.controlplane : c.instances]) : ip.public_ip_address]), ["127.0.0.1"])
+}
+
 resource "talos_client_configuration" "talosconfig" {
-  for_each        = { for idx, name in local.regions : name => idx if try(var.controlplane[name].count, 0) > 0 }
   cluster_name    = var.kubernetes["clusterName"]
   machine_secrets = talos_machine_secrets.talos.machine_secrets
-  endpoints       = [for k, v in exoscale_instance_pool.controlplane[each.key].instances : k.public_ip_address]
+  endpoints       = length(local.endpoints) > 0 ? local.endpoints : ["127.0.0.1"]
 }
 
 resource "local_sensitive_file" "talosconfig" {
-  for_each        = { for idx, name in local.regions : name => idx if try(var.controlplane[name].count, 0) > 0 }
-  content         = talos_client_configuration.talosconfig[each.key].talos_config
-  filename        = "_cfgs/talosconfig-${each.key}"
+  content         = talos_client_configuration.talosconfig.talos_config
+  filename        = "_cfgs/talosconfig"
   file_permission = "0600"
 }
 
 resource "talos_cluster_kubeconfig" "kubeconfig" {
-  for_each     = { for idx, name in local.regions : name => idx if try(var.controlplane[name].count, 0) > 0 }
-  talos_config = talos_client_configuration.talosconfig[each.key].talos_config
-  endpoint     = [for k, v in exoscale_instance_pool.controlplane[each.key].instances : k.public_ip_address][0]
-  node         = [for k, v in exoscale_instance_pool.controlplane[each.key].instances : k.public_ip_address][0]
+  count        = length(local.endpoints) > 0 ? 1 : 0
+  talos_config = talos_client_configuration.talosconfig.talos_config
+  endpoint     = local.endpoints[0]
+  node         = local.endpoints[0]
 }
 
 resource "local_sensitive_file" "kubeconfig" {
-  for_each        = { for idx, name in local.regions : name => idx if try(var.controlplane[name].count, 0) > 0 }
-  content         = talos_cluster_kubeconfig.kubeconfig[each.key].kube_config
-  filename        = "_cfgs/kubeconfig-${each.key}"
+  count           = length(local.endpoints) > 0 ? 1 : 0
+  content         = talos_cluster_kubeconfig.kubeconfig[0].kube_config
+  filename        = "_cfgs/kubeconfig"
   file_permission = "0600"
 }

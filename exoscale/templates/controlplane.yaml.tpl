@@ -19,7 +19,7 @@ machine:
         addresses:
           - 169.254.2.53/32
     kubespan:
-      enabled: true
+      enabled: false
     extraHostEntries:
       - ip: ${ipv4_local_vip}
         aliases:
@@ -42,8 +42,12 @@ machine:
         - no_read_workqueue
         - no_write_workqueue
 cluster:
+  discovery:
+    enabled: false
   network:
     dnsDomain: ${domain}
+    podSubnets: ${format("%#v",split(",",podSubnets))}
+    serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
     cni:
       name: custom
       urls:

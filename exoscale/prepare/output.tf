@@ -14,7 +14,7 @@ output "network" {
   value = { for zone, net in exoscale_private_network.main : zone => {
     name    = net.name
     id      = net.id
-    cidr    = "${net.start_ip}/24"
+    cidr    = cidrsubnet("${net.start_ip}/24", 0, 0)
     gateway = cidrhost("${exoscale_private_network.main[zone].start_ip}/24", -3)
   } }
 }

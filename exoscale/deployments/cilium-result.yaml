@@ -148,7 +148,6 @@ data:
   kube-proxy-replacement: "strict"
   kube-proxy-replacement-healthz-bind-address: ""
   bpf-lb-sock: "false"
-  host-reachable-services-protos: 
   enable-health-check-nodeport: "true"
   node-port-bind-protection: "true"
   enable-auto-protect-node-port-range: "true"
@@ -172,7 +171,6 @@ data:
   vtep-mac: ""
   enable-k8s-endpoint-slice: "true"
   enable-bgp-control-plane: "false"
-  procfs: "/host/proc"
   bpf-root: "/sys/fs/bpf"
   cgroup-root: "/sys/fs/cgroup"
   enable-k8s-terminating-endpoint: "true"
@@ -546,11 +544,6 @@ spec:
       annotations:
         prometheus.io/port: "9962"
         prometheus.io/scrape: "true"
-        # Set app AppArmor's profile to "unconfined". The value of this annotation
-        # can be modified as long users know which profiles they have available
-        # in AppArmor.
-        container.apparmor.security.beta.kubernetes.io/cilium-agent: "unconfined"
-        container.apparmor.security.beta.kubernetes.io/clean-cilium-state: "unconfined"
       labels:
         k8s-app: cilium
     spec:
@@ -643,8 +636,8 @@ spec:
               - /cni-uninstall.sh
         resources:
           limits:
-            cpu: 1
-            memory: 1Gi
+            cpu: 2
+            memory: 2Gi
           requests:
             cpu: 100m
             memory: 128Mi
@@ -662,60 +655,12 @@ spec:
           hostPort: 9964
           protocol: TCP
         securityContext:
-          seLinuxOptions:
-            level: 's0'
-            # Running with spc_t since we have removed the privileged mode.
-            # Users can change it to a different type as long as they have the
-            # type available on the system.
-            type: 'spc_t'
-          capabilities:
-            add:
-              # Use to set socket permission
-              - CHOWN
-              # Used to terminate envoy child process
-              - KILL
-              # Used since cilium modifies routing tables, etc...
-              - NET_ADMIN
-              # Used since cilium creates raw sockets, etc...
-              - NET_RAW
-              # Used since cilium monitor uses mmap
-              - IPC_LOCK
-              # Used in iptables. Consider removing once we are iptables-free
-              - SYS_MODULE
-              # We need it for now but might not need it for >= 5.11 specially
-              # for the 'SYS_RESOURCE'.
-              # In >= 5.8 there's already BPF and PERMON capabilities
-              - SYS_ADMIN
-              # Could be an alternative for the SYS_ADMIN for the RLIMIT_NPROC
-              - SYS_RESOURCE
-              # Both PERFMON and BPF requires kernel 5.8, container runtime
-              # cri-o >= v1.22.0 or containerd >= v1.5.0.
-              # If available, SYS_ADMIN can be removed.
-              #- PERFMON
-              #- BPF
-              - DAC_OVERRIDE
-              - FOWNER
-              - SETGID
-              - SETUID
-            drop:
-              - ALL
+          privileged: true
         terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
-        # Unprivileged containers need to mount /proc/sys/net from the host
-        # to have write access
-        - mountPath: /host/proc/sys/net
-          name: host-proc-sys-net
-        # Unprivileged containers need to mount /proc/sys/kernel from the host
-        # to have write access
-        - mountPath: /host/proc/sys/kernel
-          name: host-proc-sys-kernel
         - name: bpf-maps
           mountPath: /sys/fs/bpf
-          # Unprivileged containers can't set mount propagation to bidirectional
-          # in this case we will mount the bpf fs from an init container that
-          # is privileged and set the mount propagation from host to container
-          # in Cilium.
-          mountPropagation: HostToContainer
+          mountPropagation: Bidirectional
         # Check for duplicate mounts before mounting
         - name: cilium-cgroup
           mountPath: /sys/fs/cgroup
@@ -738,25 +683,6 @@ spec:
         - name: xtables-lock
           mountPath: /run/xtables.lock
       initContainers:
-      # Mount the bpf fs if it is not mounted. We will perform this task
-      # from a privileged container because the mount propagation bidirectional
-      # only works from privileged containers.
-      - name: mount-bpf-fs
-        image: "quay.io/cilium/cilium:v1.12.3@sha256:30de50c4dc0a1e1077e9e7917a54d5cab253058b3f779822aec00f5c817ca826"
-        imagePullPolicy: IfNotPresent
-        args:
-        - 'mount | grep "/sys/fs/bpf type bpf" || mount -t bpf bpf /sys/fs/bpf'
-        command:
-        - /bin/bash
-        - -c
-        - --
-        terminationMessagePolicy: FallbackToLogsOnError
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - name: bpf-maps
-          mountPath: /sys/fs/bpf
-          mountPropagation: Bidirectional
       - name: clean-cilium-state
         image: "quay.io/cilium/cilium:v1.12.3@sha256:30de50c4dc0a1e1077e9e7917a54d5cab253058b3f779822aec00f5c817ca826"
         imagePullPolicy: IfNotPresent
@@ -781,35 +707,7 @@ spec:
           value: "6443"
         terminationMessagePolicy: FallbackToLogsOnError
         securityContext:
-          seLinuxOptions:
-            level: 's0'
-            # Running with spc_t since we have removed the privileged mode.
-            # Users can change it to a different type as long as they have the
-            # type available on the system.
-            type: 'spc_t'
-          capabilities:
-            # Most of the capabilities here are the same ones used in the
-            # cilium-agent's container because this container can be used to
-            # uninstall all Cilium resources, and therefore it is likely that
-            # will need the same capabilities.
-            add:
-              # Used since cilium modifies routing tables, etc...
-              - NET_ADMIN
-              # Used in iptables. Consider removing once we are iptables-free
-              - SYS_MODULE
-              # We need it for now but might not need it for >= 5.11 specially
-              # for the 'SYS_RESOURCE'.
-              # In >= 5.8 there's already BPF and PERMON capabilities
-              - SYS_ADMIN
-              # Could be an alternative for the SYS_ADMIN for the RLIMIT_NPROC
-              - SYS_RESOURCE
-              # Both PERFMON and BPF requires kernel 5.8, container runtime
-              # cri-o >= v1.22.0 or containerd >= v1.5.0.
-              # If available, SYS_ADMIN can be removed.
-              #- PERFMON
-              #- BPF
-            drop:
-              - ALL
+          privileged: true
         volumeMounts:
         - name: bpf-maps
           mountPath: /sys/fs/bpf
@@ -886,14 +784,6 @@ spec:
       - name: cilium-config-path
         configMap:
           name: cilium-config
-      - name: host-proc-sys-net
-        hostPath:
-          path: /proc/sys/net
-          type: Directory
-      - name: host-proc-sys-kernel
-        hostPath:
-          path: /proc/sys/kernel
-          type: Directory
 ---
 # Source: cilium/templates/cilium-operator/deployment.yaml
 apiVersion: apps/v1
@@ -920,6 +810,8 @@ spec:
   template:
     metadata:
       annotations:
+        # ensure pods roll when configmap updates
+        cilium.io/cilium-configmap-checksum: "f172da9e3a61d87502a797d52ec7297d3d44bd5ad395d8b3c495856edcae94b1"
       labels:
         io.cilium/app: operator
         name: cilium-operator
