@@ -1,0 +1,5 @@
+_cfgs/
+templates/controlplane.yaml
+talos.yaml
+controlplane-*.yaml
+worker-*.yaml

@@ -6,19 +6,27 @@ data "vultr_snapshot" "talos" {
   }
 }
 
+resource "vultr_vpc" "main" {
+  description    = "main"
+  region         = "ams"
+  v4_subnet      = "10.0.0.0"
+  v4_subnet_mask = 24
+}
+
 resource "vultr_instance" "controlplane" {
-  plan        = "vc2-1c-1gb"
+  plan        = "vc2-2c-4gb"
   region      = "ams"
   snapshot_id = data.vultr_snapshot.talos.id
   label       = "talos"
-  tag         = "controlplane"
-  hostname    = "master-1"
+  hostname    = "controlplane-1"
 
-  enable_ipv6         = true
-  private_network_ids = ["329f9a26-d475-41f0-8e1f-b8cf11814848"]
-  user_data           = file("talos.yaml")
+  enable_ipv6 = true
+  vpc_ids     = [vultr_vpc.main.id]
+  user_data   = file("talos.yaml")
 
   backups          = "disabled"
   ddos_protection  = false
   activation_email = false
+
+  tags = ["develop", "test"]
 }

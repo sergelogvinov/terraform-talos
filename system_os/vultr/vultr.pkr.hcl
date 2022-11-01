@@ -11,10 +11,10 @@ packer {
 source "vultr" "talos" {
   api_key   = var.vultr_api_key
   region_id = var.vultr_region
-  plan_id   = "vc2-1c-1gb"
+  plan_id   = "vc2-1c-2gb"
 
   # Arch Linux
-  iso_id        = "20eceb4f-7b28-466e-aaf4-cff60385c30d"
+  iso_id        = "08597093-bb6f-48c3-b812-37feeabff4b0"
   state_timeout = "10m"
   ssh_username  = "root"
   ssh_password  = "packer"
@@ -42,7 +42,7 @@ build {
   sources = ["source.vultr.talos"]
 
   provisioner "file" {
-    source      = "../../../talos/_out/vultr-amd64.raw.xz"
+    source      = "vultr-amd64.raw.xz"
     destination = "/tmp/talos.raw.xz"
   }
   provisioner "shell" {
