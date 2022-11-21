@@ -28,7 +28,6 @@ resource "hcloud_server" "controlplane" {
       hcloud_image   = data.hcloud_image.talos.id
       robot_user     = var.robot_user
       robot_password = var.robot_password
-      labels         = "topology.kubernetes.io/region=${element(var.regions, count.index)}"
     })
   )
 

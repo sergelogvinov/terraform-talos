@@ -42,7 +42,7 @@ build {
   sources = ["source.hcloud.talos"]
 
   provisioner "file" {
-    source      = "../../../talos/_out/hcloud-amd64.raw.xz"
+    source      = "hcloud-amd64.raw.xz"
     destination = "/tmp/talos.raw.xz"
   }
   provisioner "shell" {

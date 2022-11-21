@@ -138,18 +138,11 @@ spec:
         prometheus.io/port: '8085'
     spec:
       serviceAccountName: cluster-autoscaler
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
       tolerations:
-        - key: node-role.kubernetes.io/master
-          effect: NoSchedule
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: node-role.kubernetes.io/control-plane
-                    operator: Exists
       containers:
         - name: cluster-autoscaler
           # image: k8s.gcr.io/autoscaling/cluster-autoscaler:v1.23.1

@@ -62,3 +62,10 @@
 
 #   tags = merge(var.tags, { os = "talos" })
 # }
+
+# data "azurerm_platform_image" "example" {
+#   location  = "westeurope"
+#   publisher = "Canonical"
+#   offer     = "0001-com-ubuntu-server-focal"
+#   sku       = "20_04-lts-arm64"
+# }

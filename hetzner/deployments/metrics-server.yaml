@@ -131,10 +131,6 @@ spec:
         kubernetes.io/os: linux
         node-role.kubernetes.io/control-plane: ""
       tolerations:
-        - key: "CriticalAddonsOnly"
-          operator: "Exists"
-        - key: "node-role.kubernetes.io/master"
-          effect: NoSchedule
         - key: "node-role.kubernetes.io/control-plane"
           effect: NoSchedule
       containers:
@@ -144,7 +140,7 @@ spec:
         - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
         - --kubelet-use-node-status-port
         - --metric-resolution=15s
-        image: k8s.gcr.io/metrics-server/metrics-server:v0.5.0
+        image: k8s.gcr.io/metrics-server/metrics-server:v0.6.1
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3

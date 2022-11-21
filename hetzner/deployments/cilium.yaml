@@ -8,6 +8,11 @@ operator:
   replicas: 1
   prometheus:
     enabled: false
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  tolerations:
+    - operator: Exists
+      effect: NoSchedule
 
 identityAllocationMode: crd
 kubeProxyReplacement: strict
@@ -45,6 +50,11 @@ externalIPs:
   enabled: true
 hostFirewall:
   enabled: true
+ingressController:
+  enabled: false
+
+securityContext:
+  privileged: true
 
 hubble:
   enabled: false

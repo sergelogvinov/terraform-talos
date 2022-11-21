@@ -10,11 +10,17 @@ machine:
     - "${ipv4_local}"
     - "${ipv4_vip}"
     - "${apiDomain}"
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:reader
+      allowedKubernetesNamespaces:
+        - kube-system
   kubelet:
     extraArgs:
       node-ip: "${ipv4_local}"
       rotate-server-certificates: true
-      node-labels: "${labels}"
     clusterDNS:
       - 169.254.2.53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
@@ -143,6 +149,7 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
+      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-csi.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/kubelet-serving-cert-approver.yaml

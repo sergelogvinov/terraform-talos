@@ -49,10 +49,10 @@ data:
   # "cilium-metrics-config" ConfigMap
   # NOTE that this will open the port on ALL nodes where Cilium pods are
   # scheduled.
-  prometheus-serve-addr: ":9090"
-  # Port to expose Envoy metrics (e.g. "9095"). Envoy metrics listener will be disabled if this
+  prometheus-serve-addr: ":9962"
+  # Port to expose Envoy metrics (e.g. "9964"). Envoy metrics listener will be disabled if this
   # field is not set.
-  proxy-prometheus-port: "9095"
+  proxy-prometheus-port: "9964"
 
   # Enable IPv4 addressing. If enabled, all endpoints are allocated an IPv4
   # address.
@@ -119,14 +119,14 @@ data:
   cluster-name: default
   # Unique ID of the cluster. Must be unique across all conneted clusters and
   # in the range of 1 and 255. Only relevant when building a mesh of clusters.
-  cluster-id: ""
+  cluster-id: "0"
 
   # Encapsulation mode for communication between nodes
   # Possible values:
   #   - disabled
   #   - vxlan (default)
   #   - geneve
-  tunnel: vxlan
+  tunnel: "vxlan"
   # Enables L7 proxy for L7 policy enforcement and visibility
   enable-l7-proxy: "true"
 
@@ -139,20 +139,20 @@ data:
   install-no-conntrack-iptables-rules: "false"
 
   auto-direct-node-routes: "false"
-  enable-bandwidth-manager: "false"
   enable-local-redirect-policy: "true"
   enable-host-firewall: "true"
   # List of devices used to attach bpf_host.o (implements BPF NodePort,
   # host-firewall and BPF masquerading)
   devices: "eth+"
 
-  kube-proxy-replacement:  "strict"
+  kube-proxy-replacement: "strict"
   kube-proxy-replacement-healthz-bind-address: ""
-  enable-host-reachable-services: "true"
+  bpf-lb-sock: "false"
+  host-reachable-services-protos: 
   enable-health-check-nodeport: "true"
   node-port-bind-protection: "true"
   enable-auto-protect-node-port-range: "true"
-  enable-session-affinity: "true"
+  enable-svc-source-range-check: "true"
   enable-l2-neigh-discovery: "true"
   arping-refresh-period: "30s"
   k8s-require-ipv4-pod-cidr: "true"
@@ -161,16 +161,30 @@ data:
   enable-health-checking: "true"
   enable-well-known-identities: "false"
   enable-remote-node-identity: "true"
+  synchronize-k8s-nodes: "true"
   operator-api-serve-addr: "127.0.0.1:9234"
   ipam: "kubernetes"
   disable-cnp-status-updates: "true"
+  enable-vtep: "false"
+  vtep-endpoint: ""
+  vtep-cidr: ""
+  vtep-mask: ""
+  vtep-mac: ""
   enable-k8s-endpoint-slice: "true"
+  enable-bgp-control-plane: "false"
+  bpf-root: "/sys/fs/bpf"
   cgroup-root: "/sys/fs/cgroup"
   enable-k8s-terminating-endpoint: "true"
-  annotate-k8s-node: "true"
   remove-cilium-node-taints: "true"
   set-cilium-is-up-condition: "true"
   unmanaged-pod-watcher-interval: "15"
+  tofqdns-dns-reject-response-code: "refused"
+  tofqdns-enable-dns-compression: "true"
+  tofqdns-endpoint-max-ip-per-hostname: "50"
+  tofqdns-idle-connection-grace-period: "0s"
+  tofqdns-max-deferred-connection-deletes: "10000"
+  tofqdns-min-ttl: "3600"
+  tofqdns-proxy-response-max-delay: "100ms"
   agent-not-ready-taint-key: "node.cilium.io/agent-not-ready"
 ---
 # Source: cilium/templates/cilium-agent/clusterrole.yaml
@@ -208,23 +222,12 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - nodes/status
-  verbs:
-  # To annotate the k8s node with Cilium's metadata
-  - patch
-- apiGroups:
   - apiextensions.k8s.io
   resources:
   - customresourcedefinitions
   verbs:
-  # Deprecated for removal in v1.10
-  - create
   - list
   - watch
-  - update
-
   # This is used when validating policies in preflight. This will need to stay
   # until we figure out how to avoid "get" inside the preflight, and then
   # should be removed ideally.
@@ -232,21 +235,61 @@ rules:
 - apiGroups:
   - cilium.io
   resources:
-  - ciliumnetworkpolicies
-  - ciliumnetworkpolicies/status
+  - ciliumbgploadbalancerippools
+  - ciliumbgppeeringpolicies
+  - ciliumclusterwideenvoyconfigs
   - ciliumclusterwidenetworkpolicies
-  - ciliumclusterwidenetworkpolicies/status
+  - ciliumegressgatewaypolicies
+  - ciliumegressnatpolicies
   - ciliumendpoints
-  - ciliumendpoints/status
-  - ciliumnodes
-  - ciliumnodes/status
+  - ciliumendpointslices
+  - ciliumenvoyconfigs
   - ciliumidentities
   - ciliumlocalredirectpolicies
-  - ciliumlocalredirectpolicies/status
-  - ciliumegressnatpolicies
-  - ciliumendpointslices
+  - ciliumnetworkpolicies
+  - ciliumnodes
   verbs:
-  - '*'
+  - list
+  - watch
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumidentities
+  - ciliumendpoints
+  - ciliumnodes
+  verbs:
+  - create
+- apiGroups:
+  - cilium.io
+  # To synchronize garbage collection of such resources
+  resources:
+  - ciliumidentities
+  verbs:
+  - update
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumendpoints
+  verbs:
+  - delete
+  - get
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumnodes
+  - ciliumnodes/status
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumnetworkpolicies/status
+  - ciliumclusterwidenetworkpolicies/status
+  - ciliumendpoints/status
+  - ciliumendpoints
+  verbs:
+  - patch
 ---
 # Source: cilium/templates/cilium-operator/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -292,14 +335,6 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - services
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
   # to perform LB IP allocation for BGP
   - services/status
   verbs:
@@ -307,11 +342,18 @@ rules:
 - apiGroups:
   - ""
   resources:
+  # to check apiserver connectivity
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
   # to perform the translation of a CNP that contains `ToGroup` to its endpoints
   - services
   - endpoints
-  # to check apiserver connectivity
-  - namespaces
   verbs:
   - get
   - list
@@ -320,26 +362,73 @@ rules:
   - cilium.io
   resources:
   - ciliumnetworkpolicies
-  - ciliumnetworkpolicies/status
-  - ciliumnetworkpolicies/finalizers
   - ciliumclusterwidenetworkpolicies
-  - ciliumclusterwidenetworkpolicies/status
-  - ciliumclusterwidenetworkpolicies/finalizers
-  - ciliumendpoints
-  - ciliumendpoints/status
-  - ciliumendpoints/finalizers
-  - ciliumnodes
-  - ciliumnodes/status
-  - ciliumnodes/finalizers
-  - ciliumidentities
-  - ciliumendpointslices
-  - ciliumidentities/status
-  - ciliumidentities/finalizers
-  - ciliumlocalredirectpolicies
-  - ciliumlocalredirectpolicies/status
-  - ciliumlocalredirectpolicies/finalizers
   verbs:
-  - '*'
+  # Create auto-generated CNPs and CCNPs from Policies that have 'toGroups'
+  - create
+  - update
+  - deletecollection
+  # To update the status of the CNPs and CCNPs
+  - patch
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumnetworkpolicies/status
+  - ciliumclusterwidenetworkpolicies/status
+  verbs:
+  # Update the auto-generated CNPs and CCNPs status.
+  - patch
+  - update
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumendpoints
+  - ciliumidentities
+  verbs:
+  # To perform garbage collection of such resources
+  - delete
+  - list
+  - watch
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumidentities
+  verbs:
+  # To synchronize garbage collection of such resources
+  - update
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumnodes
+  verbs:
+  - create
+  - update
+  - get
+  - list
+  - watch
+    # To perform CiliumNode garbage collector
+  - delete
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumnodes/status
+  verbs:
+  - update
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumendpointslices
+  - ciliumenvoyconfigs
+  verbs:
+  - create
+  - update
+  - get
+  - list
+  - watch
+  - delete
 - apiGroups:
   - apiextensions.k8s.io
   resources:
@@ -348,8 +437,28 @@ rules:
   - create
   - get
   - list
-  - update
   - watch
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - update
+  resourceNames:
+  - ciliumbgploadbalancerippools.cilium.io
+  - ciliumbgppeeringpolicies.cilium.io
+  - ciliumclusterwideenvoyconfigs.cilium.io
+  - ciliumclusterwidenetworkpolicies.cilium.io
+  - ciliumegressgatewaypolicies.cilium.io
+  - ciliumegressnatpolicies.cilium.io
+  - ciliumendpoints.cilium.io
+  - ciliumendpointslices.cilium.io
+  - ciliumenvoyconfigs.cilium.io
+  - ciliumexternalworkloads.cilium.io
+  - ciliumidentities.cilium.io
+  - ciliumlocalredirectpolicies.cilium.io
+  - ciliumnetworkpolicies.cilium.io
+  - ciliumnodes.cilium.io
 # For cilium-operator running in HA mode.
 #
 # Cilium operator running in HA mode requires the use of ResourceLock for Leader Election
@@ -401,7 +510,7 @@ metadata:
   namespace: kube-system
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "9095"
+    prometheus.io/port: "9964"
   labels:
     k8s-app: cilium
 spec:
@@ -411,7 +520,7 @@ spec:
     k8s-app: cilium
   ports:
   - name: envoy-metrics
-    port: 9095
+    port: 9964
     protocol: TCP
     targetPort: envoy-metrics
 ---
@@ -434,37 +543,14 @@ spec:
   template:
     metadata:
       annotations:
-        prometheus.io/port: "9090"
+        prometheus.io/port: "9962"
         prometheus.io/scrape: "true"
       labels:
         k8s-app: cilium
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/os
-                operator: In
-                values:
-                - linux
-            - matchExpressions:
-              - key: beta.kubernetes.io/os
-                operator: In
-                values:
-                - linux
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: k8s-app
-                operator: In
-                values:
-                - cilium
-            topologyKey: kubernetes.io/hostname
       containers:
       - name: cilium-agent
-        image: "quay.io/cilium/cilium:v1.11.6@sha256:f7f93c26739b6641a3fa3d76b1e1605b15989f25d06625260099e01c8243f54c"
+        image: "quay.io/cilium/cilium:v1.12.3@sha256:30de50c4dc0a1e1077e9e7917a54d5cab253058b3f779822aec00f5c817ca826"
         imagePullPolicy: IfNotPresent
         command:
         - cilium-agent
@@ -544,6 +630,7 @@ spec:
               - "/cni-install.sh"
               - "--enable-debug=false"
               - "--cni-exclusive=true"
+              - "--log-file=/var/run/cilium/cilium-cni.log"
           preStop:
             exec:
               command:
@@ -556,16 +643,21 @@ spec:
             cpu: 100m
             memory: 128Mi
         ports:
+        - name: peer-service
+          containerPort: 4244
+          hostPort: 4244
+          protocol: TCP
         - name: prometheus
-          containerPort: 9090
-          hostPort: 9090
+          containerPort: 9962
+          hostPort: 9962
           protocol: TCP
         - name: envoy-metrics
-          containerPort: 9095
-          hostPort: 9095
+          containerPort: 9964
+          hostPort: 9964
           protocol: TCP
         securityContext:
           privileged: true
+        terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         - name: bpf-maps
           mountPath: /sys/fs/bpf
@@ -591,10 +683,9 @@ spec:
           readOnly: true
         - name: xtables-lock
           mountPath: /run/xtables.lock
-      hostNetwork: true
       initContainers:
       - name: clean-cilium-state
-        image: "quay.io/cilium/cilium:v1.11.6@sha256:f7f93c26739b6641a3fa3d76b1e1605b15989f25d06625260099e01c8243f54c"
+        image: "quay.io/cilium/cilium:v1.12.3@sha256:30de50c4dc0a1e1077e9e7917a54d5cab253058b3f779822aec00f5c817ca826"
         imagePullPolicy: IfNotPresent
         command:
         - /init-container.sh
@@ -615,6 +706,7 @@ spec:
           value: "api.cluster.local"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
+        terminationMessagePolicy: FallbackToLogsOnError
         securityContext:
           privileged: true
         volumeMounts:
@@ -629,12 +721,22 @@ spec:
         resources:
           requests:
             cpu: 100m
-            memory: 100Mi
+            memory: 100Mi # wait-for-kube-proxy
       restartPolicy: Always
       priorityClassName: system-node-critical
       serviceAccount: "cilium"
       serviceAccountName: "cilium"
       terminationGracePeriodSeconds: 1
+      hostNetwork: true
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                k8s-app: cilium
+            topologyKey: kubernetes.io/hostname
+      nodeSelector:
+        kubernetes.io/os: linux
       tolerations:
         - operator: Exists
       volumes:
@@ -713,21 +815,9 @@ spec:
         io.cilium/app: operator
         name: cilium-operator
     spec:
-      # In HA mode, cilium-operator pods must not be scheduled on the same
-      # node as they will clash with each other.
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: io.cilium/app
-                operator: In
-                values:
-                - operator
-            topologyKey: kubernetes.io/hostname
       containers:
       - name: cilium-operator
-        image: quay.io/cilium/operator-generic:v1.11.6@sha256:9f6063c7bcaede801a39315ec7c166309f6a6783e98665f6693939cf1701bc17
+        image: "quay.io/cilium/operator-generic:v1.12.3@sha256:816ec1da586139b595eeb31932c61a7c13b07fb4a0255341c0e0f18608e84eff"
         imagePullPolicy: IfNotPresent
         command:
         - cilium-operator-generic
@@ -768,13 +858,27 @@ spec:
         - name: cilium-config-path
           mountPath: /tmp/cilium/config-map
           readOnly: true
+        terminationMessagePolicy: FallbackToLogsOnError
       hostNetwork: true
       restartPolicy: Always
       priorityClassName: system-cluster-critical
       serviceAccount: "cilium-operator"
       serviceAccountName: "cilium-operator"
+      # In HA mode, cilium-operator pods must not be scheduled on the same
+      # node as they will clash with each other.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                io.cilium/app: operator
+            topologyKey: kubernetes.io/hostname
+      nodeSelector:
+        kubernetes.io/os: linux
+        node-role.kubernetes.io/control-plane: ""
       tolerations:
-        - operator: Exists
+        - effect: NoSchedule
+          operator: Exists
       volumes:
         # To read the configuration from the config map
       - name: cilium-config-path
