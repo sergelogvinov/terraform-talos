@@ -60,3 +60,7 @@ create-deployments:
 		cilium/cilium > deployments/cilium-result.yaml
 	helm template --namespace=ingress-nginx --version=4.4.0 -f deployments/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml
+
+create-secrets:
+	dd if=/dev/urandom bs=1 count=16 2>/dev/null | hexdump -e '"%00x"' > hcloud-csi-secret.secret
+	kubectl --kubeconfig=kubeconfig create secret generic hcloud-csi-secret --from-file=encryptionPassphrase=hcloud-csi-secret.secret

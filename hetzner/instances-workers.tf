@@ -17,6 +17,6 @@ module "worker" {
 
   vm_params = merge(var.kubernetes, {
     lbv4   = local.ipv4_vip
-    labels = "project.io/node-pool=worker,node.kubernetes.io/disktype=ssd,topology.kubernetes.io/region=${each.key},hcloud/node-group=worker-${each.key}"
+    labels = "project.io/node-pool=worker,node.kubernetes.io/disktype=ssd,hcloud/node-group=worker-${each.key}"
   })
 }

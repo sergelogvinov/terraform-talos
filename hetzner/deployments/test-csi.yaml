@@ -8,25 +8,18 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: hcloud-volumes
+  storageClassName: hcloud-volumes-enc
 ---
 kind: Pod
 apiVersion: v1
 metadata:
   name: csi-app
 spec:
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
   tolerations:
-    - effect: NoExecute
-      operator: Exists
-    - effect: NoSchedule
-      operator: Exists
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: node.kubernetes.io/instance-type
-                operator: Exists
+    - key: "node-role.kubernetes.io/control-plane"
+      effect: NoSchedule
   containers:
     - name: my-frontend
       image: alpine

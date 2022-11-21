@@ -33,6 +33,6 @@ override.tf.json
 talosctl
 talosconfig
 kubeconfig
-
+*.secret
 #
 /talos/

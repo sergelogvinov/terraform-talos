@@ -8,6 +8,7 @@ spec:
   podInfoOnMount: true
   volumeLifecycleModes:
     - Persistent
+  fsGroupPolicy: File
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
@@ -16,82 +17,178 @@ metadata:
   annotations:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: csi.hetzner.cloud
+reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: hcloud-volumes-enc
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: csi.hetzner.cloud
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+parameters:
+  csi.storage.k8s.io/node-publish-secret-name: hcloud-csi-secret
+  csi.storage.k8s.io/node-publish-secret-namespace: kube-system
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: hcloud-csi
+  name: hcloud-csi-controller
   namespace: kube-system
 ---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: hcloud-csi
+  name: hcloud-csi-controller
 rules:
-  # attacher
-  - apiGroups: [""]
-    resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "update", "patch"]
-  - apiGroups: [""]
-    resources: ["nodes"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["csi.storage.k8s.io"]
-    resources: ["csinodeinfos"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["csinodes"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["volumeattachments"]
-    verbs: ["get", "list", "watch", "update", "patch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["volumeattachments/status"]
-    verbs: ["patch"]
-  # provisioner
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list"]
-  - apiGroups: [""]
-    resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "create", "delete", "patch"]
-  - apiGroups: [""]
-    resources: ["persistentvolumeclaims", "persistentvolumeclaims/status"]
-    verbs: ["get", "list", "watch", "update", "patch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["storageclasses"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["list", "watch", "create", "update", "patch"]
-  - apiGroups: ["snapshot.storage.k8s.io"]
-    resources: ["volumesnapshots"]
-    verbs: ["get", "list"]
-  - apiGroups: ["snapshot.storage.k8s.io"]
-    resources: ["volumesnapshotcontents"]
-    verbs: ["get", "list"]
-  # resizer
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["get", "list", "watch"]
-  # node
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - csi.storage.k8s.io
+  resources:
+  - csinodeinfos
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - csinodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - volumeattachments
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - volumeattachments/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  - persistentvolumeclaims/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - list
+  - watch
+  - create
+  - update
+  - patch
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshots
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshotcontents
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
 ---
-kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
-  name: hcloud-csi
-subjects:
-  - kind: ServiceAccount
-    name: hcloud-csi
-    namespace: kube-system
+  name: hcloud-csi-controller
 roleRef:
-  kind: ClusterRole
-  name: hcloud-csi
   apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: hcloud-csi-controller
+subjects:
+- kind: ServiceAccount
+  name: hcloud-csi-controller
+  namespace: kube-system
 ---
 kind: StatefulSet
 apiVersion: apps/v1
@@ -109,19 +206,12 @@ spec:
       labels:
         app: hcloud-csi-controller
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
       tolerations:
-        - key: "node-role.kubernetes.io/master"
-          effect: NoSchedule
         - key: "node-role.kubernetes.io/control-plane"
           effect: NoSchedule
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: node.kubernetes.io/instance-type
-                    operator: Exists
-      serviceAccount: hcloud-csi
+      serviceAccount: hcloud-csi-controller
       containers:
         - name: csi-attacher
           image: k8s.gcr.io/sig-storage/csi-attacher:v3.2.1
@@ -157,8 +247,10 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.6.0
+          image: hetznercloud/hcloud-csi-driver:2.0.0
           imagePullPolicy: Always
+          command:
+            - /bin/hcloud-csi-driver-controller
           env:
             - name: CSI_ENDPOINT
               value: unix:///run/csi/socket
@@ -227,8 +319,6 @@ spec:
       tolerations:
         - effect: NoSchedule
           operator: Exists
-        - key: CriticalAddonsOnly
-          operator: Exists
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -258,8 +348,10 @@ spec:
           securityContext:
             privileged: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.6.0
+          image: hetznercloud/hcloud-csi-driver:2.0.0
           imagePullPolicy: Always
+          command:
+            - /bin/hcloud-csi-driver-node
           env:
             - name: CSI_ENDPOINT
               value: unix:///run/csi/socket
@@ -267,16 +359,6 @@ spec:
               value: 0.0.0.0:9189
             - name: ENABLE_METRICS
               value: "true"
-            - name: HCLOUD_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: hcloud
-                  key: token
-            - name: KUBE_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
           volumeMounts:
             - name: kubelet-dir
               mountPath: /var/lib/kubelet
