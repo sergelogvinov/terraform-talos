@@ -64,3 +64,4 @@ create-deployments:
 create-secrets:
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | hexdump -e '"%00x"' > hcloud-csi-secret.secret
 	kubectl --kubeconfig=kubeconfig create secret generic hcloud-csi-secret --from-file=encryptionPassphrase=hcloud-csi-secret.secret
+	rm -f hcloud-csi-secret.secret

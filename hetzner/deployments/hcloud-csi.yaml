@@ -208,6 +208,7 @@ spec:
     spec:
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: hcloud
       tolerations:
         - key: "node-role.kubernetes.io/control-plane"
           effect: NoSchedule
@@ -316,19 +317,11 @@ spec:
       labels:
         app: hcloud-csi
     spec:
+      nodeSelector:
+        node.cloudprovider.kubernetes.io/platform: hcloud
       tolerations:
         - effect: NoSchedule
           operator: Exists
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: instance.hetzner.cloud/is-root-server
-                    operator: NotIn
-                    values:
-                      - "true"
-      serviceAccount: hcloud-csi
       containers:
         - name: csi-node-driver-registrar
           image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.2.0

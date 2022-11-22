@@ -140,13 +140,14 @@ spec:
       serviceAccountName: cluster-autoscaler
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: hcloud
       tolerations:
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
       containers:
         - name: cluster-autoscaler
-          # image: k8s.gcr.io/autoscaling/cluster-autoscaler:v1.23.1
-          image: ghcr.io/sergelogvinov/cluster-autoscaler-amd64:dev
+          image: k8s.gcr.io/autoscaling/cluster-autoscaler:v1.25.0
+          # image: ghcr.io/sergelogvinov/cluster-autoscaler-amd64:dev
           name: cluster-autoscaler
           resources:
             limits:
