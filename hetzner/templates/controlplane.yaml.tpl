@@ -78,9 +78,6 @@ cluster:
   clusterName: ${clusterName}
   discovery:
     enabled: true
-    registries:
-      service:
-        disabled: true
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
