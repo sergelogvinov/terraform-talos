@@ -7,6 +7,8 @@ machine:
   ca:
     crt: ${caMachine}
   certSANs: []
+  nodeLabels:
+    node.kubernetes.io/disktype: ssd
   kubelet:
     extraArgs:
       node-ip: "${ipv4}"
@@ -47,11 +49,6 @@ machine:
       options:
         - no_read_workqueue
         - no_write_workqueue
-  registries:
-    mirrors:
-      docker.io:
-        endpoints:
-          - https://registry-1.docker.io
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}

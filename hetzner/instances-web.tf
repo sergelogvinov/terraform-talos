@@ -17,6 +17,6 @@ module "web" {
 
   vm_params = merge(var.kubernetes, {
     lbv4   = local.ipv4_vip
-    labels = "project.io/node-pool=web,node.kubernetes.io/disktype=ssd,hcloud/node-group=web-${each.key}"
+    labels = "project.io/node-pool=web,hcloud/node-group=web-${each.key}"
   })
 }

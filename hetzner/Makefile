@@ -51,7 +51,6 @@ create-infrastructure: ## Bootstrap all nodes
 
 create-kubeconfig: ## Prepare kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 kubeconfig .
-	chmod 0600 kubeconfig
 	kubectl --kubeconfig=kubeconfig config set clusters.${CLUSTERNAME}.server https://${ENDPOINT}:6443
 	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
 

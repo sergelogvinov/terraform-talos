@@ -1,7 +1,7 @@
 
 resource "hcloud_firewall" "controlplane" {
   name   = "controlplane"
-  labels = merge(var.tags, { type = "infra", label = "master" })
+  labels = merge(var.tags, { type = "infra", label = "controlplane" })
 
   rule {
     direction  = "in"

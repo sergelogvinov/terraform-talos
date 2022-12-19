@@ -341,7 +341,7 @@ spec:
           securityContext:
             privileged: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:2.0.0
+          image: hetznercloud/hcloud-csi-driver:2.1.0
           imagePullPolicy: Always
           command:
             - /bin/hcloud-csi-driver-node
