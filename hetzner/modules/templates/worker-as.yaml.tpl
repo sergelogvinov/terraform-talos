@@ -53,6 +53,8 @@ cluster:
   controlPlane:
     endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
+  discovery:
+    enabled: true
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
