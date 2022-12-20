@@ -47,23 +47,11 @@ spec:
         app: csi-cinder-nodeplugin
     spec:
       nodeSelector:
-        topology.kubernetes.io/zone: nova
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: project.io/cloudprovider-type
-                    operator: In
-                    values:
-                      - openstack
+        node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: openstack
       tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/master
-        operator: Exists
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/control-plane
-        operator: Exists
+        - key: "node-role.kubernetes.io/control-plane"
+          effect: NoSchedule
       serviceAccount: csi-cinder-node-sa
       hostNetwork: true
       containers:

@@ -11,12 +11,11 @@ machine:
       rotate-server-certificates: true
       cloud-provider: external
       node-labels: "${labels}"
-    nodeIP:
-      validSubnets: ${format("%#v",split(",",nodeSubnets))}
     clusterDNS:
       - 169.254.2.53
-      - fd00::169:254:2:53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
+    nodeIP:
+      validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
     hostname: "${name}"
     interfaces:
@@ -26,22 +25,23 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
     extraHostEntries:
       - ip: ${lbv4}
         aliases:
           - ${apiDomain}
+  install:
+    wipe: false
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
-  install:
-    wipe: false
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
   controlPlane:
     endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
+  discovery:
+    enabled: true
   network:
     dnsDomain: ${domain}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}

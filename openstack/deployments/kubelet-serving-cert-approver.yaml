@@ -173,24 +173,15 @@ spec:
         app.kubernetes.io/instance: kubelet-serving-cert-approver
         app.kubernetes.io/name: kubelet-serving-cert-approver
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
       tolerations:
-        - key: "node.cloudprovider.kubernetes.io/uninitialized"
-          value: "true"
-          effect: NoSchedule
-        - key: "CriticalAddonsOnly"
-          operator: Exists
-        - key: "node-role.kubernetes.io/master"
-          effect: NoSchedule
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - preference:
-              matchExpressions:
-              - key: node-role.kubernetes.io/master
-                operator: DoesNotExist
-              - key: node-role.kubernetes.io/control-plane
-                operator: DoesNotExist
-            weight: 100
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Exists
+      - effect: NoSchedule
+        key: node.cloudprovider.kubernetes.io/uninitialized
+        operator: Exists
       containers:
       - args:
         - serve
@@ -200,7 +191,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         image: ghcr.io/alex1989hu/kubelet-serving-cert-approver:main
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
             path: /healthz
@@ -238,13 +229,3 @@ spec:
         runAsGroup: 65534
         runAsUser: 65534
       serviceAccountName: kubelet-serving-cert-approver
-      tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/master
-        operator: Exists
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/control-plane
-        operator: Exists
-      - effect: NoSchedule
-        key: node.cloudprovider.kubernetes.io/uninitialized
-        operator: Exists

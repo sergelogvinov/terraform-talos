@@ -6,7 +6,6 @@ machine:
   token: ${tokenMachine}
   ca:
     crt: ${caMachine}
-  certSANs: []
   nodeLabels:
     node.kubernetes.io/disktype: ssd
   kubelet:

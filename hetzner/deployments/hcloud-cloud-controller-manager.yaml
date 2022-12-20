@@ -40,6 +40,7 @@ spec:
       dnsPolicy: Default
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: hcloud
       tolerations:
         - key: "node.cloudprovider.kubernetes.io/uninitialized"
           value: "true"
