@@ -31,12 +31,11 @@ resource "azurerm_shared_image" "talos" {
   hyper_v_generation                  = "V2"
   architecture                        = each.key
   accelerated_network_support_enabled = lower(each.key) == "x64"
-  # specialized                         = true
 
   identifier {
     publisher = var.name
     offer     = "Talos-${lower(each.key)}"
-    sku       = "1.2-dev"
+    sku       = "MPL-2.0"
   }
 
   tags = merge(var.tags, { type = "infra" })
@@ -101,7 +100,7 @@ resource "azurerm_image" "talos" {
 
 resource "azurerm_shared_image_version" "talos" {
   for_each            = { for name, k in azurerm_storage_blob.talos : name => k.url }
-  name                = "1.2.0"
+  name                = "1.3.0"
   location            = var.regions[0]
   resource_group_name = data.azurerm_resource_group.kubernetes.name
   gallery_name        = azurerm_shared_image.talos[each.key].gallery_name

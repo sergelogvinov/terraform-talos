@@ -7,7 +7,7 @@ The goal is to create all cloud services from scratch.
 
 | Platform | Checked Talos version | Addons | Setup type | Nat |
 |---|---|---|---|---|
-| [Azure](azure)         | 1.1.0  | CCM,CSI,Autoscaler | many regions, many zones | &check; |
+| [Azure](azure)         | 1.3.0  | CCM,CSI,Autoscaler | many regions, many zones | &check; |
 | [Exoscale](exoscale)   | 1.3.0  | CCM,Autoscaler     | many regions | &cross; |
 | [GCP](gcp-zonal)       | 0.14.0 | CCM,CSI,Autoscaler | one region, many zones | &check; |
 | [Hetzner](hetzner)     | 1.3.0  | CCM,CSI,Autoscaler | many regions | &cross; |

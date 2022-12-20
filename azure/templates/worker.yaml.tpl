@@ -9,8 +9,8 @@ machine:
   kubelet:
     extraArgs:
       cloud-provider: external
-      node-labels: "${labels}"
       rotate-server-certificates: true
+      node-labels: "${labels}"
     nodeIP:
       validSubnets: ${format("%#v",nodeSubnets)}
     clusterDNS:
@@ -36,6 +36,8 @@ cluster:
   controlPlane:
     endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
+  discovery:
+    enabled: true
   network:
     dnsDomain: ${domain}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}

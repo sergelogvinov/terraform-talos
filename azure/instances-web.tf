@@ -1,6 +1,6 @@
 
 locals {
-  web_labels = "project.io/cloudprovider-type=azure,project.io/node-pool=web"
+  web_labels = "project.io/node-pool=web"
 }
 
 resource "azurerm_linux_virtual_machine_scale_set" "web" {

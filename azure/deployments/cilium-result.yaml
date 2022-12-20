@@ -148,6 +148,7 @@ data:
   kube-proxy-replacement: "strict"
   kube-proxy-replacement-healthz-bind-address: ""
   bpf-lb-sock: "false"
+  host-reachable-services-protos: 
   enable-health-check-nodeport: "true"
   node-port-bind-protection: "true"
   enable-auto-protect-node-port-range: "true"
@@ -174,7 +175,6 @@ data:
   bpf-root: "/sys/fs/bpf"
   cgroup-root: "/sys/fs/cgroup"
   enable-k8s-terminating-endpoint: "true"
-  annotate-k8s-node: "true"
   remove-cilium-node-taints: "true"
   set-cilium-is-up-condition: "true"
   unmanaged-pod-watcher-interval: "15"
@@ -221,13 +221,6 @@ rules:
   - get
   - list
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - nodes/status
-  verbs:
-  # To annotate the k8s node with Cilium's metadata
-  - patch
 - apiGroups:
   - apiextensions.k8s.io
   resources:
@@ -557,7 +550,7 @@ spec:
     spec:
       containers:
       - name: cilium-agent
-        image: "quay.io/cilium/cilium:v1.12.1@sha256:ea2db1ee21b88127b5c18a96ad155c25485d0815a667ef77c2b7c7f31cab601b"
+        image: "quay.io/cilium/cilium:v1.12.4@sha256:4b074fcfba9325c18e97569ed1988464309a5ebf64bbc79bec6f3d58cafcb8cf"
         imagePullPolicy: IfNotPresent
         command:
         - cilium-agent
@@ -644,7 +637,7 @@ spec:
               - /cni-uninstall.sh
         resources:
           limits:
-            cpu: 1
+            cpu: 2
             memory: 1Gi
           requests:
             cpu: 100m
@@ -664,6 +657,7 @@ spec:
           protocol: TCP
         securityContext:
           privileged: true
+        terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         - name: bpf-maps
           mountPath: /sys/fs/bpf
@@ -691,7 +685,7 @@ spec:
           mountPath: /run/xtables.lock
       initContainers:
       - name: clean-cilium-state
-        image: "quay.io/cilium/cilium:v1.12.1@sha256:ea2db1ee21b88127b5c18a96ad155c25485d0815a667ef77c2b7c7f31cab601b"
+        image: "quay.io/cilium/cilium:v1.12.4@sha256:4b074fcfba9325c18e97569ed1988464309a5ebf64bbc79bec6f3d58cafcb8cf"
         imagePullPolicy: IfNotPresent
         command:
         - /init-container.sh
@@ -712,6 +706,7 @@ spec:
           value: "api.cluster.local"
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
+        terminationMessagePolicy: FallbackToLogsOnError
         securityContext:
           privileged: true
         volumeMounts:
@@ -817,14 +812,14 @@ spec:
     metadata:
       annotations:
         # ensure pods roll when configmap updates
-        cilium.io/cilium-configmap-checksum: "10bcfd4171cc8219b04f7404f8c9add742e0de9272cd864272e80f23ec406384"
+        cilium.io/cilium-configmap-checksum: "c3ffdb3de5df1007b50c84e0af5ba77bc44d069f56d62d3232573a21084f2f80"
       labels:
         io.cilium/app: operator
         name: cilium-operator
     spec:
       containers:
       - name: cilium-operator
-        image: quay.io/cilium/operator-generic:v1.12.1@sha256:93d5aaeda37d59e6c4325ff05030d7b48fabde6576478e3fdbfb9bb4a68ec4a1
+        image: "quay.io/cilium/operator-generic:v1.12.4@sha256:071089ec5bca1f556afb8e541d9972a0dfb09d1e25504ae642ced021ecbedbd1"
         imagePullPolicy: IfNotPresent
         command:
         - cilium-operator-generic
@@ -865,6 +860,7 @@ spec:
         - name: cilium-config-path
           mountPath: /tmp/cilium/config-map
           readOnly: true
+        terminationMessagePolicy: FallbackToLogsOnError
       hostNetwork: true
       restartPolicy: Always
       priorityClassName: system-cluster-critical
@@ -881,8 +877,10 @@ spec:
             topologyKey: kubernetes.io/hostname
       nodeSelector:
         kubernetes.io/os: linux
+        node-role.kubernetes.io/control-plane: ""
       tolerations:
-        - operator: Exists
+        - effect: NoSchedule
+          operator: Exists
       volumes:
         # To read the configuration from the config map
       - name: cilium-config-path

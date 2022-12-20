@@ -152,25 +152,16 @@ spec:
       serviceAccountName: azure-cloud-controller-manager
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: project.io/cloudprovider-type
-                    operator: In
-                    values:
-                      - azure
+        node.cloudprovider.kubernetes.io/platform: azure
       tolerations:
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/master
-          operator: Exists
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/control-plane
-          operator: Exists
+        - key: "node.cloudprovider.kubernetes.io/uninitialized"
+          value: "true"
+          effect: "NoSchedule"
+        - key: "node-role.kubernetes.io/control-plane"
+          effect: NoSchedule
       containers:
         - name: azure-cloud-controller-manager
-          image: mcr.microsoft.com/oss/kubernetes/azure-cloud-controller-manager:v1.24.4
+          image: mcr.microsoft.com/oss/kubernetes/azure-cloud-controller-manager:v1.26.0
           imagePullPolicy: IfNotPresent
           command: ["cloud-controller-manager"]
           args:

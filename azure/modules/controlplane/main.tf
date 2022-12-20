@@ -72,7 +72,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "controlpl
 }
 
 locals {
-  controlplane_labels = "project.io/cloudprovider-type=azure,topology.kubernetes.io/region=${var.region},kubernetes.azure.com/managed=false"
+  controlplane_labels = "kubernetes.azure.com/managed=false"
 }
 
 resource "azurerm_linux_virtual_machine" "controlplane" {

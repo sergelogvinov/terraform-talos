@@ -61,30 +61,17 @@ spec:
       serviceAccountName: azure-cloud-node-manager
       hostNetwork: true   # required to fetch correct hostname
       nodeSelector:
-        kubernetes.io/os: linux
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: project.io/cloudprovider-type
-                    operator: In
-                    values:
-                      - azure
+        node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: azure
       tolerations:
-      - key: CriticalAddonsOnly
-        operator: Exists
-      - key: node-role.kubernetes.io/master
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
-      - operator: "Exists"
-        effect: NoExecute
-      - operator: "Exists"
-        effect: NoSchedule
+        - key: "node.cloudprovider.kubernetes.io/uninitialized"
+          value: "true"
+          effect: "NoSchedule"
+        - key: "node-role.kubernetes.io/control-plane"
+          effect: NoSchedule
       containers:
       - name: cloud-node-manager
-        image: mcr.microsoft.com/oss/kubernetes/azure-cloud-node-manager:v1.24.4
+        image: mcr.microsoft.com/oss/kubernetes/azure-cloud-node-manager:v1.26.0
         imagePullPolicy: IfNotPresent
         command:
         - cloud-node-manager

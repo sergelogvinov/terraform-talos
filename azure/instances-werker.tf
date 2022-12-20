@@ -1,6 +1,6 @@
 
 locals {
-  worker_labels = "project.io/cloudprovider-type=azure,project.io/node-pool=worker"
+  worker_labels = "project.io/node-pool=worker"
 }
 
 resource "azurerm_linux_virtual_machine_scale_set" "worker" {
