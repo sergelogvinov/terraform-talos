@@ -7,6 +7,8 @@ machine:
   ca:
     crt: ${caMachine}
   certSANs: []
+  nodeLabels:
+    node.kubernetes.io/disktype: ssd
   kubelet:
     extraArgs:
       cloud-provider: external
@@ -71,11 +73,6 @@ cluster:
   clusterName: ${clusterName}
   discovery:
     enabled: true
-    registries:
-      kubernetes:
-        disabled: false
-      service:
-        disabled: true
   network:
     dnsDomain: ${domain}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}

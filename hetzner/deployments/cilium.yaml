@@ -5,6 +5,7 @@ k8sServicePort: "6443"
 
 operator:
   enabled: true
+  rollOutPods: true
   replicas: 1
   prometheus:
     enabled: false

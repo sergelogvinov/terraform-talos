@@ -30,7 +30,7 @@ resource "scaleway_instance_server" "controlplane" {
         ipv4_local = cidrhost(local.main_subnet, 11 + count.index)
         lbv4       = local.lbv4
         ipv4       = scaleway_instance_ip.controlplane[count.index].address
-        labels     = "${local.controlplane_labels},node.kubernetes.io/instance-type=${lookup(var.controlplane, "type", "DEV1-M")}"
+        labels     = "node.kubernetes.io/instance-type=${lookup(var.controlplane, "type", "DEV1-M")}"
         access     = var.scaleway_access
         secret     = var.scaleway_secret
         project_id = var.scaleway_project_id

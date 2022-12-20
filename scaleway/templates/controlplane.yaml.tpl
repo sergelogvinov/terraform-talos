@@ -7,6 +7,13 @@ machine:
     - "${lbv4}"
     - "${ipv4}"
     - "${apiDomain}"
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:reader
+      allowedKubernetesNamespaces:
+        - kube-system
   kubelet:
     extraArgs:
       node-ip: "${ipv4_local}"
@@ -28,9 +35,6 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-    nameservers:
-      - 1.1.1.1
-      - 8.8.8.8
     kubespan:
       enabled: true
       allowDownPeerBypass: true
@@ -65,11 +69,6 @@ cluster:
   clusterName: ${clusterName}
   discovery:
     enabled: true
-    registries:
-      kubernetes:
-        disabled: false
-      service:
-        disabled: true
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
@@ -100,7 +99,8 @@ cluster:
             namespaces:
               - kube-system
               - ingress-nginx
-              - local-path-provisioner
+              - monitoring
+              - local-path-storage
               - local-lvm
             runtimeClasses: []
             usernames: []
@@ -134,6 +134,7 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
+      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/scaleway-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/metrics-server.yaml

@@ -195,20 +195,15 @@ spec:
       serviceAccount: scaleway-csi-controller
       nodeSelector:
         kubernetes.io/os: linux
+        node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: scaleway
       priorityClassName: system-cluster-critical
       tolerations:
-        - key: "node-role.kubernetes.io/master"
-          operator: "Exists"
-          effect: "NoSchedule"
-        - key: "node-role.kubernetes.io/controlplane"
-          operator: "Exists"
-          effect: "NoSchedule"
         - key: "node-role.kubernetes.io/control-plane"
-          operator: "Exists"
-          effect: "NoSchedule"
+          effect: NoSchedule
       containers:
         - name: scaleway-csi-plugin
-          image: scaleway/scaleway-csi:v0.1.8
+          image: scaleway/scaleway-csi:v0.2.0
           args :
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--mode=controller"
@@ -248,7 +243,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-attacher
-          image: k8s.gcr.io/sig-storage/csi-attacher:v3.3.0
+          image: k8s.gcr.io/sig-storage/csi-attacher:v3.4.0
           args:
             - "--v=5"
             - "--csi-address=$(CSI_ADDRESS)"
@@ -284,11 +279,9 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: liveness-probe
-          image: k8s.gcr.io/sig-storage/livenessprobe:v2.2.0
+          image: k8s.gcr.io/sig-storage/livenessprobe:v2.6.0
           args:
             - --csi-address=/csi/csi.sock
-            - --probe-timeout=3s
-            - --v=2
           volumeMounts:
             - name: socket-dir
               mountPath: /csi

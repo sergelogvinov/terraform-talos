@@ -30,11 +30,11 @@ machine:
       - ip: ${lbv4}
         aliases:
           - ${apiDomain}
+  install:
+    wipe: false
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
-  install:
-    wipe: false
   systemDiskEncryption:
     state:
       provider: luks2
@@ -59,7 +59,6 @@ cluster:
     enabled: true
   network:
     dnsDomain: ${domain}
-    podSubnets: ${format("%#v",split(",",podSubnets))}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
   token: ${token}
   ca:

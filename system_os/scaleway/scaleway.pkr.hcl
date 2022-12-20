@@ -2,7 +2,7 @@
 packer {
   required_plugins {
     scaleway = {
-      version = "= 1.0.3"
+      version = "= 1.0.5"
       source  = "github.com/hashicorp/scaleway"
     }
   }

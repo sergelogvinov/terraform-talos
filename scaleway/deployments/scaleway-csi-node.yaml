@@ -47,11 +47,13 @@ spec:
       hostNetwork: true
       dnsPolicy: Default
       serviceAccount: scaleway-csi-node
+      priorityClassName: system-node-critical
       nodeSelector:
         kubernetes.io/os: linux
-      priorityClassName: system-node-critical
+        node.cloudprovider.kubernetes.io/platform: scaleway
       tolerations:
-        - operator: "Exists"
+        - effect: NoSchedule
+          operator: Exists
       containers:
         - name: scaleway-csi-plugin
           image: scaleway/scaleway-csi:v0.1.7

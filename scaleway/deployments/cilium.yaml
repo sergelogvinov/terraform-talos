@@ -9,6 +9,11 @@ operator:
   replicas: 1
   prometheus:
     enabled: false
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  tolerations:
+    - operator: Exists
+      effect: NoSchedule
 
 identityAllocationMode: crd
 kubeProxyReplacement: strict
@@ -20,12 +25,6 @@ autoDirectNodeRoutes: false
 devices: [eth+]
 
 healthChecking: true
-annotateK8sNode: true
-
-# l7Proxy: false
-# encryption:
-#   enabled: true
-#   type: wireguard
 
 cni:
   install: true
@@ -42,6 +41,8 @@ ipv4:
   enabled: true
 ipv6:
   enabled: true
+hostServices:
+  enabled: true
 hostPort:
   enabled: true
 nodePort:
@@ -50,6 +51,8 @@ externalIPs:
   enabled: true
 hostFirewall:
   enabled: true
+ingressController:
+  enabled: false
 
 securityContext:
   privileged: true

@@ -131,23 +131,23 @@ spec:
       serviceAccountName: cloud-controller-manager
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: scaleway
       tolerations:
         - key: "node.cloudprovider.kubernetes.io/uninitialized"
           value: "true"
           effect: "NoSchedule"
-        - key: "node-role.kubernetes.io/master"
-          effect: NoSchedule
         - key: "node-role.kubernetes.io/control-plane"
           effect: NoSchedule
       containers:
         - name: scaleway-cloud-controller-manager
-          image: ghcr.io/sergelogvinov/scaleway-cloud-controller-manager:1fa94b15f6d87e1f951331a7dca148302fe7318b
+          image: scaleway/scaleway-cloud-controller-manager:v0.21.6
+          # image: ghcr.io/sergelogvinov/scaleway-cloud-controller-manager:1fa94b15f6d87e1f951331a7dca148302fe7318b
           imagePullPolicy: IfNotPresent
           args:
             - --cloud-provider=scaleway
             - --leader-elect=true
             - --allow-untagged-cloud
-            - --controllers=cloud-node,cloud-node-lifecycle
+            - --controllers=cloud-node-lifecycle
           resources:
             limits:
               cpu: 500m

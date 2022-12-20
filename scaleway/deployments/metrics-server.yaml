@@ -131,19 +131,16 @@ spec:
         kubernetes.io/os: linux
         node-role.kubernetes.io/control-plane: ""
       tolerations:
-        - key: "CriticalAddonsOnly"
-          operator: "Exists"
-        - key: "node-role.kubernetes.io/master"
-          effect: NoSchedule
         - key: "node-role.kubernetes.io/control-plane"
           effect: NoSchedule
       containers:
       - args:
         - --cert-dir=/tmp
-        - --secure-port=443
+        - --secure-port=6443
         - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
         - --kubelet-use-node-status-port
         - --metric-resolution=15s
+        - --authorization-always-allow-paths=/metrics
         image: k8s.gcr.io/metrics-server/metrics-server:v0.5.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -155,7 +152,7 @@ spec:
           periodSeconds: 10
         name: metrics-server
         ports:
-        - containerPort: 443
+        - containerPort: 6443
           name: https
           protocol: TCP
         readinessProbe:
