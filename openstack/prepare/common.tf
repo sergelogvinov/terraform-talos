@@ -1,9 +1,9 @@
 
-# data "openstack_networking_quota_v2" "quota" {
-#   for_each   = { for idx, name in var.regions : name => idx }
-#   region     = each.key
-#   project_id = var.project_id
-# }
+data "openstack_networking_quota_v2" "quota" {
+  for_each   = { for idx, name in var.regions : name => idx }
+  region     = each.key
+  project_id = var.project_id
+}
 
 resource "openstack_compute_keypair_v2" "keypair" {
   for_each   = { for idx, name in var.regions : name => idx }

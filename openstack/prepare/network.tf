@@ -57,24 +57,25 @@ resource "openstack_networking_subnet_v2" "private_v6" {
   ip_version        = 6
   ipv6_address_mode = "slaac" # dhcpv6-stateless dhcpv6-stateful # slaac
   # ipv6_ra_mode      = "slaac" # dhcpv6-stateless dhcpv6-stateful
+  # dns_nameservers = ["2001:4860:4860::8888", "2606:4700:4700::1111"]
 }
 
 resource "openstack_networking_subnet_route_v2" "public_v4" {
-  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
+  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) && data.openstack_networking_quota_v2.quota[name].router > 0 }
   subnet_id        = openstack_networking_subnet_v2.public[each.key].id
   destination_cidr = var.network_cidr
   next_hop         = try(var.capabilities[each.key].gateway, false) ? cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, 2) : cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, 1)
 }
 
 resource "openstack_networking_subnet_route_v2" "private_v4" {
-  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
+  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) && data.openstack_networking_quota_v2.quota[name].router > 0 }
   subnet_id        = openstack_networking_subnet_v2.private[each.key].id
   destination_cidr = var.network_cidr
   next_hop         = try(var.capabilities[each.key].gateway, false) ? cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, 2) : cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, 1)
 }
 
 resource "openstack_networking_subnet_route_v2" "private_v6" {
-  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
+  for_each         = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) && data.openstack_networking_quota_v2.quota[name].router > 0 }
   subnet_id        = openstack_networking_subnet_v2.private_v6[each.key].id
   destination_cidr = local.network_cidr_v6
   next_hop         = cidrhost(openstack_networking_subnet_v2.private_v6[each.key].cidr, 1)

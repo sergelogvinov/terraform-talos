@@ -22,7 +22,7 @@ data "openstack_networking_subnet_ids_v2" "external_v6" {
 # }
 
 resource "openstack_networking_router_v2" "nat" {
-  for_each            = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
+  for_each            = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) && data.openstack_networking_quota_v2.quota[name].router > 0 }
   region              = each.key
   name                = "nat-${openstack_networking_subnet_v2.private[each.key].name}"
   external_network_id = data.openstack_networking_network_v2.external[each.key].id
@@ -43,11 +43,10 @@ resource "openstack_networking_router_v2" "nat" {
 # }
 
 resource "openstack_networking_router_interface_v2" "private" {
-  for_each  = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) }
+  for_each  = { for idx, name in var.regions : name => idx if try(var.capabilities[name].gateway, false) && data.openstack_networking_quota_v2.quota[name].router > 0 }
   region    = each.key
   router_id = openstack_networking_router_v2.nat[each.key].id
   subnet_id = openstack_networking_subnet_v2.private[each.key].id
-  # port_id = openstack_networking_port_v2.gw_private[each.key].id
 }
 
 ### Soft router to peering networks
@@ -69,7 +68,7 @@ resource "openstack_networking_port_v2" "router" {
   admin_state_up = "true"
   fixed_ip {
     subnet_id  = openstack_networking_subnet_v2.private[each.key].id
-    ip_address = cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, try(var.capabilities[each.key].gateway, false) ? 2 : 1)
+    ip_address = cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, try(var.capabilities[each.key].gateway, false) && data.openstack_networking_quota_v2.quota[each.key].router > 0 ? 2 : 1)
   }
   # fixed_ip {
   #   subnet_id  = openstack_networking_subnet_v2.private_v6[each.key].id
