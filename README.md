@@ -12,7 +12,7 @@ The goal is to create all cloud services from scratch.
 | [GCP](gcp-zonal)       | 0.14.0 | CCM,CSI,Autoscaler | one region, many zones | &check; |
 | [Hetzner](hetzner)     | 1.3.0  | CCM,CSI,Autoscaler | many regions | &cross; |
 | [Openstack](openstack) | 1.3.0  | CCM,CSI            | many regions, many zones | &check; |
-| [Oracle](oracle)       | 1.0.0  |                    | many regions, many zones | &check; |
+| [Oracle](oracle)       | 1.3.0  |                    | many regions, many zones | &check; |
 | [Scaleway](scaleway)   | 1.3.0  | CCM,CSI            | one region | &check; |
 
 

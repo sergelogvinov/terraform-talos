@@ -2,18 +2,37 @@ version: v1alpha1
 debug: false
 persist: true
 machine:
+  type: controlplane
   certSANs:
     - ${lbv4}
     - ${lbv4_local}
     - ${apiDomain}
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:reader
+      allowedKubernetesNamespaces:
+        - kube-system
   kubelet:
     extraArgs:
       rotate-server-certificates: true
       node-labels: ${labels}
+    clusterDNS:
+      - 169.254.2.53
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
     hostname: "${name}"
+    interfaces:
+      - interface: dummy0
+        addresses:
+          - 169.254.2.53/32
+    extraHostEntries:
+      - ip: ${ipv4_local_vip}
+        aliases:
+          - ${apiDomain}
   install:
     wipe: false
   sysctls:
@@ -30,6 +49,9 @@ machine:
       keys:
         - nodeID: {}
           slot: 0
+      options:
+        - no_read_workqueue
+        - no_write_workqueue
   time:
     servers:
       - 169.254.169.254
@@ -38,6 +60,9 @@ cluster:
   secret: ${clusterSecret}
   controlPlane:
     endpoint: https://${lbv4_local}:6443
+  clusterName: ${clusterName}
+  discovery:
+    enabled: true
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
@@ -53,12 +78,37 @@ cluster:
       - ${lbv4}
       - ${lbv4_local}
       - ${apiDomain}
+    admissionControl:
+      - name: PodSecurity
+        configuration:
+          apiVersion: pod-security.admission.config.k8s.io/v1alpha1
+          defaults:
+            audit: restricted
+            audit-version: latest
+            enforce: baseline
+            enforce-version: latest
+            warn: restricted
+            warn-version: latest
+          exemptions:
+            namespaces:
+              - kube-system
+              - ingress-nginx
+              - monitoring
+              - local-path-storage
+              - local-lvm
+            runtimeClasses: []
+            usernames: []
+          kind: PodSecurityConfiguration
   controllerManager:
     extraArgs:
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
   scheduler: {}
-  etcd: {}
+  etcd:
+    advertisedSubnets:
+      - ${nodeSubnets[0]}
+    listenSubnets:
+      - ${nodeSubnets[0]}
   inlineManifests:
     - name: cloud-provider.yaml
       contents: |-
@@ -73,6 +123,7 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
+      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/oci-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/metrics-server.yaml

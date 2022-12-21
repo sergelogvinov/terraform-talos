@@ -27,8 +27,6 @@ controller:
     server-tokens: "false"
     http-redirect-code: "301"
 
-    disable-ipv6-dns: "true"
-
     use-gzip: "true"
     use-geoip: "false"
     use-geoip2: "false"
@@ -41,16 +39,12 @@ controller:
     log-format-escape-json: "true"
     log-format-upstream: '{"ip":"$remote_addr", "ssl":"$ssl_protocol", "method":"$request_method", "proto":"$scheme", "host":"$host", "uri":"$request_uri", "status":$status, "size":$bytes_sent, "agent":"$http_user_agent", "referer":"$http_referer", "namespace":"$namespace"}'
 
-    upstream-keepalive-connections: "64"
+    upstream-keepalive-connections: "32"
     proxy-connect-timeout: "10"
-    proxy-read-timeout: "120"
-    proxy-send-timeout: "120"
+    proxy-read-timeout: "60"
+    proxy-send-timeout: "60"
 
-    ssl-protocols: "TLSv1.2 TLSv1.3"
-
-    http-snippet: |
-      proxy_cache_path /tmp/static levels=1:2 use_temp_path=off keys_zone=static:16m inactive=24h max_size=512m;
-
+    ssl-protocols: "TLSv1.3"
     hsts: "true"
     hsts-max-age: "31536000"
     hsts-include-subdomains: "true"
@@ -79,7 +73,7 @@ controller:
           fieldPath: metadata.name
 
   livenessProbe:
-    initialDelaySeconds: 30
+    initialDelaySeconds: 15
     periodSeconds: 30
   readinessProbe:
     periodSeconds: 30
@@ -106,6 +100,10 @@ controller:
     enabled: true
     type: ClusterIP
     clusterIP: None
+    ipFamilyPolicy: "RequireDualStack"
+    ipFamilies:
+      - IPv4
+      - IPv6
 
   admissionWebhooks:
     enabled: false

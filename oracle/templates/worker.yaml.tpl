@@ -6,12 +6,11 @@ machine:
   token: ${tokenMachine}
   ca:
     crt: ${caMachine}
-  certSANs: []
   kubelet:
     extraArgs:
       cloud-provider: external
       rotate-server-certificates: true
-      node-labels: ${labels}
+      node-labels: "${labels}"
     clusterDNS:
       - 169.254.2.53
       - ${clusterDns}
@@ -22,15 +21,15 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
+    extraHostEntries:
+      - ip: ${lbv4}
+        aliases:
+          - ${apiDomain}
   install:
     wipe: true
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
-    net.ipv4.tcp_keepalive_time: 600
-    net.ipv4.tcp_keepalive_intvl: 60
-    fs.inotify.max_user_instances: 256
   systemDiskEncryption:
     state:
       provider: luks2
@@ -44,8 +43,10 @@ cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
   controlPlane:
-    endpoint: https://${lbv4}:6443
+    endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
+  discovery:
+    enabled: true
   network:
     dnsDomain: ${domain}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
