@@ -16,13 +16,13 @@ resource "oci_core_instance_pool" "web" {
 
   load_balancers {
     backend_set_name = oci_load_balancer_backend_set.web.name
-    load_balancer_id = oci_load_balancer.web.id
+    load_balancer_id = oci_load_balancer_load_balancer.web.id
     port             = 80
     vnic_selection   = "primaryvnic"
   }
   load_balancers {
     backend_set_name = oci_load_balancer_backend_set.webs.name
-    load_balancer_id = oci_load_balancer.web.id
+    load_balancer_id = oci_load_balancer_load_balancer.web.id
     port             = 443
     vnic_selection   = "primaryvnic"
   }
@@ -37,7 +37,7 @@ resource "oci_core_instance_pool" "web" {
 }
 
 locals {
-  web_labels = "topology.kubernetes.io/region=${var.region},project.io/node-pool=web"
+  web_labels = "project.io/node-pool=web"
 }
 
 resource "oci_core_instance_configuration" "web" {
@@ -68,7 +68,7 @@ resource "oci_core_instance_configuration" "web" {
             lbv4        = local.lbv4_local
             clusterDns  = cidrhost(split(",", var.kubernetes["serviceSubnets"])[0], 10)
             nodeSubnets = local.network_public[each.key].cidr_block
-            labels      = "${local.web_labels},topology.kubernetes.io/zone=${split(":", each.key)[1]}"
+            labels      = local.web_labels
           })
         ))
       }

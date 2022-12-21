@@ -4,7 +4,7 @@ variable "tenancy_ocid" {}
 variable "user_ocid" {}
 variable "fingerprint" {}
 variable "key_file" {
-  default = "~/.oci/oci_public.pem"
+  default = "~/.oci/oci_main_terraform.pem"
 }
 
 variable "project" {
@@ -57,6 +57,7 @@ variable "kubernetes" {
   default = {
     podSubnets     = "10.32.0.0/12,fd40:10:32::/102"
     serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
+    nodeSubnets    = "192.168.0.0/16"
     domain         = "cluster.local"
     apiDomain      = "api.cluster.local"
     clusterName    = "talos-k8s-oracle"
@@ -75,9 +76,9 @@ variable "controlplane" {
   type        = map(any)
   default = {
     count = 0,
-    type  = "VM.Standard.E4.Flex"
-    ocpus = 1
-    memgb = 3
+    type  = "VM.Standard.A1.Flex"
+    ocpus = 2
+    memgb = 8
   }
 }
 

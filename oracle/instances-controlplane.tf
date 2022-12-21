@@ -83,7 +83,8 @@ resource "oci_core_instance" "contolplane" {
       shape_config,
       defined_tags,
       create_vnic_details["defined_tags"],
-      launch_options["is_pv_encryption_in_transit_enabled"]
+      launch_options["is_pv_encryption_in_transit_enabled"],
+      metadata
     ]
   }
 }

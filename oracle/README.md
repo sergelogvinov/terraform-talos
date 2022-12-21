@@ -65,7 +65,7 @@ make create-config create-templates
 
 ```tf
 controlplane = {
-  count = 1,
+  count = 1
   type  = "VM.Standard.E4.Flex"
   ocpus = 1
   memgb = 4

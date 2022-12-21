@@ -30,7 +30,7 @@ machine:
         addresses:
           - 169.254.2.53/32
     extraHostEntries:
-      - ip: ${ipv4_local_vip}
+      - ip: ${lbv4_local}
         aliases:
           - ${apiDomain}
   install:
@@ -59,7 +59,7 @@ cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
   controlPlane:
-    endpoint: https://${lbv4_local}:6443
+    endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
   discovery:
     enabled: true
@@ -106,9 +106,9 @@ cluster:
   scheduler: {}
   etcd:
     advertisedSubnets:
-      - ${nodeSubnets[0]}
+      - ${nodeSubnets}
     listenSubnets:
-      - ${nodeSubnets[0]}
+      - ${nodeSubnets}
   inlineManifests:
     - name: cloud-provider.yaml
       contents: |-
@@ -128,5 +128,6 @@ cluster:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/local-path-storage.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/coredns-local.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/ingress-ns.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/ingress_result.yaml

@@ -5,7 +5,7 @@ locals {
   lbv4_local  = local.lbv4_enable ? [for ip in oci_network_load_balancer_network_load_balancer.contolplane[0].ip_addresses : ip.ip_address if !ip.is_public][0] : cidrhost(local.network_public[0].cidr_block, 11)
 
   lbv4_web_enable = false
-  lbv4_web        = local.lbv4_web_enable ? [for ip in oci_network_load_balancer_network_load_balancer.web[0].ip_addresses : ip.ip_address if ip.is_public][0] : oci_load_balancer.web.ip_addresses[0]
+  lbv4_web        = local.lbv4_web_enable ? [for ip in oci_network_load_balancer_network_load_balancer.web[0].ip_addresses : ip.ip_address if ip.is_public][0] : oci_load_balancer_load_balancer.web.ip_address_details[0].ip_address
 }
 
 resource "oci_dns_rrset" "lbv4_local" {
@@ -69,7 +69,7 @@ resource "oci_network_load_balancer_backend_set" "contolplane" {
     protocol           = "HTTPS"
     port               = 6443
     url_path           = "/readyz"
-    return_code        = 200
+    return_code        = 401
     interval_in_millis = 15000
   }
 }

@@ -28,7 +28,7 @@ resource "oci_core_image" "talos_amd64" {
     object_name    = oci_objectstorage_object.talos_amd64.object
 
     operating_system         = "Talos"
-    operating_system_version = "0.15.0"
+    operating_system_version = "1.3.0"
     source_image_type        = "QCOW2"
   }
 
@@ -50,7 +50,7 @@ resource "oci_core_image" "talos_arm64" {
     object_name    = oci_objectstorage_object.talos_arm64.object
 
     operating_system         = "Talos"
-    operating_system_version = "0.15.0"
+    operating_system_version = "1.3.0"
     source_image_type        = "QCOW2"
   }
 
