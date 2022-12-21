@@ -57,7 +57,7 @@ resource "openstack_networking_subnet_v2" "private_v6" {
   ip_version        = 6
   ipv6_address_mode = "slaac" # dhcpv6-stateless dhcpv6-stateful # slaac
   # ipv6_ra_mode      = "slaac" # dhcpv6-stateless dhcpv6-stateful
-  # dns_nameservers = ["2001:4860:4860::8888", "2606:4700:4700::1111"]
+  dns_nameservers = ["2001:4860:4860::8888"]
 }
 
 resource "openstack_networking_subnet_route_v2" "public_v4" {

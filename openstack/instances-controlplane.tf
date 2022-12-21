@@ -18,8 +18,9 @@ module "controlplane" {
   instance_tags        = concat(var.tags, ["infra"])
   instance_secgroups   = [local.network_secgroup[each.key].common, local.network_secgroup[each.key].controlplane]
   instance_params = merge(var.kubernetes, {
-    lbv4   = local.lbv4
-    routes = "\n${join("\n", formatlist("- network: %s", flatten([for zone in local.regions : local.network_subnets[zone] if zone != each.key])))}"
+    lbv4 = local.lbv4
+    # routes: ${indent(10,routes)}
+    # routes = "\n${join("\n", formatlist("- network: %s", flatten([for zone in local.regions : local.network_subnets[zone] if zone != each.key])))}"
 
     region              = each.key
     auth                = local.openstack_auth_url

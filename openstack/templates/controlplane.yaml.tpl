@@ -35,7 +35,6 @@ machine:
           - ${ipv4_local}/24
         vip:
           ip: ${ipv4_local_vip}
-        routes: ${indent(10,routes)}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -116,9 +115,9 @@ cluster:
   scheduler: {}
   etcd:
     advertisedSubnets:
-      - ${nodeSubnets}
+      - ${nodeSubnets[0]}
     listenSubnets:
-      - ${nodeSubnets}
+      - ${nodeSubnets[0]}
     extraArgs:
       election-timeout: "5000"
       heartbeat-interval: "1000"

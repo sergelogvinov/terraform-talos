@@ -8,8 +8,8 @@ machine:
     crt: ${caMachine}
   kubelet:
     extraArgs:
-      rotate-server-certificates: true
       cloud-provider: external
+      rotate-server-certificates: true
       node-labels: "${labels}"
     clusterDNS:
       - 169.254.2.53
@@ -19,9 +19,6 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
-      - interface: ${iface}
-        dhcp: true
-        routes: ${indent(10,routes)}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32

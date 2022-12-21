@@ -32,7 +32,7 @@ resource "openstack_networking_port_v2" "worker_public" {
 }
 
 locals {
-  worker_labels = "project.io/cloudprovider-type=openstack,topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=nova,project.io/node-pool=${var.instance_name}"
+  worker_labels = "topology.kubernetes.io/region=${var.region},project.io/node-pool=${var.instance_name}"
 }
 
 resource "openstack_compute_instance_v2" "worker" {

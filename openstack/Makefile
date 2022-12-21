@@ -35,7 +35,7 @@ create-templates:
 
 create-controlplane-bootstrap:
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
-	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.11 bootstrap
+	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} bootstrap
 
 create-deployments:
 	helm template --namespace=kube-system   --version=1.12.4 -f deployments/cilium.yaml cilium \
@@ -53,7 +53,7 @@ create-controlplane: ## Bootstrap controlplane
 
 create-kubeconfig: ## Download kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} kubeconfig .
-	kubectl --kubeconfig=kubeconfig config set clusters.talos-k8s-scaleway.server https://${ENDPOINT}:6443
+	kubectl --kubeconfig=kubeconfig config set clusters.talos-k8s-openstack.server https://${ENDPOINT}:6443
 	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
 
 create-infrastructure: ## Bootstrap all nodes

@@ -6,6 +6,7 @@ resource "openstack_networking_port_v2" "controlplane" {
   network_id     = var.network_internal.network_id
   admin_state_up = true
 
+  port_security_enabled = false
   fixed_ip {
     subnet_id  = var.network_internal.subnet_id
     ip_address = cidrhost(var.network_internal.cidr, var.instance_ip_start + count.index)
@@ -55,7 +56,7 @@ locals {
   ipv4_local     = var.instance_count > 0 ? [for ip in try(openstack_networking_port_v2.controlplane_public[0].all_fixed_ips, []) : ip if length(split(".", ip)) > 1][0] : ""
   ipv4_local_vip = var.instance_count > 0 ? cidrhost(var.network_internal.cidr, 5) : ""
 
-  controlplane_labels = "project.io/cloudprovider-type=openstack,topology.kubernetes.io/region=${var.region},topology.kubernetes.io/zone=nova"
+  controlplane_labels = "topology.kubernetes.io/region=${var.region}"
 }
 
 resource "local_file" "controlplane" {
