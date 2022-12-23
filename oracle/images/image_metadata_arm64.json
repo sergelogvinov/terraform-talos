@@ -1,0 +1,27 @@
+{
+    "version": 2,
+    "externalLaunchOptions": {
+        "firmware": "UEFI_64",
+        "networkType": "PARAVIRTUALIZED",
+        "bootVolumeType": "PARAVIRTUALIZED",
+        "remoteDataVolumeType": "PARAVIRTUALIZED",
+        "localDataVolumeType": "PARAVIRTUALIZED",
+        "launchOptionsSource": "PARAVIRTUALIZED",
+        "pvAttachmentVersion": 2,
+        "pvEncryptionInTransitEnabled": true,
+        "consistentVolumeNamingEnabled": true
+    },
+    "imageCapabilityData": null,
+    "imageCapsFormatVersion": null,
+    "operatingSystem": "Talos",
+    "operatingSystemVersion": "1.3.0",
+    "additionalMetadata": {
+        "shapeCompatibilities": [
+            {
+                "internalShapeName": "VM.Standard.A1.Flex",
+                "ocpuConstraints": null,
+                "memoryConstraints": null
+            }
+        ]
+    }
+}

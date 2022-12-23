@@ -16,6 +16,9 @@ resource "oci_identity_policy" "terraform" {
     "Allow group ${oci_identity_group.terraform.name} to read objectstorage-namespaces in compartment ${oci_identity_compartment.project.name}",
     "Allow group ${oci_identity_group.terraform.name} to manage buckets in compartment ${oci_identity_compartment.project.name}",
     "Allow group ${oci_identity_group.terraform.name} to manage objects in compartment ${oci_identity_compartment.project.name}",
+
+    "Allow group ${oci_identity_group.terraform.name} to manage volumes in compartment ${oci_identity_compartment.project.name}",
+    "Allow group ${oci_identity_group.terraform.name} to manage volume-attachments in compartment ${oci_identity_compartment.project.name}",
   ]
 }
 

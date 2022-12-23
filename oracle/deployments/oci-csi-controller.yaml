@@ -1,0 +1,156 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+ name: csi-oci-node-sa
+ namespace: kube-system
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+ name: csi-oci
+ namespace: kube-system
+rules:
+ - apiGroups: [""]
+   resources: ["events"]
+   verbs: ["get", "list", "watch", "create", "update", "patch"]
+ - apiGroups: [""]
+   resources: ["nodes"]
+   verbs: ["get", "list", "watch"]
+ - apiGroups: ["volume.oci.oracle.com"]
+   resources: ["blockscsiinfos"]
+   verbs: ["get", "list", "watch", "create", "delete", "update", "patch"]
+ - apiGroups: [""]
+   resources: ["persistentvolumes"]
+   verbs: ["get", "list", "watch", "create", "delete", "patch"]
+ - apiGroups: [""]
+   resources: ["persistentvolumeclaims"]
+   verbs: ["get", "list", "watch", "update", "create"]
+ - apiGroups: ["storage.k8s.io"]
+   resources: ["storageclasses", "volumeattachments", "volumeattachments/status", "csinodes"]
+   verbs: ["get", "list", "watch", "patch"]
+ - apiGroups: ["coordination.k8s.io"]
+   resources: ["leases"]
+   verbs: ["get", "list", "watch", "create", "delete", "update", "patch"]
+ - apiGroups: [""]
+   resources: ["endpoints"]
+   verbs: ["get", "watch", "create", "update"]
+ - apiGroups: [""]
+   resources: ["pods"]
+   verbs: ["get", "list", "watch"]
+ - apiGroups: [""]
+   resources: ["persistentvolumeclaims/status"]
+   verbs: ["patch"]
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+ name: csi-oci-binding
+subjects:
+ - kind: ServiceAccount
+   name: csi-oci-node-sa
+   namespace: kube-system
+roleRef:
+ kind: ClusterRole
+ name: csi-oci
+ apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deprecated.daemonset.template.generation: "1"
+  generation: 1
+  name: csi-oci-controller
+  namespace: kube-system
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: csi-oci-controller
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: csi-oci-controller
+        role: csi-oci
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: oracle
+      tolerations:
+        - key: "node-role.kubernetes.io/control-plane"
+          effect: NoSchedule
+      containers:
+        - name: csi-volume-provisioner
+          image: k8s.gcr.io/sig-storage/csi-provisioner:v3.2.1
+          args:
+            - --csi-address=/var/run/shared-tmpfs/csi.sock
+            - --volume-name-prefix=csi
+            - --feature-gates=Topology=true
+            - --timeout=120s
+            - --leader-election
+            - --leader-election-namespace=kube-system
+          volumeMounts:
+            - name: config
+              mountPath: /etc/oci/
+              readOnly: true
+            - mountPath: /var/run/shared-tmpfs
+              name: shared-tmpfs
+        - name: csi-attacher
+          image: k8s.gcr.io/sig-storage/csi-attacher:v3.5.0
+          args:
+            - --csi-address=/var/run/shared-tmpfs/csi.sock
+            - --timeout=120s
+            - --leader-election=true
+            - --leader-election-namespace=kube-system
+          volumeMounts:
+            - name: config
+              mountPath: /etc/oci/
+              readOnly: true
+            - mountPath: /var/run/shared-tmpfs
+              name: shared-tmpfs
+        - name: csi-resizer
+          image: k8s.gcr.io/sig-storage/csi-resizer:v1.5.0
+          args:
+            - --csi-address=/var/run/shared-tmpfs/csi.sock
+            - --leader-election
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - mountPath: /var/run/shared-tmpfs
+              name: shared-tmpfs
+        - name: oci-csi-controller-driver
+          args:
+            - --endpoint=unix://var/run/shared-tmpfs/csi.sock
+          command:
+            - /usr/local/bin/oci-csi-controller-driver
+          image: ghcr.io/oracle/cloud-provider-oci:v1.24.0
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config
+              mountPath: /etc/oci/
+              readOnly: true
+            - name: kubernetes
+              mountPath: /etc/kubernetes
+              readOnly: true
+            - mountPath: /var/run/shared-tmpfs
+              name: shared-tmpfs
+      volumes:
+        - name: config
+          secret:
+            secretName: oci-volume-provisioner
+        - name: kubernetes
+          hostPath:
+            path: /etc/kubernetes
+        - name: shared-tmpfs
+          emptyDir: {}
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      imagePullSecrets:
+        - name: image-pull-secret
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      serviceAccount: csi-oci-node-sa
+      serviceAccountName: csi-oci-node-sa
+      terminationGracePeriodSeconds: 30

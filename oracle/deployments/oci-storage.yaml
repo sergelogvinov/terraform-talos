@@ -1,0 +1,30 @@
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: blockvolume.csi.oraclecloud.com
+spec:
+  fsGroupPolicy: File
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: oci-bv
+provisioner: blockvolume.csi.oraclecloud.com
+parameters:
+  csi.storage.k8s.io/fstype: xfs
+  attachment-type: "paravirtualized"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: oci-bv-encrypted
+provisioner: blockvolume.csi.oraclecloud.com
+parameters:
+  csi.storage.k8s.io/fstype: xfs
+  attachment-type: "paravirtualized"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete

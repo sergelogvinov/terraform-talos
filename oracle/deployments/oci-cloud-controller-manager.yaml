@@ -92,6 +92,18 @@ rules:
   - create
 
 - apiGroups:
+    - "coordination.k8s.io"
+  resources:
+    - leases
+  verbs:
+    - get
+    - create
+    - update
+    - delete
+    - patch
+    - watch
+
+- apiGroups:
   - ""
   resources:
   - configmaps
@@ -109,6 +121,8 @@ rules:
     - "extension-apiserver-authentication"
   verbs:
     - get
+    - list
+    - watch
 
 - apiGroups:
   - ""
@@ -174,26 +188,33 @@ spec:
           - 169.254.169.254
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: oracle
       tolerations:
-      - key: node.cloudprovider.kubernetes.io/uninitialized
-        value: "true"
-        effect: NoSchedule
-      - key: node-role.kubernetes.io/master
-        operator: Exists
-        effect: NoSchedule
+        - key: "node.cloudprovider.kubernetes.io/uninitialized"
+          value: "true"
+          effect: "NoSchedule"
+        - key: "node-role.kubernetes.io/control-plane"
+          effect: NoSchedule
       volumes:
         - name: cfg
           secret:
             secretName: oci-cloud-controller-manager
       containers:
         - name: oci-cloud-controller-manager
-          image: iad.ocir.io/oracle/cloud-provider-oci:0.12.0
+          image: ghcr.io/oracle/cloud-provider-oci:v1.24.0
           command: ["/usr/local/bin/oci-cloud-controller-manager"]
           args:
+            - -v=4
+            - --cluster-name=$(CLUSTER_NAME)
             - --cloud-config=/etc/oci/cloud-provider.yaml
             - --cloud-provider=oci
-            - --leader-elect-resource-lock=configmaps
-            - -v=2
+            - --allocate-node-cidrs=false
+            - --controllers=cloud-node-lifecycle
+            - --leader-elect-resource-name=cloud-controller-manager-oci
+            - --bind-address=127.0.0.1
+          env:
+            - name: CLUSTER_NAME
+              value: kubernetes
           volumeMounts:
             - name: cfg
               mountPath: /etc/oci

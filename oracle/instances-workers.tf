@@ -40,7 +40,7 @@ resource "oci_core_instance_configuration" "worker" {
       display_name                        = "${var.project}-worker"
       is_pv_encryption_in_transit_enabled = true
       preferred_maintenance_action        = "LIVE_MIGRATE"
-      launch_mode                         = "NATIVE"
+      launch_mode                         = "PARAVIRTUALIZED"
 
       shape = lookup(var.instances[each.key], "worker_instance_shape", "VM.Standard.E2.1.Micro")
       shape_config {
