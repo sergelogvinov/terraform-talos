@@ -53,7 +53,7 @@ resource "oci_core_instance_configuration" "worker" {
           merge(var.kubernetes, {
             lbv4        = local.lbv4_local
             clusterDns  = cidrhost(split(",", var.kubernetes["serviceSubnets"])[0], 10)
-            nodeSubnets = local.network_public[each.key].cidr_block
+            nodeSubnets = local.network_private[each.key].cidr_block
             labels      = local.worker_labels
           })
         ))

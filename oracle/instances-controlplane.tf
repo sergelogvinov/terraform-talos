@@ -11,7 +11,10 @@ resource "oci_core_ipv6" "contolplane" {
 }
 
 locals {
-  contolplane_labels = "topology.kubernetes.io/region=${var.region}"
+  oci = templatefile("${path.module}/templates/oci.ini", {
+    compartment_id = var.compartment_ocid
+    region         = var.region
+  })
 }
 
 resource "oci_core_instance" "contolplane" {
@@ -32,12 +35,12 @@ resource "oci_core_instance" "contolplane" {
   metadata = {
     user_data = base64encode(templatefile("${path.module}/templates/controlplane.yaml",
       merge(var.kubernetes, {
-        name        = "contolplane-${count.index + 1}"
+        name        = "${local.project}-contolplane-${count.index + 1}"
         lbv4        = local.lbv4
         lbv4_local  = local.lbv4_local
         nodeSubnets = local.network_public[element(local.zones, count.index)].cidr_block
-        labels      = local.contolplane_labels
-        ccm         = base64encode("useInstancePrincipals: true\nloadBalancer:\n  disabled: true")
+        ccm         = filebase64("${path.module}/templates/oci-cloud-provider.yaml")
+        oci         = base64encode(local.oci)
       })
     ))
   }

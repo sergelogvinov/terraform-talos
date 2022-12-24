@@ -17,7 +17,6 @@ machine:
   kubelet:
     extraArgs:
       rotate-server-certificates: true
-      node-labels: ${labels}
     clusterDNS:
       - 169.254.2.53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
@@ -120,6 +119,7 @@ cluster:
           namespace: kube-system
         data:
           cloud-provider.yaml: ${ccm}
+          config.ini: ${oci}
   externalCloudProvider:
     enabled: true
     manifests:

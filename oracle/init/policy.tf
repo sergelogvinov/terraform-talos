@@ -24,14 +24,40 @@ resource "oci_identity_policy" "terraform" {
 
 resource "oci_identity_policy" "ccm" {
   name           = "ccm"
-  description    = "policy created by terraform for ccm"
+  description    = "This is a kubernetes role for CCM, created via Terraform"
   compartment_id = oci_identity_compartment.project.id
 
   # https://github.com/oracle/oci-cloud-controller-manager/blob/master/manifests/provider-config-example.yaml
   statements = [
     "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to read instance-family in compartment ${oci_identity_compartment.project.name}",
-    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to read virtual-network-family in compartment ${oci_identity_compartment.project.name}"
-    # "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to manage load-balancers in compartment ${oci_identity_compartment.project.name}"
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to read virtual-network-family in compartment ${oci_identity_compartment.project.name}",
+    # "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to manage load-balancers in compartment ${oci_identity_compartment.project.name}",
+  ]
+}
+
+resource "oci_identity_policy" "csi" {
+  name           = "csi"
+  description    = "This is a kubernetes role for CSI, created via Terraform"
+  compartment_id = oci_identity_compartment.project.id
+
+  statements = [
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to manage volumes in compartment ${oci_identity_compartment.project.name}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to manage volume-attachments in compartment ${oci_identity_compartment.project.name}",
+  ]
+}
+
+resource "oci_identity_policy" "scaler" {
+  name           = "scaler"
+  description    = "This is a kubernetes role for node autoscaler system, created via Terraform"
+  compartment_id = oci_identity_compartment.project.id
+
+  statements = [
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to manage instance-pools in compartment ${oci_identity_compartment.project.name}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to manage instance-configurations in compartment ${oci_identity_compartment.project.name}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to manage instance-family in compartment ${oci_identity_compartment.project.name}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to use subnets in compartment ${oci_identity_compartment.project.name}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to read virtual-network-family in compartment ${oci_identity_compartment.project.name}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.ccm.name} to use vnics in compartment ${oci_identity_compartment.project.name}",
   ]
 }
 

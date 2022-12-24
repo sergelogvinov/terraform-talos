@@ -36,9 +36,6 @@ machine:
       keys:
         - nodeID: {}
           slot: 0
-  time:
-    servers:
-      - 169.254.169.254
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
