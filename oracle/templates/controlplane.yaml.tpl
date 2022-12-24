@@ -51,9 +51,6 @@ machine:
       options:
         - no_read_workqueue
         - no_write_workqueue
-  time:
-    servers:
-      - 169.254.169.254
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
@@ -69,7 +66,7 @@ cluster:
     cni:
       name: custom
       urls:
-        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/cilium_result.yaml
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/cilium-result.yaml
   proxy:
     disabled: true
   apiServer:
@@ -130,4 +127,4 @@ cluster:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/local-path-storage.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/coredns-local.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/ingress-ns.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/ingress_result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/oracle/deployments/ingress-result.yaml
