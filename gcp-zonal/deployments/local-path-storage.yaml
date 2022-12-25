@@ -59,15 +59,15 @@ spec:
       labels:
         app: local-path-provisioner
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
       tolerations:
-        - key: "CriticalAddonsOnly"
-          operator: "Exists"
-        - key: "node-role.kubernetes.io/master"
+        - key: "node-role.kubernetes.io/control-plane"
           effect: NoSchedule
       serviceAccountName: local-path-provisioner-service-account
       containers:
         - name: local-path-provisioner
-          image: rancher/local-path-provisioner:v0.0.19
+          image: rancher/local-path-provisioner:v0.0.23
           imagePullPolicy: IfNotPresent
           command:
             - local-path-provisioner
@@ -117,40 +117,12 @@ data:
     }
   setup: |-
     #!/bin/sh
-    while getopts "m:s:p:" opt
-    do
-        case $opt in
-            p)
-            absolutePath=$OPTARG
-            ;;
-            s)
-            sizeInBytes=$OPTARG
-            ;;
-            m)
-            volMode=$OPTARG
-            ;;
-        esac
-    done
-
-    mkdir -m 0777 -p ${absolutePath}
+    set -eu
+    mkdir -m 0777 -p "$VOL_DIR"
   teardown: |-
     #!/bin/sh
-    while getopts "m:s:p:" opt
-    do
-        case $opt in
-            p)
-            absolutePath=$OPTARG
-            ;;
-            s)
-            sizeInBytes=$OPTARG
-            ;;
-            m)
-            volMode=$OPTARG
-            ;;
-        esac
-    done
-
-    rm -rf ${absolutePath}
+    set -eu
+    rm -rf "$VOL_DIR"
   helperPod.yaml: |-
     apiVersion: v1
     kind: Pod
