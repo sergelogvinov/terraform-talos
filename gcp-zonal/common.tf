@@ -1,5 +1,5 @@
 
-data "google_client_openid_userinfo" "terraform" {}
+# data "google_client_openid_userinfo" "terraform" {}
 
 data "google_compute_image" "talos" {
   project = local.project

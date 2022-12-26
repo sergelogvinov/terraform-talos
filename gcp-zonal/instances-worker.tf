@@ -55,10 +55,10 @@ resource "google_compute_instance_group_manager" "worker_spot" {
     max_unavailable_fixed = 1
     replacement_method    = "SUBSTITUTE"
   }
-  # auto_healing_policies {
-  #   health_check      = google_compute_health_check.instance.id
-  #   initial_delay_sec = 300
-  # }
+  auto_healing_policies {
+    health_check      = google_compute_region_health_check.instance.id
+    initial_delay_sec = 300
+  }
 
   target_pools       = []
   target_size        = 0

@@ -60,7 +60,7 @@ data:
 
   # Enable IPv6 addressing. If enabled, all endpoints are allocated an IPv6
   # address.
-  enable-ipv6: "false"
+  enable-ipv6: "true"
   # Users who wish to specify their own custom CNI configuration file must set
   # custom-cni-conf to "true", otherwise Cilium may overwrite the configuration.
   custom-cni-conf: "false"
@@ -156,6 +156,7 @@ data:
   enable-l2-neigh-discovery: "true"
   arping-refresh-period: "30s"
   k8s-require-ipv4-pod-cidr: "true"
+  k8s-require-ipv6-pod-cidr: "true"
   enable-endpoint-health-checking: "true"
   enable-health-checking: "true"
   enable-well-known-identities: "false"
@@ -813,7 +814,7 @@ spec:
     metadata:
       annotations:
         # ensure pods roll when configmap updates
-        cilium.io/cilium-configmap-checksum: "16ad070d5b63bf306024e40a412abddb22eac12ab78ce8b3f821045c84af75f5"
+        cilium.io/cilium-configmap-checksum: "1fba38b457dca54f2e3f842507d9f35143a396529e557ad5ad7fe557e72be995"
       labels:
         io.cilium/app: operator
         name: cilium-operator

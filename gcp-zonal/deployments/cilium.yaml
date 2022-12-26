@@ -35,14 +35,14 @@ ipam:
   mode: "kubernetes"
 k8s:
   requireIPv4PodCIDR: true
-  # requireIPv6PodCIDR: true
+  requireIPv6PodCIDR: true
 
 bpf:
   masquerade: false
 ipv4:
   enabled: true
 ipv6:
-  enabled: false
+  enabled: true
 hostServices:
   enabled: true
 hostPort:

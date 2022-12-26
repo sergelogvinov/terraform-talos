@@ -11,22 +11,16 @@ resource "google_service_account_iam_member" "terraform" {
   member             = "serviceAccount:${google_service_account.terraform.email}"
 }
 
-resource "google_project_iam_binding" "terraform" {
+resource "google_project_iam_member" "terraform" {
   project = var.project
   role    = "roles/editor"
-
-  members = [
-    "serviceAccount:${google_service_account.terraform.email}",
-  ]
+  member  = "serviceAccount:${google_service_account.terraform.email}"
 }
 
-resource "google_project_iam_binding" "terraform_networksAdmin" {
+resource "google_project_iam_member" "terraform_networksAdmin" {
   project = var.project
   role    = "roles/servicenetworking.networksAdmin"
-
-  members = [
-    "serviceAccount:${google_service_account.terraform.email}",
-  ]
+  member  = "serviceAccount:${google_service_account.terraform.email}"
 
   # condition {
   #   title       = "ExpiresAfter_2023_12_31"
@@ -35,20 +29,14 @@ resource "google_project_iam_binding" "terraform_networksAdmin" {
   # }
 }
 
-resource "google_project_iam_binding" "terraform_saAdmin" {
+resource "google_project_iam_member" "terraform_saAdmin" {
   project = var.project
   role    = "roles/iam.serviceAccountAdmin"
-
-  members = [
-    "serviceAccount:${google_service_account.terraform.email}",
-  ]
+  member  = "serviceAccount:${google_service_account.terraform.email}"
 }
 
-resource "google_project_iam_binding" "terraform_iamAdmin" {
+resource "google_project_iam_member" "terraform_iamAdmin" {
   project = var.project
   role    = "roles/iam.securityAdmin"
-
-  members = [
-    "serviceAccount:${google_service_account.terraform.email}",
-  ]
+  member  = "serviceAccount:${google_service_account.terraform.email}"
 }

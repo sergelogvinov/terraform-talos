@@ -23,6 +23,26 @@ resource "google_compute_firewall" "common" {
     protocol = "udp"
     ports    = ["8472"]
   }
+
+  depends_on = [google_compute_network.network]
+}
+
+
+resource "google_compute_firewall" "dhcp" {
+  project       = var.project
+  name          = "${var.cluster_name}-dhcp-v6"
+  network       = var.network_name
+  description   = "Managed by terraform: Allow dhcp traffic"
+  priority      = 910
+  direction     = "INGRESS"
+  source_ranges = ["fe80::/10"]
+  target_tags   = ["${var.cluster_name}-common"]
+
+  allow {
+    protocol = "udp"
+  }
+
+  depends_on = [google_compute_network.network]
 }
 
 resource "google_compute_firewall" "common_health_check" {
@@ -39,6 +59,8 @@ resource "google_compute_firewall" "common_health_check" {
     protocol = "tcp"
     ports    = ["50000"]
   }
+
+  depends_on = [google_compute_network.network]
 }
 
 resource "google_compute_firewall" "controlplane" {
@@ -55,6 +77,8 @@ resource "google_compute_firewall" "controlplane" {
     protocol = "tcp"
     ports    = ["2379", "2380", "6443", ]
   }
+
+  depends_on = [google_compute_network.network]
 }
 
 resource "google_compute_firewall" "controlplane_admin" {
@@ -75,6 +99,8 @@ resource "google_compute_firewall" "controlplane_admin" {
     protocol = "tcp"
     ports    = ["6443", "50000"]
   }
+
+  depends_on = [google_compute_network.network]
 }
 
 resource "google_compute_firewall" "controlplane_health_check" {
@@ -91,6 +117,8 @@ resource "google_compute_firewall" "controlplane_health_check" {
     protocol = "tcp"
     ports    = ["6443"]
   }
+
+  depends_on = [google_compute_network.network]
 }
 
 # resource "google_compute_firewall" "web" {

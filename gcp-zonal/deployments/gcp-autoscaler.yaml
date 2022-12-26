@@ -3,14 +3,17 @@
 #
 
 fullnameOverride: cluster-autoscaler-gcp
+image:
+  tag: v1.26.0
 
 cloudProvider: gce
+cloudConfigPath: /etc/gce/gce.conf
 
 autoscalingGroups:
-  - name: https://www.googleapis.com/compute/v1/projects/metal-dimension/zones/
+  - name: https://www.googleapis.com/compute/v1/projects//zones/
     minSize: 0
     maxSize: 2
-  - name: https://www.googleapis.com/compute/v1/projects/metal-dimension/zones/
+  - name: https://www.googleapis.com/compute/v1/projects//zones/
     minSize: 0
     maxSize: 2
 
@@ -20,18 +23,37 @@ extraArgs:
   stderrthreshold: info
   v: 4
 
-extraEnv:
-  GOOGLE_APPLICATION_CREDENTIALS: /etc/gce/cloud-sa.json
+# extraEnv:
+#   GOOGLE_APPLICATION_CREDENTIALS: /etc/gce/cloud-sa.json
+# extraVolumeSecrets:
+#   google-cloud-key:
+#     name: cloud-autoscaler-gcp
+#     mountPath: /etc/gce
+#     items:
+#       - key: cloud-sa.json
+#         path: cloud-sa.json
 
-extraVolumeSecrets:
-  google-cloud-key:
-    name: cloud-autoscaler-gcp
-    mountPath: /etc/gce
-    items:
-      - key: cloud-sa.json
-        path: cloud-sa.json
+extraArgs:
+  cloud-config: /etc/gce/gce.conf
+extraVolumeMounts:
+  - mountPath: /etc/gce
+    name: config
+    readOnly: true
+extraVolumes:
+  - configMap:
+      defaultMode: 420
+      name: gcp-cloud-controller-manager
+    name: config
 
 priorityClassName: system-cluster-critical
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 300Mi
+  requests:
+    cpu: 100m
+    memory: 300Mi
 
 nodeSelector:
   node-role.kubernetes.io/control-plane: ""

@@ -291,21 +291,19 @@ spec:
       dnsPolicy: "ClusterFirst"
       containers:
         - name: gce-cluster-autoscaler
-          image: "k8s.gcr.io/autoscaling/cluster-autoscaler:v1.23.0"
+          image: "k8s.gcr.io/autoscaling/cluster-autoscaler:v1.26.0"
           imagePullPolicy: "IfNotPresent"
           command:
             - ./cluster-autoscaler
             - --cloud-provider=gce
             - --namespace=kube-system
-            - --nodes=0:2:https://www.googleapis.com/compute/v1/projects/metal-dimension/zones/
-            - --nodes=0:2:https://www.googleapis.com/compute/v1/projects/metal-dimension/zones/
+            - --nodes=0:2:https://www.googleapis.com/compute/v1/projects//zones/
+            - --nodes=0:2:https://www.googleapis.com/compute/v1/projects//zones/
+            - --cloud-config=/etc/gce/gce.conf
             - --logtostderr=true
-            - --regional=true
             - --stderrthreshold=info
             - --v=4
           env:
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: "/etc/gce/cloud-sa.json"
           livenessProbe:
             httpGet:
               path: /health-check
@@ -313,10 +311,15 @@ spec:
           ports:
             - containerPort: 8085
           resources:
-            {}
+            limits:
+              cpu: 100m
+              memory: 300Mi
+            requests:
+              cpu: 100m
+              memory: 300Mi
           volumeMounts:
-            - name: google-cloud-key
-              mountPath: /etc/gce
+            - mountPath: /etc/gce
+              name: config
               readOnly: true
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
@@ -326,9 +329,7 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/control-plane
       volumes:
-        - name: google-cloud-key
-          secret:
-            secretName: cloud-autoscaler-gcp
-            items:
-              - key: cloud-sa.json
-                path: cloud-sa.json
+        - configMap:
+            defaultMode: 420
+            name: gcp-cloud-controller-manager
+          name: config
