@@ -60,7 +60,7 @@ data:
 
   # Enable IPv6 addressing. If enabled, all endpoints are allocated an IPv6
   # address.
-  enable-ipv6: "true"
+  enable-ipv6: "false"
   # Users who wish to specify their own custom CNI configuration file must set
   # custom-cni-conf to "true", otherwise Cilium may overwrite the configuration.
   custom-cni-conf: "false"
@@ -156,7 +156,6 @@ data:
   enable-l2-neigh-discovery: "true"
   arping-refresh-period: "30s"
   k8s-require-ipv4-pod-cidr: "true"
-  k8s-require-ipv6-pod-cidr: "true"
   enable-endpoint-health-checking: "true"
   enable-health-checking: "true"
   enable-well-known-identities: "false"
@@ -185,6 +184,8 @@ data:
   tofqdns-max-deferred-connection-deletes: "10000"
   tofqdns-min-ttl: "3600"
   tofqdns-proxy-response-max-delay: "100ms"
+  
+  mtu: "1300"
   agent-not-ready-taint-key: "node.cilium.io/agent-not-ready"
 ---
 # Source: cilium/templates/cilium-agent/clusterrole.yaml
@@ -812,7 +813,7 @@ spec:
     metadata:
       annotations:
         # ensure pods roll when configmap updates
-        cilium.io/cilium-configmap-checksum: "c3ffdb3de5df1007b50c84e0af5ba77bc44d069f56d62d3232573a21084f2f80"
+        cilium.io/cilium-configmap-checksum: "16ad070d5b63bf306024e40a412abddb22eac12ab78ce8b3f821045c84af75f5"
       labels:
         io.cilium/app: operator
         name: cilium-operator

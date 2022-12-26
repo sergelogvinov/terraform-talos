@@ -3,4 +3,4 @@ _cfgs/
 templates/controlplane.yaml
 *.patch
 #
-gcloud.json
+*.json

@@ -1,14 +1,12 @@
 
 provider "google" {
-  project     = var.project_id
-  region      = var.region
-  credentials = "gcloud.json"
+  project = local.project
+  region  = local.region
 }
 
-provider "google-beta" {
-  project     = var.project_id
-  region      = var.region
-  credentials = "gcloud.json"
-}
+# provider "google-beta" {
+#   project     = var.project_id
+#   region      = var.region
+# }
 
-data "google_client_config" "default" {}
+# data "google_client_config" "default" {}

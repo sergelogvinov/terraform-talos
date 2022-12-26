@@ -3,44 +3,60 @@ debug: false
 persist: true
 machine:
   type: worker
-  token: ${tokenmachine}
+  token: ${tokenMachine}
   certSANs: []
   kubelet:
     extraArgs:
       cloud-provider: external
       rotate-server-certificates: true
+      node-labels: "${labels}"
+    clusterDNS:
+      - 169.254.2.53
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
+    nodeIP:
+      validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
     interfaces:
-      - interface: eth0
-        dhcp: true
       - interface: dummy0
         cidr: "169.254.2.53/32"
-      - interface: dummy0
-        cidr: "fd00::169:254:2:53/128"
+    extraHostEntries:
+      - ip: ${lbv4}
+        aliases:
+          - ${apiDomain}
+  install:
+    wipe: false
+    extraKernelArgs:
+      - elevator=noop
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
-  install:
-    disk: /dev/sda
-    extraKernelArgs:
-      - elevator=noop
-    bootloader: true
-    wipe: true
   systemDiskEncryption:
+    state:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
     ephemeral:
       provider: luks2
       keys:
         - nodeID: {}
           slot: 0
+      options:
+        - no_read_workqueue
+        - no_write_workqueue
 cluster:
+  id: ${clusterID}
+  secret: ${clusterSecret}
   controlPlane:
-    endpoint: https://${lbv4}:6443
-  clusterName: ${cluster_name}
+    endpoint: https://${apiDomain}:6443
+  clusterName: ${clusterName}
+  discovery:
+    enabled: true
   network:
     dnsDomain: ${domain}
+    serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
   proxy:
-    mode: ipvs
+    disabled: true
   token: ${token}
   ca:
     crt: ${ca}
-    key: ""

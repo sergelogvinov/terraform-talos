@@ -23,6 +23,8 @@ localRedirectPolicy: true
 tunnel: "vxlan"
 autoDirectNodeRoutes: false
 devices: [eth+]
+extraConfig:
+  mtu: "1300"
 
 healthChecking: true
 
@@ -33,14 +35,14 @@ ipam:
   mode: "kubernetes"
 k8s:
   requireIPv4PodCIDR: true
-  requireIPv6PodCIDR: true
+  # requireIPv6PodCIDR: true
 
 bpf:
   masquerade: false
 ipv4:
   enabled: true
 ipv6:
-  enabled: true
+  enabled: false
 hostServices:
   enabled: true
 hostPort:

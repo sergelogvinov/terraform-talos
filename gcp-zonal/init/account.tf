@@ -34,3 +34,21 @@ resource "google_project_iam_binding" "terraform_networksAdmin" {
   #   expression  = "request.time < timestamp(\"2023-01-30T22:00:00.000Z\")"
   # }
 }
+
+resource "google_project_iam_binding" "terraform_saAdmin" {
+  project = var.project
+  role    = "roles/iam.serviceAccountAdmin"
+
+  members = [
+    "serviceAccount:${google_service_account.terraform.email}",
+  ]
+}
+
+resource "google_project_iam_binding" "terraform_iamAdmin" {
+  project = var.project
+  role    = "roles/iam.securityAdmin"
+
+  members = [
+    "serviceAccount:${google_service_account.terraform.email}",
+  ]
+}

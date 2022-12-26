@@ -1,79 +1,64 @@
 
-resource "google_compute_address" "controlplane" {
-  count        = max(lookup(var.controlplane, "count", 0), length(var.zones))
-  project      = var.project_id
-  region       = var.region
-  name         = "${var.cluster_name}-master-${count.index + 1}"
-  description  = "Local ${var.cluster_name}-master-${count.index + 1} ip"
-  address_type = "INTERNAL"
-  address      = cidrhost(cidrsubnet(var.network_cidr, 8, 0), 231 + count.index)
-  subnetwork   = "core"
-  purpose      = "GCE_ENDPOINT"
+locals {
+  contolplane_labels = "cloud.google.com/gke-boot-disk=pd-ssd"
 }
 
-resource "google_compute_instance_from_template" "controlplane" {
-  count = lookup(var.controlplane, "count", 0)
-  name  = "master-${count.index + 1}"
-  project = var.project_id
-  zone    = element(var.zones, count.index)
+module "controlplane" {
+  source = "./modules/controlplane"
 
-  network_interface {
-    network    = var.network
-    network_ip = google_compute_address.controlplane[count.index].address
-    subnetwork = "core"
-    access_config {
-      network_tier = "STANDARD"
-    }
-    alias_ip_range = count.index == 0 ? [{
-      ip_cidr_range = "${google_compute_address.lbv4_local.address}/32"
-      subnetwork_range_name = ""
-    }] : []
-  }
+  for_each     = toset(local.zones)
+  name         = "${local.cluster_name}-controlplane-${each.value}"
+  project      = local.project
+  region       = local.region
+  zone         = each.value
+  cluster_name = local.cluster_name
 
-  source_instance_template = google_compute_instance_template.controlplane.id
-  depends_on = [
-    google_compute_instance_template.controlplane
-  ]
-
-  lifecycle {
-    ignore_changes = [
-      source_instance_template,
-      labels
-    ]
-  }
+  kubernetes = merge(var.kubernetes, {
+    lbv4_local  = google_compute_address.lbv4_local.address
+    nodeSubnets = local.network_controlplane.ip_cidr_range
+    region      = local.region
+    zone        = each.key
+    project     = local.project
+    network     = local.network
+  })
+  controlplane      = try(var.controlplane[each.key], {})
+  network           = local.network_controlplane
+  subnetwork        = local.network_controlplane.name
+  network_cidr      = cidrsubnet(local.network_controlplane.ip_cidr_range, 6, 1 + index(local.zones, each.value))
+  instance_template = google_compute_instance_template.controlplane.id
 }
 
 resource "google_compute_instance_template" "controlplane" {
-  name_prefix  = "${var.cluster_name}-master-"
-  project      = var.project_id
-  region       = var.region
-  machine_type = lookup(var.controlplane, "type", "e2-standard-2")
-  # min_cpu_platform = ""
+  name_prefix  = "${local.cluster_name}-controlplane-"
+  project      = local.project
+  region       = local.region
+  machine_type = "e2-medium"
 
-  tags = concat(var.tags, ["${var.cluster_name}-infra", "${var.cluster_name}-master"])
+  tags = concat(var.tags, ["${local.cluster_name}-common", "${local.cluster_name}-controlplane"])
   labels = {
     label = "controlplane"
   }
 
-  # metadata = {
-  #   ssh-keys = "debian:${file("~/.ssh/terraform.pub")}"
-  # }
-  # metadata_startup_script = "apt-get install -y nginx"
+  metadata = {
+    cluster-name     = local.cluster_name
+    cluster-location = local.region
+    kube-labels      = local.contolplane_labels
+  }
 
   disk {
     boot              = true
     auto_delete       = true
-    disk_size_gb      = 16
+    disk_size_gb      = 30
     disk_type         = "pd-ssd"
     resource_policies = []
     source_image      = data.google_compute_image.talos.self_link
-    labels            = { label = "controlplane" }
+    labels            = { label = "${local.cluster_name}-controlplane" }
   }
 
   network_interface {
-    network    = var.network
-    subnetwork = "core"
-
+    network    = local.network_controlplane.network
+    subnetwork = local.network_controlplane.name
+    stack_type = "IPV4_IPV6"
     access_config {
       network_tier = "STANDARD"
     }
@@ -90,33 +75,12 @@ resource "google_compute_instance_template" "controlplane" {
     enable_vtpm                 = true
   }
 
+  service_account {
+    email  = google_service_account.controlplane.email
+    scopes = ["cloud-platform"]
+  }
+
   lifecycle {
     create_before_destroy = "true"
   }
 }
-
-# resource "local_file" "controlplane" {
-#   count = lookup(var.controlplane, "count", 0)
-#   content = templatefile("${path.module}/templates/controlplane.yaml",
-#     merge(var.kubernetes, {
-#       name       = "master-${count.index + 1}"
-#       type       = count.index == 0 ? "init" : "controlplane"
-#       ipv4_local = google_compute_address.controlplane[count.index].address
-#       ipv4       = google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip
-#       lbv4_local = google_compute_address.lbv4_local.address
-#       lbv4       = google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip
-#     })
-#   )
-#   filename        = "_cfgs/controlplane-${count.index + 1}.yaml"
-#   file_permission = "0640"
-
-#   depends_on = [google_compute_instance_from_template.controlplane]
-# }
-
-# resource "null_resource" "controlplane" {
-#   count = lookup(var.controlplane, "count", 0)
-#   provisioner "local-exec" {
-#     command = "sleep 60 && talosctl apply-config --insecure --nodes ${google_compute_instance_from_template.controlplane[count.index].network_interface[0].access_config[0].nat_ip} --file _cfgs/controlplane-${count.index + 1}.yaml"
-#   }
-#   depends_on = [google_compute_instance_from_template.controlplane, local_file.controlplane]
-# }

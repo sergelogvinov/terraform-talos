@@ -1,0 +1,208 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gcp-cloud-controller-manager
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+  name: system:gcp-cloud-controller-manager
+rules:
+- apiGroups:
+  - ""
+  - events.k8s.io
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - update
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+- apiGroups:
+  - coordination.k8s.io
+  resourceNames:
+  - cloud-controller-manager
+  resources:
+  - leases
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  - serviceaccounts
+  verbs:
+  - create
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - nodes/status
+  verbs:
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - update
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts/token
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:gcp-cloud-controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:gcp-cloud-controller-manager
+subjects:
+  - kind: ServiceAccount
+    name: gcp-cloud-controller-manager
+    namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: system:gcp-cloud-controller-manager:extension-apiserver-authentication-reader
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+  - kind: ServiceAccount
+    name: gcp-cloud-controller-manager
+    namespace: kube-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: cloud-controller-manager
+    tier: control-plane
+  name: cloud-controller-manager
+  namespace: kube-system
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: cloud-controller-manager
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        k8s-app: cloud-controller-manager
+        tier: control-plane
+    spec:
+      containers:
+      - args:
+        - --bind-address=127.0.0.1
+        - --cloud-provider=gce
+        - --cloud-config=/etc/gce/gce.conf
+        - --allocate-node-cidrs=false
+        - --cluster-cidr=10.64.0.0/12
+        - --controllers=cloud-node-lifecycle
+        - --port=0
+        - --use-service-account-credentials
+        - -v=2
+        command:
+        - /bin/gcp-cloud-controller-manager
+        image: quay.io/openshift/origin-gcp-cloud-controller-manager:4.10.0
+        imagePullPolicy: IfNotPresent
+        name: cloud-controller-manager
+        resources:
+          requests:
+            cpu: 50m
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/gce
+          name: config
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: gcp
+      priorityClassName: system-cluster-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65521
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccount: gcp-cloud-controller-manager
+      serviceAccountName: gcp-cloud-controller-manager
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: node.cloudprovider.kubernetes.io/uninitialized
+        value: "true"
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: gcp-cloud-controller-manager
+        name: config

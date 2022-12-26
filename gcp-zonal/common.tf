@@ -1,13 +1,19 @@
 
 data "google_client_openid_userinfo" "terraform" {}
 
-resource "google_os_login_ssh_public_key" "terraform" {
-  project = var.project_id
-  user    = data.google_client_openid_userinfo.terraform.email
-  key     = file("~/.ssh/terraform.pub")
+data "google_compute_image" "talos" {
+  project = local.project
+  family  = "talos-amd64"
 }
 
-data "google_compute_image" "talos" {
-  project = var.project_id
-  family  = "talos"
+resource "google_compute_health_check" "instance" {
+  name                = "${local.cluster_name}-instance-health-check"
+  timeout_sec         = 5
+  check_interval_sec  = 30
+  healthy_threshold   = 1
+  unhealthy_threshold = 10
+
+  tcp_health_check {
+    port = "50000"
+  }
 }
