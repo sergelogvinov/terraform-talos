@@ -126,6 +126,7 @@ cluster:
     enabled: true
     manifests:
       - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/gcp-zonal/deployments/gcp-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/gcp-zonal/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/gcp-zonal/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/gcp-zonal/deployments/local-path-storage.yaml

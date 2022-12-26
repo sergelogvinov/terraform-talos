@@ -1,0 +1,334 @@
+---
+# Source: cluster-autoscaler/templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+    app.kubernetes.io/name: "gce-cluster-autoscaler"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "cluster-autoscaler-9.21.1"
+  name: cluster-autoscaler-gcp
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+      app.kubernetes.io/name: "gce-cluster-autoscaler"
+  
+  maxUnavailable: 1
+---
+# Source: cluster-autoscaler/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+    app.kubernetes.io/name: "gce-cluster-autoscaler"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "cluster-autoscaler-9.21.1"
+  name: cluster-autoscaler-gcp
+  namespace: kube-system
+automountServiceAccountToken: true
+---
+# Source: cluster-autoscaler/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+    app.kubernetes.io/name: "gce-cluster-autoscaler"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "cluster-autoscaler-9.21.1"
+  name: cluster-autoscaler-gcp
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+      - endpoints
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+    - ""
+    resources:
+    - pods/eviction
+    verbs:
+    - create
+  - apiGroups:
+      - ""
+    resources:
+      - pods/status
+    verbs:
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    resourceNames:
+      - cluster-autoscaler
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+    - watch
+    - list
+    - get
+    - update
+  - apiGroups:
+    - ""
+    resources:
+      - namespaces
+      - pods
+      - services
+      - replicationcontrollers
+      - persistentvolumeclaims
+      - persistentvolumes
+    verbs:
+      - watch
+      - list
+      - get
+  - apiGroups:
+    - batch
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - watch
+      - list
+      - get
+  - apiGroups:
+    - batch
+    - extensions
+    resources:
+    - jobs
+    verbs:
+    - get
+    - list
+    - patch
+    - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - replicasets
+      - daemonsets
+    verbs:
+      - watch
+      - list
+      - get
+  - apiGroups:
+      - policy
+    resources:
+      - poddisruptionbudgets
+    verbs:
+      - watch
+      - list
+  - apiGroups:
+    - apps
+    resources:
+    - daemonsets
+    - replicasets
+    - statefulsets
+    verbs:
+    - watch
+    - list
+    - get
+  - apiGroups:
+    - storage.k8s.io
+    resources:
+    - storageclasses
+    - csinodes
+    - csidrivers
+    - csistoragecapacities
+    verbs:
+    - watch
+    - list
+    - get
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+    - coordination.k8s.io
+    resources:
+    - leases
+    verbs:
+    - create
+  - apiGroups:
+    - coordination.k8s.io
+    resourceNames:
+    - cluster-autoscaler
+    resources:
+    - leases
+    verbs:
+    - get
+    - update
+---
+# Source: cluster-autoscaler/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+    app.kubernetes.io/name: "gce-cluster-autoscaler"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "cluster-autoscaler-9.21.1"
+  name: cluster-autoscaler-gcp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-autoscaler-gcp
+subjects:
+  - kind: ServiceAccount
+    name: cluster-autoscaler-gcp
+    namespace: kube-system
+---
+# Source: cluster-autoscaler/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+    app.kubernetes.io/name: "gce-cluster-autoscaler"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "cluster-autoscaler-9.21.1"
+  name: cluster-autoscaler-gcp
+  namespace: kube-system
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    resourceNames:
+      - cluster-autoscaler-status
+    verbs:
+      - delete
+      - get
+      - update
+---
+# Source: cluster-autoscaler/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+    app.kubernetes.io/name: "gce-cluster-autoscaler"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "cluster-autoscaler-9.21.1"
+  name: cluster-autoscaler-gcp
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cluster-autoscaler-gcp
+subjects:
+  - kind: ServiceAccount
+    name: cluster-autoscaler-gcp
+    namespace: kube-system
+---
+# Source: cluster-autoscaler/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+    app.kubernetes.io/name: "gce-cluster-autoscaler"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "cluster-autoscaler-9.21.1"
+  name: cluster-autoscaler-gcp
+  namespace: kube-system
+spec:
+  ports:
+    - port: 8085
+      protocol: TCP
+      targetPort: 8085
+      name: http
+  selector:
+    app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+    app.kubernetes.io/name: "gce-cluster-autoscaler"
+  type: "ClusterIP"
+---
+# Source: cluster-autoscaler/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    {}
+  labels:
+    app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+    app.kubernetes.io/name: "gce-cluster-autoscaler"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "cluster-autoscaler-9.21.1"
+  name: cluster-autoscaler-gcp
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+      app.kubernetes.io/name: "gce-cluster-autoscaler"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: "cluster-autoscaler-gcp"
+        app.kubernetes.io/name: "gce-cluster-autoscaler"
+    spec:
+      priorityClassName: "system-cluster-critical"
+      dnsPolicy: "ClusterFirst"
+      containers:
+        - name: gce-cluster-autoscaler
+          image: "k8s.gcr.io/autoscaling/cluster-autoscaler:v1.23.0"
+          imagePullPolicy: "IfNotPresent"
+          command:
+            - ./cluster-autoscaler
+            - --cloud-provider=gce
+            - --namespace=kube-system
+            - --nodes=0:2:https://www.googleapis.com/compute/v1/projects/metal-dimension/zones/
+            - --nodes=0:2:https://www.googleapis.com/compute/v1/projects/metal-dimension/zones/
+            - --logtostderr=true
+            - --regional=true
+            - --stderrthreshold=info
+            - --v=4
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/etc/gce/cloud-sa.json"
+          livenessProbe:
+            httpGet:
+              path: /health-check
+              port: 8085
+          ports:
+            - containerPort: 8085
+          resources:
+            {}
+          volumeMounts:
+            - name: google-cloud-key
+              mountPath: /etc/gce
+              readOnly: true
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: gcp
+      serviceAccountName: cluster-autoscaler-gcp
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: cloud-autoscaler-gcp
+            items:
+              - key: cloud-sa.json
+                path: cloud-sa.json

@@ -6,7 +6,7 @@ data "google_compute_image" "talos" {
   family  = "talos-amd64"
 }
 
-resource "google_compute_health_check" "instance" {
+resource "google_compute_region_health_check" "instance" {
   name                = "${local.cluster_name}-instance-health-check"
   timeout_sec         = 5
   check_interval_sec  = 30

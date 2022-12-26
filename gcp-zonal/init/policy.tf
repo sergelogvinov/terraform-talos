@@ -33,7 +33,23 @@ resource "google_project_iam_custom_role" "autoscaler" {
   title       = "Kubernetes node autoscale role"
   description = "This is a kubernetes role for node autoscaler system, created via Terraform"
   permissions = [
-    # "compute.*",
+    "compute.instanceGroupManagers.get",
+    "compute.instanceGroupManagers.list",
+    "compute.instanceGroupManagers.update",
+    "compute.instanceGroups.update",
+    "compute.instanceTemplates.get",
+    "compute.instanceTemplates.list",
+    "compute.machineTypes.get",
+    "compute.machineTypes.list",
+    "compute.instances.setLabels",
+    "compute.instances.setMetadata",
+    "compute.instances.setTags",
+    "compute.instances.create",
+    "compute.disks.create",
+    "compute.disks.setLabels",
+    "compute.images.useReadOnly",
+    "compute.subnetworks.use",
+    # "compute.instances.*",
     "servicemanagement.services.get",
     "servicemanagement.services.list",
   ]

@@ -1,0 +1,42 @@
+#
+# kubectl create secret generic cloud-autoscaler-gcp --from-file=cloud-sa.json
+#
+
+fullnameOverride: cluster-autoscaler-gcp
+
+cloudProvider: gce
+
+autoscalingGroups:
+  - name: https://www.googleapis.com/compute/v1/projects/metal-dimension/zones/
+    minSize: 0
+    maxSize: 2
+  - name: https://www.googleapis.com/compute/v1/projects/metal-dimension/zones/
+    minSize: 0
+    maxSize: 2
+
+extraArgs:
+  regional: true
+  logtostderr: true
+  stderrthreshold: info
+  v: 4
+
+extraEnv:
+  GOOGLE_APPLICATION_CREDENTIALS: /etc/gce/cloud-sa.json
+
+extraVolumeSecrets:
+  google-cloud-key:
+    name: cloud-autoscaler-gcp
+    mountPath: /etc/gce
+    items:
+      - key: cloud-sa.json
+        path: cloud-sa.json
+
+priorityClassName: system-cluster-critical
+
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""
+  node.cloudprovider.kubernetes.io/platform: gcp
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    effect: NoSchedule

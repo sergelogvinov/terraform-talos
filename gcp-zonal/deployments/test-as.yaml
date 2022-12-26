@@ -1,0 +1,51 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: overprovisioning
+value: -1
+globalDefault: false
+description: "Priority class used by overprovisioning."
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: overprovisioning
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: overprovisioning
+  template:
+    metadata:
+      labels:
+        run: overprovisioning
+    spec:
+      nodeSelector:
+        project.io/node-pool: worker
+      tolerations:
+        - key: DeletionCandidateOfClusterAutoscaler
+          effect: PreferNoSchedule
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchExpressions:
+                  - key: run
+                    operator: In
+                    values:
+                      - overprovisioning
+      priorityClassName: overprovisioning
+      containers:
+      - name: reserve-resources
+        image: registry.k8s.io/pause:3.6
+        resources:
+          requests:
+            cpu: "700m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          seccompProfile:
+            type: RuntimeDefault
+          capabilities:
+            drop: ["ALL"]

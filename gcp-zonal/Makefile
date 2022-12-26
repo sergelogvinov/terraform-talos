@@ -50,5 +50,7 @@ create-kubeconfig: ## Download kubeconfig
 create-deployments:
 	helm template --namespace=kube-system   --version=1.12.4 -f deployments/cilium.yaml cilium \
 		cilium/cilium > deployments/cilium-result.yaml
+	helm template --namespace=kube-system -f deployments/gcp-autoscaler.yaml cluster-autoscaler-gcp \
+		autoscaler/cluster-autoscaler > deployments/gcp-autoscaler-result.yaml
 	helm template --namespace=ingress-nginx --version=4.4.0 -f deployments/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml
