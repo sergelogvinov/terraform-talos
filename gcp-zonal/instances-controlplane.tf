@@ -62,6 +62,9 @@ resource "google_compute_instance_template" "controlplane" {
     access_config {
       network_tier = "STANDARD"
     }
+    ipv6_access_config {
+      network_tier = local.network_controlplane.ipv6_access_type == "EXTERNAL" ? "PREMIUM" : "STANDARD"
+    }
   }
 
   scheduling {

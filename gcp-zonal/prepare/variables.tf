@@ -20,7 +20,7 @@ variable "network_name" {
 variable "network_cidr" {
   description = "Local subnet rfc1918"
   type        = list(string)
-  default     = ["172.16.0.0/16", "fd20:172:1600::/48"]
+  default     = ["172.16.0.0/16", "fd20:172:1600::/40"]
 
   validation {
     condition     = length(var.network_cidr) == 2

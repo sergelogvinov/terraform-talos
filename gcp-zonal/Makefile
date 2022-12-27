@@ -35,14 +35,14 @@ create-templates:
 
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
-create-controlplane-bootstrap:
-	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
-	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} bootstrap
-
 create-controlplane: ## Bootstrap controlplane node
 	terraform apply -auto-approve -target=null_resource.controlplane
 
-create-kubeconfig: ## Download kubeconfig
+bootstrap:
+	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
+	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} bootstrap
+
+kubeconfig: ## Download kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} kubeconfig .
 	kubectl --kubeconfig=kubeconfig config set clusters.talos-k8s-gcp.server https://${ENDPOINT}:6443
 	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
