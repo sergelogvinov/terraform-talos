@@ -63,27 +63,36 @@ resource "azurerm_virtual_network_peering" "peering" {
   allow_gateway_transit        = false
 }
 
-resource "azurerm_route_table" "link" {
-  for_each            = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_gw_enable, false) }
+resource "azurerm_route_table" "main" {
+  for_each            = { for idx, name in var.regions : name => idx }
   location            = each.key
-  name                = "link-${each.key}"
+  name                = "main-${each.key}"
   resource_group_name = var.resource_group
 
   dynamic "route" {
-    for_each = range(0, length(var.network_cidr))
+    for_each = [for cidr in azurerm_virtual_network.main[each.key].address_space : cidr if length(split(".", cidr)) == 1]
 
     content {
-      name                   = "link-${each.key}-v${length(split(".", var.network_cidr[route.value])) > 1 ? "4" : "6"}"
+      name           = "main-${each.key}-local-v6"
+      address_prefix = route.value
+      next_hop_type  = "VnetLocal"
+    }
+  }
+  dynamic "route" {
+    for_each = try(var.capabilities[each.key].network_gw_enable, false) ? range(0, length(var.network_cidr)) : []
+
+    content {
+      name                   = "main-${each.key}-route-v${length(split(".", var.network_cidr[route.value])) > 1 ? "4" : "6"}"
       address_prefix         = var.network_cidr[route.value]
       next_hop_type          = "VirtualAppliance"
       next_hop_in_ip_address = azurerm_network_interface.router[each.key].private_ip_addresses[route.value]
     }
   }
   dynamic "route" {
-    for_each = [for ip in azurerm_network_interface.router[each.key].private_ip_addresses : ip if length(split(".", ip)) == 1]
+    for_each = try(var.capabilities[each.key].network_gw_enable, false) ? [for ip in azurerm_network_interface.router[each.key].private_ip_addresses : ip if length(split(".", ip)) == 1] : []
 
     content {
-      name                   = "link-${each.key}-default-v6"
+      name                   = "main-${each.key}-default-v6"
       address_prefix         = "::/0"
       next_hop_type          = "VirtualAppliance"
       next_hop_in_ip_address = route.value
@@ -94,19 +103,19 @@ resource "azurerm_route_table" "link" {
 }
 
 resource "azurerm_subnet_route_table_association" "controlplane" {
-  for_each       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_gw_enable, false) }
+  for_each       = { for idx, name in var.regions : name => idx }
   subnet_id      = azurerm_subnet.controlplane[each.key].id
-  route_table_id = azurerm_route_table.link[each.key].id
+  route_table_id = azurerm_route_table.main[each.key].id
 }
 
 resource "azurerm_subnet_route_table_association" "public" {
-  for_each       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_gw_enable, false) }
+  for_each       = { for idx, name in var.regions : name => idx }
   subnet_id      = azurerm_subnet.public[each.key].id
-  route_table_id = azurerm_route_table.link[each.key].id
+  route_table_id = azurerm_route_table.main[each.key].id
 }
 
 resource "azurerm_subnet_route_table_association" "private" {
-  for_each       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_gw_enable, false) }
+  for_each       = { for idx, name in var.regions : name => idx }
   subnet_id      = azurerm_subnet.private[each.key].id
-  route_table_id = azurerm_route_table.link[each.key].id
+  route_table_id = azurerm_route_table.main[each.key].id
 }

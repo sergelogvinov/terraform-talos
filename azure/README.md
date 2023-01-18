@@ -37,7 +37,3 @@ az ad sp create-for-rbac --name "kubernetes-csi" --role kubernetes-csi --scopes=
 * [metrics-server](https://github.com/kubernetes-sigs/metrics-server) 0.5.0
 * [rancher.io/local-path](https://github.com/rancher/local-path-provisioner) 0.0.19
 * [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) 4.4.2
-
-
-TODO:
-* ipv6 route

@@ -23,6 +23,13 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
+      - interface: eth0
+        dhcp: true
+        dhcpOptions:
+          ipv6: true
+        routes:
+          - network: ::/0
+            gateway: fe80::1234:5678:9abc
       - interface: lo
         addresses: ${format("%#v",ipAliases)}
       - interface: dummy0

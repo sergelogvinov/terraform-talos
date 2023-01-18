@@ -18,6 +18,13 @@ machine:
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
   network:
     interfaces:
+      - interface: eth0
+        dhcp: true
+        dhcpOptions:
+          ipv6: true
+        routes:
+          - network: ::/0
+            gateway: fe80::1234:5678:9abc
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
