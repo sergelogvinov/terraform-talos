@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.4.0
+    helm.sh/chart: ingress-nginx-4.4.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.5.1"
@@ -20,7 +20,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.4.0
+    helm.sh/chart: ingress-nginx-4.4.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.5.1"
@@ -66,7 +66,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.4.0
+    helm.sh/chart: ingress-nginx-4.4.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.5.1"
@@ -150,7 +150,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.4.0
+    helm.sh/chart: ingress-nginx-4.4.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.5.1"
@@ -171,7 +171,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.4.0
+    helm.sh/chart: ingress-nginx-4.4.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.5.1"
@@ -228,26 +228,6 @@ rules:
       - get
       - list
       - watch
-  # TODO(Jintao Zhang)
-  # Once we release a new version of the controller,
-  # we will be able to remove the configmap related permissions
-  # We have used the Lease API for selection
-  # ref: https://github.com/kubernetes/ingress-nginx/pull/8921
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
-    resourceNames:
-      - ingress-nginx-leader
-    verbs:
-      - get
-      - update
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
-    verbs:
-      - create
   - apiGroups:
       - coordination.k8s.io
     resources:
@@ -284,7 +264,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.4.0
+    helm.sh/chart: ingress-nginx-4.4.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.5.1"
@@ -308,7 +288,7 @@ kind: Service
 metadata:
   annotations:
   labels:
-    helm.sh/chart: ingress-nginx-4.4.0
+    helm.sh/chart: ingress-nginx-4.4.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.5.1"
@@ -345,7 +325,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.4.0
+    helm.sh/chart: ingress-nginx-4.4.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.5.1"
@@ -471,7 +451,7 @@ apiVersion: networking.k8s.io/v1
 kind: IngressClass
 metadata:
   labels:
-    helm.sh/chart: ingress-nginx-4.4.0
+    helm.sh/chart: ingress-nginx-4.4.2
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/version: "1.5.1"

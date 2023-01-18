@@ -1,11 +1,15 @@
 
-ENDPOINT:=${shell terraform output -raw controlplane_endpoint_public 2>/dev/null}
+ENDPOINT := ${shell terraform output -raw controlplane_endpoint_public 2>/dev/null}
 ifeq ($(ENDPOINT),)
 ENDPOINT := 127.0.0.1
 endif
 
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+clean:
+	rm -rf _cfgs/
+	rm -f kubeconfig talosctl
 
 create-config: ## Genereate talos configs
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-azure https://${ENDPOINT}:6443
@@ -29,9 +33,9 @@ create-templates:
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
 create-deployments:
-	helm template --namespace=kube-system   --version=1.12.4 -f deployments/cilium.yaml cilium \
+	helm template --namespace=kube-system   --version=1.12.5 -f deployments/cilium.yaml cilium \
 		cilium/cilium > deployments/cilium-result.yaml
-	helm template --namespace=ingress-nginx --version=4.4.0 -f deployments/ingress.yaml ingress-nginx \
+	helm template --namespace=ingress-nginx --version=4.4.2 -f deployments/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml
 
 create-network: ## Create networks

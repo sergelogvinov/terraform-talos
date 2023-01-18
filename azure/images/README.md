@@ -14,10 +14,10 @@ regions         = ["uksouth", "ukwest", "westeurope"]
 ## Init and upload images
 
 ```shell
-wget https://github.com/siderolabs/talos/releases/download/v1.3.0/azure-amd64.tar.gz
+wget -q https://github.com/siderolabs/talos/releases/download/v1.3.2/azure-amd64.tar.gz
 tar -xzf azure-amd64.tar.gz && mv disk.vhd disk-x64.vhd
 
-wget https://github.com/siderolabs/talos/releases/download/v1.3.0/azure-arm64.tar.gz
+wget -q https://github.com/siderolabs/talos/releases/download/v1.3.2/azure-arm64.tar.gz
 tar -xzf azure-arm64.tar.gz && mv disk.vhd disk-arm64.vhd
 
 terraform init && terraform apply

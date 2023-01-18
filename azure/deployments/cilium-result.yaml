@@ -34,6 +34,7 @@ data:
   identity-allocation-mode: crd
   cilium-endpoint-gc-interval: "5m0s"
   nodes-gc-interval: "5m0s"
+  skip-cnp-status-startup-clean: "false"
   # Disable the usage of CiliumEndpoint CRD
   disable-endpoint-crd: "false"
 
@@ -550,7 +551,7 @@ spec:
     spec:
       containers:
       - name: cilium-agent
-        image: "quay.io/cilium/cilium:v1.12.4@sha256:4b074fcfba9325c18e97569ed1988464309a5ebf64bbc79bec6f3d58cafcb8cf"
+        image: "quay.io/cilium/cilium:v1.12.5@sha256:06ce2b0a0a472e73334a7504ee5c5d8b2e2d7b72ef728ad94e564740dd505be5"
         imagePullPolicy: IfNotPresent
         command:
         - cilium-agent
@@ -685,7 +686,7 @@ spec:
           mountPath: /run/xtables.lock
       initContainers:
       - name: clean-cilium-state
-        image: "quay.io/cilium/cilium:v1.12.4@sha256:4b074fcfba9325c18e97569ed1988464309a5ebf64bbc79bec6f3d58cafcb8cf"
+        image: "quay.io/cilium/cilium:v1.12.5@sha256:06ce2b0a0a472e73334a7504ee5c5d8b2e2d7b72ef728ad94e564740dd505be5"
         imagePullPolicy: IfNotPresent
         command:
         - /init-container.sh
@@ -812,14 +813,14 @@ spec:
     metadata:
       annotations:
         # ensure pods roll when configmap updates
-        cilium.io/cilium-configmap-checksum: "c3ffdb3de5df1007b50c84e0af5ba77bc44d069f56d62d3232573a21084f2f80"
+        cilium.io/cilium-configmap-checksum: "93ed3047796c548140dd014145d2cb313155de38c36595eb2f05f60856400ae5"
       labels:
         io.cilium/app: operator
         name: cilium-operator
     spec:
       containers:
       - name: cilium-operator
-        image: "quay.io/cilium/operator-generic:v1.12.4@sha256:071089ec5bca1f556afb8e541d9972a0dfb09d1e25504ae642ced021ecbedbd1"
+        image: "quay.io/cilium/operator-generic:v1.12.5@sha256:b296eb7f0f7656a5cc19724f40a8a7121b7fd725278b7d61dc91fe0b7ffd7c0e"
         imagePullPolicy: IfNotPresent
         command:
         - cilium-operator-generic
