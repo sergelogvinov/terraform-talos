@@ -80,12 +80,16 @@ variable "instances" {
       web_type     = "Standard_B2s",
       worker_count = 0,
       worker_type  = "Standard_B4ms", # B4ms E2as_v4
+      db_count     = 0,
+      db_type      = "Standard_B4ms",
     },
     "ukwest" = {
       web_count    = 0,
       web_type     = "Standard_B2s",
       worker_count = 0,
       worker_type  = "Standard_B4ms", # B4ms E2as_v4
+      db_count     = 0,
+      db_type      = "Standard_B4ms",
     },
   }
 }
