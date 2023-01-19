@@ -107,10 +107,10 @@ resource "azurerm_linux_virtual_machine" "controlplane" {
   # vtpm_enabled               = false
   # encryption_at_host_enabled = true
   os_disk {
-    name                 = "controlplane-${lower(var.region)}-${1 + count.index}-boot"
+    name                 = "controlplane-${lower(var.region)}-${1 + count.index}"
     caching              = "ReadOnly"
     storage_account_type = "StandardSSD_LRS"
-    disk_size_gb         = 32
+    disk_size_gb         = 48
   }
 
   admin_username = "talos"

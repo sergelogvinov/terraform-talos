@@ -1,0 +1,48 @@
+#
+# kubectl create secret generic cloud-autoscaler-gcp --from-file=cloud-sa.json
+#
+
+fullnameOverride: cluster-autoscaler-azure
+image:
+  tag: v1.26.0
+
+cloudProvider: azure
+cloudConfigPath: /etc/azure/azure.json
+
+autoDiscovery:
+  clusterName: talos-uksouth
+
+extraArgs:
+  cloud-config: /etc/azure/azure.json
+  regional: true
+  logtostderr: true
+  stderrthreshold: info
+  v: 3
+
+extraVolumeSecrets:
+  cloud-config:
+    name: azure-cloud-controller-manager
+    mountPath: /etc/azure
+
+priorityClassName: system-cluster-critical
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 300Mi
+  requests:
+    cpu: 100m
+    memory: 300Mi
+
+containerSecurityContext:
+  capabilities:
+    drop:
+      - ALL
+
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""
+  node.cloudprovider.kubernetes.io/platform: azure
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    effect: NoSchedule

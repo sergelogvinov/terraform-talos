@@ -35,6 +35,8 @@ create-templates:
 create-deployments:
 	helm template --namespace=kube-system   --version=1.12.5 -f deployments/cilium.yaml cilium \
 		cilium/cilium > deployments/cilium-result.yaml
+	helm template --namespace=kube-system -f deployments/azure-autoscaler.yaml cluster-autoscaler-azure \
+		autoscaler/cluster-autoscaler > deployments/azure-autoscaler-result.yaml
 	helm template --namespace=ingress-nginx --version=4.4.2 -f deployments/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml
 

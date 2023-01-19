@@ -38,7 +38,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
   custom_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
     merge(var.kubernetes, {
       lbv4        = local.network_controlplane[each.key].controlplane_lb[0]
-      labels      = "topology.kubernetes.io/region=${each.key},${local.worker_labels}"
+      labels      = local.worker_labels
       nodeSubnets = [local.network_private[each.key].cidr[0]]
     })
   ))
