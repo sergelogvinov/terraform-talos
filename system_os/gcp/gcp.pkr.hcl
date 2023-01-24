@@ -28,7 +28,7 @@ variable "google_locations" {
 
 variable "talos_version" {
   type    = string
-  default = "v1.0.3"
+  default = "v1.3.3"
 }
 
 source "googlecompute" "talos" {

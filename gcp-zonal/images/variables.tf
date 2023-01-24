@@ -8,5 +8,5 @@ variable "region" {
 }
 
 variable "talos_version" {
-  default = "v1.3.0"
+  default = "v1.3.3"
 }
