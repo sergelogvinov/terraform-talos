@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-azure"
     app.kubernetes.io/name: "azure-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.21.1"
+    helm.sh/chart: "cluster-autoscaler-9.23.0"
   name: cluster-autoscaler-azure
   namespace: kube-system
 spec:
@@ -26,7 +26,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-azure"
     app.kubernetes.io/name: "azure-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.21.1"
+    helm.sh/chart: "cluster-autoscaler-9.23.0"
   name: cluster-autoscaler-azure
   namespace: kube-system
 automountServiceAccountToken: true
@@ -55,7 +55,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-azure"
     app.kubernetes.io/name: "azure-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.21.1"
+    helm.sh/chart: "cluster-autoscaler-9.23.0"
   name: cluster-autoscaler-azure
 rules:
   - apiGroups:
@@ -196,7 +196,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-azure"
     app.kubernetes.io/name: "azure-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.21.1"
+    helm.sh/chart: "cluster-autoscaler-9.23.0"
   name: cluster-autoscaler-azure
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -215,7 +215,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-azure"
     app.kubernetes.io/name: "azure-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.21.1"
+    helm.sh/chart: "cluster-autoscaler-9.23.0"
   name: cluster-autoscaler-azure
   namespace: kube-system
 rules:
@@ -244,7 +244,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-azure"
     app.kubernetes.io/name: "azure-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.21.1"
+    helm.sh/chart: "cluster-autoscaler-9.23.0"
   name: cluster-autoscaler-azure
   namespace: kube-system
 roleRef:
@@ -264,7 +264,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-azure"
     app.kubernetes.io/name: "azure-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.21.1"
+    helm.sh/chart: "cluster-autoscaler-9.23.0"
   name: cluster-autoscaler-azure
   namespace: kube-system
 spec:
@@ -288,7 +288,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-azure"
     app.kubernetes.io/name: "azure-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.21.1"
+    helm.sh/chart: "cluster-autoscaler-9.23.0"
   name: cluster-autoscaler-azure
   namespace: kube-system
 spec:

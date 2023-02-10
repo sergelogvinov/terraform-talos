@@ -22,7 +22,7 @@ localRedirectPolicy: true
 
 tunnel: "vxlan"
 autoDirectNodeRoutes: false
-devices: [eth+]
+devices: [eth+,wg+]
 
 healthChecking: true
 

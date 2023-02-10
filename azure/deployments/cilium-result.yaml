@@ -144,7 +144,7 @@ data:
   enable-host-firewall: "true"
   # List of devices used to attach bpf_host.o (implements BPF NodePort,
   # host-firewall and BPF masquerading)
-  devices: "eth+"
+  devices: "eth+ wg+"
 
   kube-proxy-replacement: "strict"
   kube-proxy-replacement-healthz-bind-address: ""
@@ -551,7 +551,7 @@ spec:
     spec:
       containers:
       - name: cilium-agent
-        image: "quay.io/cilium/cilium:v1.12.5@sha256:06ce2b0a0a472e73334a7504ee5c5d8b2e2d7b72ef728ad94e564740dd505be5"
+        image: "quay.io/cilium/cilium:v1.12.6@sha256:454134506b0448c756398d3e8df68d474acde2a622ab58d0c7e8b272b5867d0d"
         imagePullPolicy: IfNotPresent
         command:
         - cilium-agent
@@ -686,7 +686,7 @@ spec:
           mountPath: /run/xtables.lock
       initContainers:
       - name: clean-cilium-state
-        image: "quay.io/cilium/cilium:v1.12.5@sha256:06ce2b0a0a472e73334a7504ee5c5d8b2e2d7b72ef728ad94e564740dd505be5"
+        image: "quay.io/cilium/cilium:v1.12.6@sha256:454134506b0448c756398d3e8df68d474acde2a622ab58d0c7e8b272b5867d0d"
         imagePullPolicy: IfNotPresent
         command:
         - /init-container.sh
@@ -813,14 +813,14 @@ spec:
     metadata:
       annotations:
         # ensure pods roll when configmap updates
-        cilium.io/cilium-configmap-checksum: "93ed3047796c548140dd014145d2cb313155de38c36595eb2f05f60856400ae5"
+        cilium.io/cilium-configmap-checksum: "5e23bd083a707099be04c9822a92e7ebf88fb85dff685037eca164fcf07a0662"
       labels:
         io.cilium/app: operator
         name: cilium-operator
     spec:
       containers:
       - name: cilium-operator
-        image: "quay.io/cilium/operator-generic:v1.12.5@sha256:b296eb7f0f7656a5cc19724f40a8a7121b7fd725278b7d61dc91fe0b7ffd7c0e"
+        image: "quay.io/cilium/operator-generic:v1.12.6@sha256:eec4430d222cb2967d42d3b404d2606e66468de47ae85e0a3ca3f58f00a5e017"
         imagePullPolicy: IfNotPresent
         command:
         - cilium-operator-generic
