@@ -87,6 +87,10 @@ resource "azurerm_linux_virtual_machine" "controlplane" {
   availability_set_id        = var.instance_availability_set
   network_interface_ids      = [azurerm_network_interface.controlplane[count.index].id]
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   # custom_data = base64encode(templatefile("${path.module}/../../templates/controlplane.yaml",
   #   merge(var.instance_params, {
   #     name        = "controlplane-${lower(var.region)}-${1 + count.index}"
@@ -161,4 +165,11 @@ resource "local_file" "controlplane" {
   file_permission = "0600"
 
   depends_on = [azurerm_linux_virtual_machine.controlplane]
+}
+
+resource "azurerm_role_assignment" "controlplane" {
+  count                = var.instance_count
+  scope                = "/subscriptions/${var.subscription_id}"
+  role_definition_name = var.instance_role_definition
+  principal_id         = azurerm_linux_virtual_machine.controlplane[count.index].identity[0].principal_id
 }

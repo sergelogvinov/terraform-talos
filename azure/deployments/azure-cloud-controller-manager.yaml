@@ -161,7 +161,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: azure-cloud-controller-manager
-          image: mcr.microsoft.com/oss/kubernetes/azure-cloud-controller-manager:v1.26.0
+          image: mcr.microsoft.com/oss/kubernetes/azure-cloud-controller-manager:v1.26.5
           imagePullPolicy: IfNotPresent
           command: ["cloud-controller-manager"]
           args:

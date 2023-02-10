@@ -21,6 +21,12 @@ variable "name" {
   default     = "talos"
 }
 
+variable "release" {
+  description = "The image name"
+  type        = string
+  default     = "1.3.4"
+}
+
 variable "arch" {
   description = "The Talos architecture list"
   type        = list(string)

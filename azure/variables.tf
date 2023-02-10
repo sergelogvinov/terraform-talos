@@ -1,10 +1,6 @@
 
-variable "ccm_username" {
-  default = ""
-}
-
-variable "ccm_password" {
-  default = ""
+variable "ccm_role_definition" {
+  default = "kubernetes-ccm"
 }
 
 variable "gallery_name" {

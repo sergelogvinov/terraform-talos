@@ -19,6 +19,12 @@ variable "instance_resource_group" {
   default     = ""
 }
 
+variable "instance_role_definition" {
+  description = "Role difinition name"
+  type        = string
+  default     = "Reader"
+}
+
 variable "instance_availability_set" {
   description = "Server availability set"
   type        = string

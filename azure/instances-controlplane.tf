@@ -24,6 +24,7 @@ module "controlplane" {
   instance_image            = data.azurerm_shared_image_version.talos.id
   instance_tags             = merge(var.tags, { type = "infra" })
   instance_secgroup         = local.network_secgroup[each.key].controlplane
+  instance_role_definition  = var.ccm_role_definition
   instance_params = merge(var.kubernetes, {
     lbv4   = local.network_controlplane[each.key].controlplane_lb[0]
     lbv6   = try(local.network_controlplane[each.key].controlplane_lb[1], "")
@@ -32,8 +33,6 @@ module "controlplane" {
     ccm = templatefile("${path.module}/deployments/azure.json.tpl", {
       subscriptionId = local.subscription_id
       tenantId       = data.azurerm_client_config.terraform.tenant_id
-      clientId       = var.ccm_username
-      clientSecret   = var.ccm_password
       region         = each.key
       resourceGroup  = local.resource_group
       vnetName       = local.network[each.key].name

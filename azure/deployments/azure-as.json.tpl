@@ -2,6 +2,8 @@
     "cloud": "AzurePublicCloud",
     "subscriptionId": "${subscriptionId}",
     "tenantId": "${tenantId}",
+    "aadClientId": "${clientId}",
+    "aadClientSecret": "${clientSecret}",
     "resourceGroup": "${resourceGroup}",
     "location": "${region}",
     "vmType": "vmss",
@@ -16,6 +18,6 @@
     "cloudProviderRatelimit": true,
     "cloudProviderRateLimitQPS": 6,
     "cloudProviderRateLimitBucket": 20,
-    "useManagedIdentityExtension": true,
-    "useInstanceMetadata": true
+    "useManagedIdentityExtension": false,
+    "useInstanceMetadata": false
 }
