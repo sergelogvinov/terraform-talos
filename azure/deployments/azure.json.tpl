@@ -17,5 +17,6 @@
     "cloudProviderRateLimitQPS": 6,
     "cloudProviderRateLimitBucket": 20,
     "useManagedIdentityExtension": true,
-    "useInstanceMetadata": true
+    "useInstanceMetadata": true,
+    "tags": "${tags}"
 }

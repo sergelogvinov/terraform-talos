@@ -13,8 +13,12 @@ cd init
 terraform init
 terraform apply
 
-az ad sp create-for-rbac --name "kubernetes-ccm" --role kubernetes-ccm --scopes="/subscriptions/<subscription-id>" --output json
 az ad sp create-for-rbac --name "kubernetes-csi" --role kubernetes-csi --scopes="/subscriptions/<subscription-id>" --output json
+az ad sp create-for-rbac --name "kubernetes-node-autoscaler" --role kubernetes-node-autoscaler --scopes="/subscriptions/<subscription-id>" --output json
+
+# add aadClientId,aadClientSecret to the file _cfgs/azure.json, andd apply it
+kubectl -n kube-system create secret generic azure-cluster-autoscaler --from-file=azure.json=_cfgs/azure.json
+kubectl -n kube-system create secret generic azure-csi --from-file=azure.json=_cfgs/azure.json
 ```
 
 ## Local utilities

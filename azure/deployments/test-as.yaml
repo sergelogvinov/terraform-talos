@@ -34,9 +34,19 @@ spec:
                     values:
                       - overprovisioning
       priorityClassName: overprovisioning
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65521
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: reserve-resources
         image: k8s.gcr.io/pause
         resources:
           requests:
             cpu: "700m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL

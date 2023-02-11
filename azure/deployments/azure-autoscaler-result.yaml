@@ -31,22 +31,6 @@ metadata:
   namespace: kube-system
 automountServiceAccountToken: true
 ---
-# Source: cluster-autoscaler/templates/secret.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: cluster-autoscaler-azure
-  namespace: kube-system
-data:
-  ClientID: ""
-  ClientSecret: ""
-  ResourceGroup: ""
-  SubscriptionID: ""
-  TenantID: ""
-  VMType: "QUtT"
-  ClusterName: ""
-  NodeResourceGroup: ""
----
 # Source: cluster-autoscaler/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -307,7 +291,7 @@ spec:
       dnsPolicy: "ClusterFirst"
       containers:
         - name: azure-cluster-autoscaler
-          image: "k8s.gcr.io/autoscaling/cluster-autoscaler:v1.26.0"
+          image: "k8s.gcr.io/autoscaling/cluster-autoscaler:v1.26.1"
           imagePullPolicy: "IfNotPresent"
           command:
             - ./cluster-autoscaler
@@ -350,4 +334,4 @@ spec:
       volumes:
         - name: cloud-config
           secret:
-            secretName: azure-cloud-controller-manager
+            secretName: azure-cluster-autoscaler

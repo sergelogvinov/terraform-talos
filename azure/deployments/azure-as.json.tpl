@@ -2,12 +2,11 @@
     "cloud": "AzurePublicCloud",
     "subscriptionId": "${subscriptionId}",
     "tenantId": "${tenantId}",
-    "aadClientId": "${clientId}",
-    "aadClientSecret": "${clientSecret}",
+    "aadClientId": "",
+    "aadClientSecret": "",
     "resourceGroup": "${resourceGroup}",
     "location": "${region}",
     "vmType": "vmss",
-    "vnetName": "${vnetName}",
     "vnetResourceGroup": "${resourceGroup}",
     "loadBalancerSku": "standard",
     "cloudProviderBackoff": true,
@@ -19,5 +18,6 @@
     "cloudProviderRateLimitQPS": 6,
     "cloudProviderRateLimitBucket": 20,
     "useManagedIdentityExtension": false,
-    "useInstanceMetadata": false
+    "useInstanceMetadata": true,
+    "tags": "${tags}"
 }

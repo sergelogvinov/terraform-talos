@@ -15,7 +15,15 @@ spec:
         app: nginx
     spec:
       nodeSelector:
-        "kubernetes.io/os": linux
+        node.cloudprovider.kubernetes.io/platform: azure
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: statefulset-azuredisk
           image: ubuntu
@@ -23,6 +31,11 @@ spec:
           volumeMounts:
             - name: persistent-storage
               mountPath: /mnt/azuredisk
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
   updateStrategy:
     type: RollingUpdate
   selector:

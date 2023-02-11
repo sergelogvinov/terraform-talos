@@ -36,10 +36,23 @@ module "controlplane" {
       region         = each.key
       resourceGroup  = local.resource_group
       vnetName       = local.network[each.key].name
+      tags           = join(",", [for k, v in var.tags : "${k}=${v}"])
     })
   })
 
   network_internal = local.network_controlplane[each.key]
+}
+
+resource "local_file" "azure" {
+  content = templatefile("${path.module}/deployments/azure-as.json.tpl", {
+    subscriptionId = local.subscription_id
+    tenantId       = data.azurerm_client_config.terraform.tenant_id
+    region         = local.regions[0]
+    resourceGroup  = local.resource_group
+    tags           = join(",", [for k, v in var.tags : "${k}=${v}"])
+  })
+  filename        = "_cfgs/azure.json"
+  file_permission = "0600"
 }
 
 locals {

@@ -1,10 +1,10 @@
 #
-# kubectl create secret generic cloud-autoscaler-gcp --from-file=cloud-sa.json
+# kubectl create secret generic azure-cluster-autoscaler --from-file=azure.json=_cfgs/azure.json --from-literal=ClientID= --from-literal=ClientSecret=
 #
 
 fullnameOverride: cluster-autoscaler-azure
 image:
-  tag: v1.26.0
+  tag: v1.26.1
 
 cloudProvider: azure
 cloudConfigPath: /etc/azure/azure.json
@@ -21,7 +21,7 @@ extraArgs:
 
 extraVolumeSecrets:
   cloud-config:
-    name: azure-cloud-controller-manager
+    name: azure-cluster-autoscaler
     mountPath: /etc/azure
 
 priorityClassName: system-cluster-critical
