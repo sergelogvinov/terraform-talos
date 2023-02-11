@@ -41,3 +41,7 @@ kubectl -n kube-system create secret generic azure-csi --from-file=azure.json=_c
 * [metrics-server](https://github.com/kubernetes-sigs/metrics-server) 0.5.0
 * [rancher.io/local-path](https://github.com/rancher/local-path-provisioner) 0.0.19
 * [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) 4.4.2
+
+# Known Issues
+
+* CSI controller needs a region name. And I think this can affect multi region setup. The half solution is using the node identity method, and receiving the region name from the meta server.

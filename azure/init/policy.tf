@@ -1,5 +1,6 @@
 
 # Source https://kubernetes-sigs.github.io/cloud-provider-azure/topics/azure-permissions/
+# https://learn.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations
 
 resource "azurerm_role_definition" "ccm" {
   name              = "kubernetes-ccm"
