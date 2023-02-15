@@ -10,7 +10,7 @@ regions          = ["GRA7", "GRA9"]
 ```
 
 ```shell
-wget https://github.com/siderolabs/talos/releases/download/v1.3.0/openstack-amd64.tar.gz
+wget https://github.com/siderolabs/talos/releases/download/v1.3.4/openstack-amd64.tar.gz
 tar -xzf openstack-amd64.tar.gz
 
 terraform init && terraform apply -auto-approve

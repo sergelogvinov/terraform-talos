@@ -6,7 +6,7 @@ output "controlplane_endpoint" {
 
 output "controlplane_endpoint_public" {
   description = "Kubernetes controlplane endpoint public"
-  value       = try(flatten([for c in module.controlplane : c.controlplane_endpoints])[0], "")
+  value       = try(flatten([for c in module.controlplane : c.controlplane_endpoints])[0], "127.0.0.1")
 }
 
 output "web_endpoint" {

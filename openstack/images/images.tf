@@ -7,7 +7,7 @@ resource "openstack_images_image_v2" "talos" {
   disk_format      = "raw"
   min_disk_gb      = 5
   min_ram_mb       = 1
-  tags             = ["talos-1.3.0"]
+  tags             = ["talos-1.3.4"]
 
   properties = {
     hw_qemu_guest_agent = "no"
