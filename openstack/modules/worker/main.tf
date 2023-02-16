@@ -80,7 +80,7 @@ resource "local_file" "worker" {
     merge(var.instance_params, {
       name        = "${var.instance_name}-${lower(var.region)}-${count.index + 1}"
       labels      = local.worker_labels
-      iface       = try(var.network_external.name, "") == "" ? "eth0" : "eth1"
+      iface       = length(try(var.network_external, {})) == 0 ? "eth0" : "eth1"
       nodeSubnets = var.network_internal.cidr
     })
   )

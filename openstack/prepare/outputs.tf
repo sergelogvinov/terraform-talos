@@ -8,7 +8,7 @@ output "network" {
   value = { for zone, network in local.network_id : zone => {
     name    = var.network_name
     id      = network.id
-    cidr    = var.network_cidr
+    cidr    = cidrsubnet(var.network_cidr, 6, (var.network_shift + index(var.regions, zone)))
     cidr_v6 = local.network_cidr_v6
     mtu     = network.mtu
   } }
@@ -33,6 +33,7 @@ output "network_public" {
     cidr       = subnet.cidr
     cidr_v6    = openstack_networking_subnet_v2.private_v6[zone].cidr
     gateway    = subnet.gateway_ip != "" ? subnet.gateway_ip : cidrhost(subnet.cidr, 1)
+    gateway_v6 = cidrhost(openstack_networking_subnet_v2.private_v6[zone].cidr, 1)
     mtu        = local.network_id[zone].mtu
   } }
 }
@@ -45,6 +46,7 @@ output "network_private" {
     cidr       = subnet.cidr
     cidr_v6    = openstack_networking_subnet_v2.private_v6[zone].cidr
     gateway    = subnet.gateway_ip != "" ? subnet.gateway_ip : cidrhost(subnet.cidr, 1)
+    gateway_v6 = cidrhost(openstack_networking_subnet_v2.private_v6[zone].cidr, 1)
     mtu        = local.network_id[zone].mtu
   } }
 }

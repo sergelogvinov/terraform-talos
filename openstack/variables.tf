@@ -19,7 +19,7 @@ locals {
   network         = data.terraform_remote_state.prepare.outputs.network
   network_public  = data.terraform_remote_state.prepare.outputs.network_public
   network_private = data.terraform_remote_state.prepare.outputs.network_private
-  network_subnets = { for zone in local.regions : zone => [local.network_public[zone].cidr, local.network_private[zone].cidr] }
+  network_subnets = { for zone in local.regions : zone => [local.network[zone].cidr] }
 
   network_secgroup = data.terraform_remote_state.prepare.outputs.network_secgroup
 }

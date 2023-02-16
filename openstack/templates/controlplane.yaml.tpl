@@ -35,6 +35,7 @@ machine:
           - ${ipv4_local}/24
         vip:
           ip: ${ipv4_local_vip}
+        routes: ${routes}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32

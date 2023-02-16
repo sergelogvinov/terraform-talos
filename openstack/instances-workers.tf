@@ -14,7 +14,7 @@ module "worker" {
     ipv4_local_network = local.network[each.key].cidr
     ipv4_local_gw      = local.network_private[each.key].gateway
     lbv4               = module.controlplane[each.key].controlplane_lb != "" ? module.controlplane[each.key].controlplane_lb : one(local.lbv4s)
-    routes             = "\n${join("\n", formatlist("- network: %s", flatten([for zone in local.regions : local.network_subnets[zone] if zone != each.key])))}"
+    routes             = "${join("\n          ", formatlist("- network: %s", flatten([for zone in local.regions : local.network_subnets[zone]])))}"
   })
 
   network_internal = local.network_private[each.key]

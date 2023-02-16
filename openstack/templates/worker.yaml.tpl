@@ -19,6 +19,10 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
+      - interface: ${iface}
+        dhcp: true
+        routes:
+          ${routes}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
