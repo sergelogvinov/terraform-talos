@@ -72,15 +72,17 @@ variable "capabilities" {
     },
     "uksouth" = {
       network_nat_enable = false,
-      network_lb_type    = "Basic", # Standard
+      network_lb_sku     = "Basic", # Standard
       network_gw_enable  = false,
       network_gw_type    = "Standard_B1s",
+      network_gw_sku     = "Basic", # Standard
     },
     "ukwest" = {
       network_nat_enable = false,
-      network_lb_type    = "Basic",
+      network_lb_sku     = "Basic",
       network_gw_enable  = false,
       network_gw_type    = "Standard_B1s",
+      network_gw_sku     = "Basic", # Standard
     },
   }
 }

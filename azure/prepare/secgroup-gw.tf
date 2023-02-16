@@ -62,5 +62,20 @@ resource "azurerm_network_security_group" "router" {
     }
   }
 
+  dynamic "security_rule" {
+    for_each = var.network_cidr
+    content {
+      name                       = "Nat-${security_rule.key}"
+      priority                   = 1800 + security_rule.key
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      source_address_prefix      = security_rule.value
+      destination_port_range     = "*"
+      destination_address_prefix = "*"
+    }
+  }
+
   tags = merge(var.tags, { type = "infra" })
 }

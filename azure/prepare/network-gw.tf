@@ -5,20 +5,20 @@ resource "azurerm_public_ip" "router_v4" {
   name                = "router-${lower(each.key)}-v4"
   resource_group_name = var.resource_group
   ip_version          = "IPv4"
-  sku                 = azurerm_lb.controlplane[each.key].sku
-  allocation_method   = azurerm_lb.controlplane[each.key].sku == "Standard" ? "Static" : "Dynamic"
+  sku                 = var.capabilities[each.key].network_gw_sku
+  allocation_method   = var.capabilities[each.key].network_gw_sku == "Standard" ? "Static" : "Dynamic"
 
   tags = merge(var.tags, { type = "infra" })
 }
 
 resource "azurerm_public_ip" "router_v6" {
-  for_each            = { for idx, name in var.regions : name => idx if azurerm_lb.controlplane[name].sku == "Standard" && try(var.capabilities[name].network_gw_enable, false) }
+  for_each            = { for idx, name in var.regions : name => idx if var.capabilities[name].network_gw_sku == "Standard" && try(var.capabilities[name].network_gw_enable, false) }
   location            = each.key
   name                = "router-${lower(each.key)}-v6"
   resource_group_name = var.resource_group
   ip_version          = "IPv6"
-  sku                 = azurerm_lb.controlplane[each.key].sku
-  allocation_method   = "Static"
+  sku                 = var.capabilities[each.key].network_gw_sku
+  allocation_method   = var.capabilities[each.key].network_gw_sku == "Standard" ? "Static" : "Dynamic"
 
   tags = merge(var.tags, { type = "infra" })
 }
@@ -31,12 +31,12 @@ resource "azurerm_network_interface" "router" {
   enable_ip_forwarding = true
 
   dynamic "ip_configuration" {
-    for_each = azurerm_subnet.controlplane[each.key].address_prefixes
+    for_each = azurerm_subnet.shared[each.key].address_prefixes
 
     content {
       name                          = "router-${lower(each.key)}-v${length(split(".", ip_configuration.value)) > 1 ? "4" : "6"}"
       primary                       = length(split(".", ip_configuration.value)) > 1
-      subnet_id                     = azurerm_subnet.controlplane[each.key].id
+      subnet_id                     = azurerm_subnet.shared[each.key].id
       private_ip_address            = cidrhost(ip_configuration.value, -2)
       private_ip_address_version    = length(split(".", ip_configuration.value)) > 1 ? "IPv4" : "IPv6"
       private_ip_address_allocation = "Static"
@@ -68,7 +68,7 @@ resource "azurerm_linux_virtual_machine" "router" {
     name                 = "router-${lower(each.key)}"
     caching              = "ReadOnly"
     storage_account_type = "Standard_LRS"
-    disk_size_gb         = 32
+    disk_size_gb         = 30
   }
 
   admin_username = "debian"

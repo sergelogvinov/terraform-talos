@@ -41,7 +41,7 @@ output "network_public" {
   value = { for zone, subnet in azurerm_subnet.public : zone => {
     network_id = subnet.id
     cidr       = subnet.address_prefixes
-    sku        = azurerm_lb.controlplane[zone].sku
+    sku        = var.capabilities[zone].network_gw_sku
   } }
 }
 
@@ -51,6 +51,7 @@ output "network_private" {
     network_id = subnet.id
     cidr       = subnet.address_prefixes
     nat        = try(azurerm_public_ip.nat[zone].ip_address, "")
+    sku        = try(azurerm_public_ip.nat[zone].ip_address, "") == "" ? "Standard" : var.capabilities[zone].network_gw_sku
   } }
 }
 

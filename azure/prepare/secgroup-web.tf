@@ -44,7 +44,7 @@ resource "azurerm_network_security_group" "web" {
       access                     = "Allow"
       protocol                   = "Tcp"
       source_port_range          = "*"
-      source_address_prefix      = security_rule.value
+      source_address_prefix      = length(split(".", security_rule.value)) > 1 ? security_rule.value : "::/0"
       destination_port_ranges    = ["4240"]
       destination_address_prefix = security_rule.value
     }
@@ -72,7 +72,7 @@ resource "azurerm_network_security_group" "web" {
       access                     = "Allow"
       protocol                   = "Icmp"
       source_port_range          = "*"
-      source_address_prefix      = security_rule.value
+      source_address_prefix      = length(split(".", security_rule.value)) > 1 ? security_rule.value : "::/0"
       destination_port_range     = "*"
       destination_address_prefix = security_rule.value
     }

@@ -34,10 +34,14 @@ resource "azurerm_linux_virtual_machine_scale_set" "db" {
       name      = "db-${lower(each.key)}-v6"
       version   = "IPv6"
       subnet_id = local.network_public[each.key].network_id
-      # public_ip_address {
-      #   name    = "db-${lower(each.key)}-v6"
-      #   version = "IPv6"
-      # }
+
+      dynamic "public_ip_address" {
+        for_each = local.network_public[each.key].sku == "Standard" ? ["IPv6"] : []
+        content {
+          name    = "worker-${lower(each.key)}-v6"
+          version = public_ip_address.value
+        }
+      }
     }
   }
 

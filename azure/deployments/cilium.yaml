@@ -23,6 +23,8 @@ localRedirectPolicy: true
 tunnel: "vxlan"
 autoDirectNodeRoutes: false
 devices: [eth+,wg+]
+extraConfig:
+  mtu: "1420"
 
 healthChecking: true
 
