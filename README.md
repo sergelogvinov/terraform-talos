@@ -20,16 +20,19 @@ Having a single Kubernetes control plane that spans multiple cloud providers can
 
 ## Clouds
 
-| Platform | Checked Talos version | Addons | Setup type | Nat |
-|---|---|---|---|---|
-| [Azure](azure)         | 1.3.0  | CCM,CSI,Autoscaler | many regions, many zones | &check; |
-| [Exoscale](exoscale)   | 1.3.0  | CCM,Autoscaler     | many regions | &cross; |
-| [GCP](gcp-zonal)       | 1.3.0  | CCM,CSI,Autoscaler | one region, many zones | &check; |
-| [Hetzner](hetzner)     | 1.3.0  | CCM,CSI,Autoscaler | many regions | &cross; |
-| [Openstack](openstack) | 1.3.0  | CCM,CSI            | many regions, many zones | &check; |
-| [Oracle](oracle)       | 1.3.0  | CCM,~~CSI~~,Autoscaler | one region, many zones | &check; |
-| [Scaleway](scaleway)   | 1.3.0  | CCM,CSI            | one region | &check; |
+| Platform | Checked Talos version | Addons | Setup type | Nat-IPv4 | IPv6 |
+|---|---|---|---|---|---|
+| [Azure](azure)         | 1.3.4  | CCM,CSI,Autoscaler | many regions, many zones | &check; | &check; |
+| [Exoscale](exoscale)   | 1.3.0  | CCM,Autoscaler     | many regions | &cross; | |
+| [GCP](gcp-zonal)       | 1.3.4  | CCM,CSI,Autoscaler | one region, many zones | &check; | &check; |
+| [Hetzner](hetzner)     | 1.3.4  | CCM,CSI,Autoscaler | many regions | &cross; | &check; |
+| [Openstack](openstack) | 1.3.4  | CCM,CSI            | many regions, many zones | &check; | &check; |
+| [Oracle](oracle)       | 1.3.4  | CCM,~~CSI~~,Autoscaler | one region, many zones | &check; | &check; |
+| [Scaleway](scaleway)   | 1.3.4  | CCM,CSI            | one region | &check; | &check; |
 
+## Known issues
+
+* Talos does not support Oracle CSI.
 
 ## Common
 
