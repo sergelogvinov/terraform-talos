@@ -8,8 +8,8 @@ About image_metadata.json https://www.oracle.com/docs/tech/oracle-private-cloud-
 ```
 
 ```shell
-wget https://github.com/siderolabs/talos/releases/download/v1.3.0/oracle-amd64.qcow2.xz
-wget https://github.com/siderolabs/talos/releases/download/v1.3.0/oracle-arm64.qcow2.xz
+wget https://github.com/siderolabs/talos/releases/download/v1.3.4/oracle-amd64.qcow2.xz
+wget https://github.com/siderolabs/talos/releases/download/v1.3.4/oracle-arm64.qcow2.xz
 xz -d oracle-amd64.qcow2.xz
 xz -d oracle-arm64.qcow2.xz
 
