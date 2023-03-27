@@ -1,0 +1,28 @@
+---
+
+system_cpufrequtils_governor: schedutil
+system_packages:
+  - tcpdump
+  - htop
+  - iftop
+system_sshd_tcpforward: true
+system_sshd_acceptenv: LC_PVE_TICKET
+system_sysctl:
+  - { name: net.ipv4.ip_forward,          value: 1 }
+  - { name: net.ipv6.conf.all.forwarding, value: 1 }
+  - { name: net.ipv6.conf.all.autoconf,   value: 0 }
+  - { name: net.ipv6.conf.all.accept_ra,  value: 0 }
+
+#
+
+iptables_apply_changes: false
+iptables_configuration_template: iptables_proxmox.j2
+iptables6_configuration_template: iptables6_proxmox.j2
+iptables_nat_enabled: true
+
+iptables_input_policy: "ACCEPT"
+iptables_forward_policy: "ACCEPT"
+iptables_output_policy: "ACCEPT"
+iptables6_input_policy: "ACCEPT"
+iptables6_forward_policy: "ACCEPT"
+iptables6_output_policy: "ACCEPT"

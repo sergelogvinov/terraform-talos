@@ -1,0 +1,6 @@
+
+- hosts: pve
+  roles:
+    - ansible-role-system
+    - ansible-role-users
+    - ansible-role-iptables
