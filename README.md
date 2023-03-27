@@ -28,7 +28,23 @@ Having a single Kubernetes control plane that spans multiple cloud providers can
 | [Hetzner](hetzner)     | 1.3.4  | CCM,CSI,Autoscaler | many regions | &cross; | &check; |
 | [Openstack](openstack) | 1.3.4  | CCM,CSI            | many regions, many zones | &check; | &check; |
 | [Oracle](oracle)       | 1.3.4  | CCM,~~CSI~~,Autoscaler | one region, many zones | &check; | &check; |
+| [Proxmox](proxmox)     | 1.3.4  | CCM                | one region, one zones | &check; | &check; |
 | [Scaleway](scaleway)   | 1.3.4  | CCM,CSI            | one region | &check; | &check; |
+
+## Multi cloud compatibility
+
+CCM compatibility, which can work together:
+* Talos CCM in mode: `cloud-node`
+* Other CCMs in mode: `cloud-node-lifecycle`
+
+|   | Azure | GCP | Hetzner | Openstack | Proxmox |
+|---|---|---|---|---|---|
+| Azure     | | &check; | &check; | &check; | &check; |
+| Exoscale  | |         |         |         |
+| GCP       | &check; | | &check; | &check; | &check; |
+| Hetzner   | &check; | &check; | | &check; | &check; |
+| Openstack | &check; | &check; | &check; | | &check; |
+| Proxmox   | &check; | &check; | &check; | &check; | |
 
 ## Known issues
 
@@ -43,5 +59,4 @@ It helps me to tweak the kernel on a host and apply it to ingress controller.
 And I can disable conntrack too.
 * **coredns-local** (daemonsets) uses dummy interface on al nodes and has ip ```169.254.2.53```
 It decrease the dns response (all traffic does not leave the node).
-It makes sense in multi-cloud setup. Kubernets still does not have geo-based load balancer capabilities (alfa).
 * **rancher.io/local-path** as default storage class.
