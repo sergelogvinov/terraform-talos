@@ -1,9 +1,9 @@
 # Proxmox hypervisor
 
 Apply a few changes to the proxmox node.
-* ipv4 NAT
+* IPv4 NAT
 * cpu governor to `schedutil` (by default it is `performance`)
-* ipv4/v6 forwarding
+* IPv4/v6 forwarding
 
 1. Download the galaxy roles:
 
