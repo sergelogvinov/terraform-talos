@@ -83,7 +83,7 @@ VM network config:
 ```config
 # /etc/pve/qemu-server/ID.conf
 net0: virtio=81:0B:E8:85:D2:F1,bridge=vmbr0,firewall=1
-ipconfig0: ip=192.168.0.11/24,gw=192.168.0.1,ip6=a:b:c:d:8100b:e8ff:fe85:d2f1/64,gw6=a:b:c:d:8100::2
+ipconfig0: ip=192.168.0.11/24,gw=192.168.0.1,ip6=a:b:c:d:810b:e8ff:fe85:d2f1/64,gw6=a:b:c:d:8100::2
 ```
 
 IPv6 looks like SLAAC does, but it is static here.
