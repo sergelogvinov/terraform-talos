@@ -74,9 +74,9 @@ iface vmbr0 inet6 static
 
 IPv6 tricks:
 
-* Host has IPv6 a:b:c:d::/64
+* Host has IPv6 `a:b:c:d::/64`
 * MAC Address prefix - 81 (/etc/pve/datacenter.cfg)
-* IPv6 for VM looks like a:b:c:d:8100:../68 - a:b:c:d:81ff:../68
+* IPv6 for VM looks like `a:b:c:d:8100:../68` - `a:b:c:d:81ff:../68`
 
 VM network config:
 
