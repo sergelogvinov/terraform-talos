@@ -59,10 +59,16 @@ variable "kubernetes" {
   sensitive = true
 }
 
+variable "network_shift" {
+  description = "Network number shift"
+  type        = number
+  default     = 6
+}
+
 variable "vpc_main_cidr" {
   description = "Local proxmox subnet"
   type        = string
-  default     = "192.168.10.0/24"
+  default     = "192.168.0.0/24"
 }
 
 variable "controlplane" {

@@ -1,8 +1,6 @@
 
 locals {
   worker_prefix = "worker"
-
-  zones = [for k, v in var.instances : k]
   workers = { for k in flatten([
     for zone in local.zones : [
       for inx in range(lookup(try(var.instances[zone], {}), "worker_count", 0)) : {
@@ -12,7 +10,7 @@ locals {
         node_name : zone
         cpu : lookup(try(var.instances[zone], {}), "worker_cpu", 1)
         mem : lookup(try(var.instances[zone], {}), "worker_mem", 2048)
-        ipv4 : "${cidrhost(var.vpc_main_cidr, 81 + inx)}/24"
+        ipv4 : "${cidrhost(local.subnets[zone], inx)}/24"
         gwv4 : local.gwv4
       }
     ]
@@ -24,7 +22,7 @@ output "workers" {
 }
 
 resource "null_resource" "worker_machineconfig" {
-  for_each = var.instances
+  for_each = { for k, v in var.instances : k => v if lookup(try(var.instances[k], {}), "worker_count", 0) > 0 }
   connection {
     type = "ssh"
     user = "root"
