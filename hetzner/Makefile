@@ -18,7 +18,7 @@ create-lb: ## Create load balancer
 	terraform refresh
 
 create-config: ## Genereate talos configs
-	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false talos-k8s-hetzner https://${ENDPOINT}:6443
+	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false ${CLUSTERNAME} https://${ENDPOINT}:6443
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 
 create-templates:

@@ -11,6 +11,7 @@ Apply a few changes to the proxmox node.
 ansible-galaxy role install git+https://github.com/sergelogvinov/ansible-role-system.git,main
 ansible-galaxy role install git+https://github.com/sergelogvinov/ansible-role-users.git,main
 ansible-galaxy role install git+https://github.com/sergelogvinov/ansible-role-iptables.git,main
+ansible-galaxy role install git+https://github.com/sergelogvinov/ansible-role-dnsmasq.git,main
 ```
 
 2. Update inventory file, replace the host ip here `ansible_host`

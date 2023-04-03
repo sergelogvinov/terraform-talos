@@ -1,0 +1,5 @@
+hostname: ${hostname}
+instance-id: ${id}
+instance-type: ${type}
+region: ${region}
+zone: ${zone}

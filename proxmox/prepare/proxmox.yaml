@@ -4,3 +4,4 @@
     - ansible-role-system
     - ansible-role-users
     - ansible-role-iptables
+    - ansible-role-dnsmasq

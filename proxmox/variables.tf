@@ -1,4 +1,10 @@
 
+variable "proxmox_domain" {
+  description = "Proxmox host"
+  type        = string
+  default     = "example.com"
+}
+
 variable "proxmox_host" {
   description = "Proxmox host"
   type        = string
@@ -13,15 +19,11 @@ variable "proxmox_nodename" {
 variable "proxmox_image" {
   description = "Proxmox source image name"
   type        = string
+  default     = "talos"
 }
 
 variable "proxmox_storage" {
   description = "Proxmox storage name"
-  type        = string
-}
-
-variable "proxmox_bridge" {
-  description = "Proxmox bridge name"
   type        = string
 }
 
@@ -33,6 +35,12 @@ variable "proxmox_token_id" {
 variable "proxmox_token_secret" {
   description = "Proxmox token secret"
   type        = string
+}
+
+variable "region" {
+  description = "Proxmox host"
+  type        = string
+  default     = "nova"
 }
 
 variable "kubernetes" {
@@ -65,10 +73,39 @@ variable "controlplane" {
   }
 }
 
-variable "worker" {
-  description = "Property of worker"
+variable "instances" {
+  description = "Map of region's properties"
   type        = map(any)
   default = {
-    count = 0,
+    "node1" = {
+      web_id       = 1000
+      web_count    = 0,
+      web_cpu      = 2,
+      web_mem      = 4096,
+      worker_id    = 1050
+      worker_count = 0,
+      worker_cpu   = 2,
+      worker_mem   = 4096,
+    },
+    "node2" = {
+      web_id       = 2000
+      web_count    = 0,
+      web_cpu      = 2,
+      web_mem      = 4096,
+      worker_id    = 2050
+      worker_count = 0,
+      worker_cpu   = 2,
+      worker_mem   = 4096,
+    }
+    "node3" = {
+      web_id       = 3000
+      web_count    = 0,
+      web_cpu      = 2,
+      web_mem      = 4096,
+      worker_id    = 3050
+      worker_count = 0,
+      worker_cpu   = 2,
+      worker_mem   = 4096,
+    }
   }
 }

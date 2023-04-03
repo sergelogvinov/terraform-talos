@@ -1,0 +1,23 @@
+machine:
+  kubelet:
+    extraArgs:
+      cloud-provider: external
+      rotate-server-certificates: true
+    clusterDNS:
+      - 169.254.2.53
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
+  network:
+    interfaces:
+      - interface: dummy0
+        addresses:
+          - 169.254.2.53/32
+    extraHostEntries:
+      - ip: ${lbv4}
+        aliases:
+          - ${apiDomain}
+  sysctls:
+    net.core.somaxconn: 65535
+    net.core.netdev_max_backlog: 4096
+cluster:
+  proxy:
+    disabled: true
