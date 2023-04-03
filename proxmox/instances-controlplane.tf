@@ -1,78 +1,131 @@
 
-# resource "null_resource" "controlplane_machineconfig" {
-#   count = lookup(var.controlplane, "count", 0)
-#   connection {
-#     type = "ssh"
-#     user = "root"
-#     host = var.proxmox_host
-#   }
+locals {
+  controlplane_prefix = "controlplane"
+  controlplanes = { for k in flatten([
+    for zone in local.zones : [
+      for inx in range(lookup(try(var.controlplane[zone], {}), "count", 0)) : {
+        id : lookup(try(var.controlplane[zone], {}), "id", 9000) + inx
+        name : "${local.controlplane_prefix}-${lower(substr(zone, -1, -1))}${1 + inx}"
+        zone : zone
+        node_name : zone
+        cpu : lookup(try(var.controlplane[zone], {}), "cpu", 1)
+        mem : lookup(try(var.controlplane[zone], {}), "mem", 2048)
+        ipv4 : "${cidrhost(local.controlplane_subnet, index(local.zones, zone) + inx)}/24"
+        gwv4 : local.gwv4
+      }
+    ]
+  ]) : k.name => k }
+}
 
-#   provisioner "file" {
-#     content = templatefile("${path.module}/templates/controlplane.yaml",
-#       merge(var.kubernetes, {
-#         name        = "controlplane-${count.index + 1}"
-#         type        = "controlplane"
-#         ipv4_local  = "192.168.10.11"
-#         ipv4_vip    = "192.168.10.10"
-#         nodeSubnets = "${var.vpc_main_cidr}"
-#       })
-#     )
+resource "null_resource" "controlplane_metadata" {
+  for_each = local.controlplanes
+  connection {
+    type = "ssh"
+    user = "root"
+    host = "${each.value.node_name}.${var.proxmox_domain}"
+  }
 
-#     destination = "/var/lib/vz/snippets/controlplane-${count.index + 1}.yml"
-#   }
-# }
+  provisioner "file" {
+    content = templatefile("${path.module}/templates/metadata.yaml", {
+      hostname : each.value.name,
+      id : each.value.id,
+      type : "qemu",
+      zone : each.value.zone,
+      region : var.region,
+    })
+    destination = "/var/lib/vz/snippets/${each.value.name}.metadata.yaml"
+  }
 
-# resource "proxmox_vm_qemu" "controlplane" {
-#   count       = lookup(var.controlplane, "count", 0)
-#   name        = "controlplane-${count.index + 1}"
-#   target_node = var.proxmox_nodename
-#   clone       = var.proxmox_image
+  triggers = {
+    params = join(",", [for k, v in local.controlplanes[each.key] : "${k}-${v}"])
+  }
+}
 
-#   # preprovision           = false
-#   define_connection_info  = false
-#   os_type                 = "ubuntu"
-#   ipconfig0               = "ip=${cidrhost(var.vpc_main_cidr, 11 + count.index)}/24,gw=${local.gwv4}"
-#   cicustom                = "user=local:snippets/controlplane-${count.index + 1}.yml"
-#   cloudinit_cdrom_storage = var.proxmox_storage
+resource "proxmox_vm_qemu" "controlplane" {
+  for_each    = local.controlplanes
+  name        = each.value.name
+  vmid        = each.value.id
+  target_node = each.value.node_name
+  clone       = var.proxmox_image
 
-#   onboot  = false
-#   cpu     = "host,flags=+aes"
-#   cores   = 2
-#   sockets = 1
-#   memory  = 2048
-#   scsihw  = "virtio-scsi-pci"
+  agent                   = 0
+  define_connection_info  = false
+  os_type                 = "ubuntu"
+  qemu_os                 = "l26"
+  ipconfig0               = "ip6=auto"
+  ipconfig1               = "ip=${each.value.ipv4},gw=${each.value.gwv4}"
+  cicustom                = "meta=local:snippets/${each.value.name}.metadata.yaml"
+  cloudinit_cdrom_storage = var.proxmox_storage
 
-#   vga {
-#     memory = 0
-#     type   = "serial0"
-#   }
-#   serial {
-#     id   = 0
-#     type = "socket"
-#   }
+  onboot  = false
+  cpu     = "host,flags=+aes"
+  sockets = 1
+  cores   = each.value.cpu
+  memory  = each.value.mem
+  scsihw  = "virtio-scsi-pci"
 
-#   network {
-#     model    = "virtio"
-#     bridge   = var.proxmox_bridge
-#     firewall = false
-#   }
+  vga {
+    memory = 0
+    type   = "serial0"
+  }
+  serial {
+    id   = 0
+    type = "socket"
+  }
 
-#   boot = "order=scsi0"
-#   disk {
-#     type    = "scsi"
-#     storage = var.proxmox_storage
-#     size    = "16G"
-#     cache   = "writethrough"
-#     ssd     = 1
-#     backup  = 0
-#   }
+  network {
+    model    = "virtio"
+    bridge   = "vmbr0"
+    firewall = true
+  }
+  network {
+    model  = "virtio"
+    bridge = "vmbr1"
+  }
 
-#   lifecycle {
-#     ignore_changes = [
-#       desc,
-#       define_connection_info,
-#     ]
-#   }
+  boot = "order=scsi0"
+  disk {
+    type    = "scsi"
+    storage = var.proxmox_storage
+    size    = "32G"
+    cache   = "writethrough"
+    ssd     = 1
+    backup  = false
+  }
 
-#   depends_on = [null_resource.controlplane_machineconfig]
-# }
+  lifecycle {
+    ignore_changes = [
+      boot,
+      network,
+      desc,
+      numa,
+      agent,
+      ipconfig0,
+      ipconfig1,
+      define_connection_info,
+    ]
+  }
+
+  depends_on = [null_resource.controlplane_metadata]
+}
+
+resource "local_file" "controlplane" {
+  for_each = local.controlplanes
+  content = templatefile("${path.module}/templates/controlplane.yaml.tpl",
+    merge(var.kubernetes, {
+      name        = each.value.name
+      ipv4_vip    = local.ipv4_vip
+      nodeSubnets = local.controlplane_subnet
+    })
+  )
+  filename        = "_cfgs/${each.value.name}.yaml"
+  file_permission = "0600"
+}
+
+resource "null_resource" "controlplane" {
+  for_each = local.controlplanes
+  provisioner "local-exec" {
+    command = "sleep 60 && talosctl apply-config --insecure --nodes ${each.value.ipv4} --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
+  }
+  depends_on = [proxmox_vm_qemu.controlplane, local_file.controlplane]
+}

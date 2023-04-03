@@ -1,29 +1,25 @@
-version: v1alpha1
-debug: false
-persist: true
 machine:
-  type: ${type}
-  certSANs:
-    - "${ipv4_local}"
-    - "${ipv4_vip}"
   kubelet:
     extraArgs:
       rotate-server-certificates: true
+    clusterDNS:
+      - 169.254.2.53
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
     hostname: "${name}"
     interfaces:
-      - interface: eth0
-        dhcp: true
+      - interface: eth1
         vip:
           ip: ${ipv4_vip}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
-          - fd00::169:254:2:53/128
-  install:
-    wipe: false
+    extraHostEntries:
+      - ip: 127.0.0.1
+        aliases:
+          - ${apiDomain}
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
@@ -46,20 +42,31 @@ machine:
           slot: 0
 cluster:
   controlPlane:
-    endpoint: https://${ipv4_vip}:6443
+    endpoint: https://${apiDomain}:6443
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
-  # proxy:
-  #   disabled: true
-  apiServer:
-    certSANs:
-      - "${ipv4_local}"
-      - "${ipv4_vip}"
+    cni:
+      name: custom
+      urls:
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/cilium-result.yaml
+  proxy:
+    disabled: true
   controllerManager:
     extraArgs:
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
-  scheduler: {}
-  etcd: {}
+  etcd:
+    advertisedSubnets:
+      - ${nodeSubnets}
+    listenSubnets:
+      - ${nodeSubnets}
+  externalCloudProvider:
+    enabled: true
+    manifests:
+      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/metrics-server.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/coredns-local.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/ingress-result.yaml
