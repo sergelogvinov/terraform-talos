@@ -1,6 +1,8 @@
 
 locals {
   web_prefix = "web"
+  web_labels = "project.io/node-pool=web"
+
   webs = { for k in flatten([
     for zone in local.zones : [
       for inx in range(lookup(try(var.instances[zone], {}), "web_count", 0)) : {

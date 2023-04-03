@@ -1,5 +1,5 @@
 
-ENDPOINT=192.168.10.10
+ENDPOINT=api.cluster.local
 CLUSTERNAME:="talos-k8s-proxmox"
 
 help:
