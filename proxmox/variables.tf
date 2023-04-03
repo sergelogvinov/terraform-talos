@@ -75,12 +75,23 @@ variable "controlplane" {
   description = "Property of controlplane"
   type        = map(any)
   default = {
-    count = 0,
+    "node1" = {
+      id    = 500
+      count = 0,
+      cpu   = 2,
+      mem   = 4096,
+    },
+    "node2" = {
+      id    = 510
+      count = 0,
+      cpu   = 2,
+      mem   = 4096,
+    }
   }
 }
 
 variable "instances" {
-  description = "Map of region's properties"
+  description = "Map of VMs launched on proxmox hosts"
   type        = map(any)
   default = {
     "node1" = {

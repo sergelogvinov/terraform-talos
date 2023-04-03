@@ -10,15 +10,11 @@ locals {
         node_name : zone
         cpu : lookup(try(var.instances[zone], {}), "worker_cpu", 1)
         mem : lookup(try(var.instances[zone], {}), "worker_mem", 2048)
-        ipv4 : "${cidrhost(local.subnets[zone], inx)}/24"
+        ipv4 : "${cidrhost(local.subnets[zone], 4 + inx)}/24"
         gwv4 : local.gwv4
       }
     ]
   ]) : k.name => k }
-}
-
-output "workers" {
-  value = local.workers
 }
 
 resource "null_resource" "worker_machineconfig" {
