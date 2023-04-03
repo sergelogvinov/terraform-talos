@@ -125,7 +125,7 @@ resource "local_file" "controlplane" {
 resource "null_resource" "controlplane" {
   for_each = local.controlplanes
   provisioner "local-exec" {
-    command = "sleep 60 && talosctl apply-config --insecure --nodes ${each.value.ipv4} --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
+    command = "echo talosctl apply-config --insecure --nodes ${split("/", each.value.ipv4)[0]} --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
   }
   depends_on = [proxmox_vm_qemu.controlplane, local_file.controlplane]
 }

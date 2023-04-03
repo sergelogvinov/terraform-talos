@@ -76,6 +76,6 @@ cluster:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/metrics-server.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/coredns-local.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/local-path-storage.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/local-path-storage.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/ingress-ns.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/ingress-result.yaml

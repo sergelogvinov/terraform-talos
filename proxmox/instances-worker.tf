@@ -1,7 +1,7 @@
 
 locals {
   worker_prefix = "worker"
-  web_labels    = "project.io/node-pool=worker"
+  worker_labels = "project.io/node-pool=worker"
 
   workers = { for k in flatten([
     for zone in local.zones : [
