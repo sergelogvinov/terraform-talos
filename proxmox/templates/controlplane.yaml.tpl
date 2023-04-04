@@ -48,6 +48,8 @@ machine:
       allowedKubernetesNamespaces:
         - kube-system
 cluster:
+  adminKubeconfig:
+    certLifetime: 8h0m0s
   controlPlane:
     endpoint: https://${apiDomain}:6443
   network:

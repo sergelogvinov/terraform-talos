@@ -17,3 +17,7 @@ cicustom: user=local:snippets/VMID.yaml,meta=local:snippets/VMID.meta
 ipconfig0: ...
 net0: ...
 ```
+
+```shell
+make create-config create-templates
+```

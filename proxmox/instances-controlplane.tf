@@ -10,6 +10,7 @@ locals {
         node_name : zone
         cpu : lookup(try(var.controlplane[zone], {}), "cpu", 1)
         mem : lookup(try(var.controlplane[zone], {}), "mem", 2048)
+        ip0 : lookup(try(var.controlplane[zone], {}), "ip0", "ip6=auto")
         ipv4 : "${cidrhost(local.controlplane_subnet, index(local.zones, zone) + inx)}/24"
         gwv4 : local.gwv4
       }
@@ -52,7 +53,7 @@ resource "proxmox_vm_qemu" "controlplane" {
   define_connection_info  = false
   os_type                 = "ubuntu"
   qemu_os                 = "l26"
-  ipconfig0               = "ip6=auto"
+  ipconfig0               = each.value.ip0
   ipconfig1               = "ip=${each.value.ipv4},gw=${each.value.gwv4}"
   cicustom                = "meta=local:snippets/${each.value.name}.metadata.yaml"
   cloudinit_cdrom_storage = var.proxmox_storage
@@ -122,10 +123,10 @@ resource "local_file" "controlplane" {
   file_permission = "0600"
 }
 
-resource "null_resource" "controlplane" {
-  for_each = local.controlplanes
-  provisioner "local-exec" {
-    command = "echo talosctl apply-config --insecure --nodes ${split("/", each.value.ipv4)[0]} --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
-  }
-  depends_on = [proxmox_vm_qemu.controlplane, local_file.controlplane]
-}
+# resource "null_resource" "controlplane" {
+#   for_each = local.controlplanes
+#   provisioner "local-exec" {
+#     command = "sleep 60 && talosctl apply-config --insecure --nodes ${split("/", each.value.ipv4)[0]} --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
+#   }
+#   depends_on = [proxmox_vm_qemu.controlplane, local_file.controlplane]
+# }

@@ -12,6 +12,7 @@ locals {
         node_name : zone
         cpu : lookup(try(var.instances[zone], {}), "worker_cpu", 1)
         mem : lookup(try(var.instances[zone], {}), "worker_mem", 2048)
+        ip0 : lookup(try(var.instances[zone], {}), "worke_ip0", "ip6=auto")
         ipv4 : "${cidrhost(local.subnets[zone], 4 + inx)}/24"
         gwv4 : local.gwv4
       }
@@ -28,12 +29,17 @@ resource "null_resource" "worker_machineconfig" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/_cfgs/worker.yaml"
+    content = templatefile("${path.module}/templates/worker.yaml.tpl",
+      merge(var.kubernetes, {
+        lbv4        = local.ipv4_vip
+        nodeSubnets = var.vpc_main_cidr
+        labels      = local.worker_labels
+    }))
     destination = "/var/lib/vz/snippets/${local.worker_prefix}.yaml"
   }
 
   triggers = {
-    params = filemd5("${path.module}/_cfgs/worker.yaml")
+    params = filemd5("${path.module}/templates/worker.yaml.tpl")
   }
 }
 
@@ -146,7 +152,7 @@ resource "proxmox_vm_qemu" "worker" {
   define_connection_info  = false
   os_type                 = "ubuntu"
   qemu_os                 = "l26"
-  ipconfig0               = "ip6=auto"
+  ipconfig0               = each.value.ip0
   ipconfig1               = "ip=${each.value.ipv4},gw=${each.value.gwv4}"
   cicustom                = "user=local:snippets/${local.worker_prefix}.yaml,meta=local:snippets/${each.value.name}.metadata.yaml"
   cloudinit_cdrom_storage = var.proxmox_storage
@@ -186,10 +192,19 @@ resource "proxmox_vm_qemu" "worker" {
     ssd     = 1
     backup  = false
   }
+  disk {
+    type    = "scsi"
+    storage = var.proxmox_storage
+    size    = "128G"
+    cache   = "none"
+    ssd     = 1
+    backup  = false
+  }
 
   lifecycle {
     ignore_changes = [
       boot,
+      disk,
       network,
       desc,
       numa,

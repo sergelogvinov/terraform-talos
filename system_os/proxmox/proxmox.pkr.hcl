@@ -42,9 +42,9 @@ source "proxmox" "talos" {
 
   cpu_type = "host"
   memory   = 3072
-  vga {
-    type = "serial0"
-  }
+  # vga {
+  #   type = "serial0"
+  # }
   serials = ["socket"]
 
   ssh_username = "root"

@@ -12,6 +12,7 @@ locals {
         node_name : zone
         cpu : lookup(try(var.instances[zone], {}), "web_cpu", 1)
         mem : lookup(try(var.instances[zone], {}), "web_mem", 2048)
+        ip0 : lookup(try(var.instances[zone], {}), "web_ip0", "ip6=auto")
         ipv4 : "${cidrhost(local.subnets[zone], inx)}/24"
         gwv4 : local.gwv4
       }
@@ -28,12 +29,19 @@ resource "null_resource" "web_machineconfig" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/_cfgs/worker.yaml"
+    # source      = "${path.module}/_cfgs/worker.yaml"
+    content = templatefile("${path.module}/templates/web.yaml.tpl",
+      merge(var.kubernetes, {
+        lbv4        = local.ipv4_vip
+        nodeSubnets = var.vpc_main_cidr
+        labels      = local.web_labels
+    }))
+
     destination = "/var/lib/vz/snippets/${local.web_prefix}.yaml"
   }
 
   triggers = {
-    params = filemd5("${path.module}/_cfgs/worker.yaml")
+    params = filemd5("${path.module}/templates/web.yaml.tpl")
   }
 }
 
@@ -72,7 +80,7 @@ resource "proxmox_vm_qemu" "web" {
   define_connection_info  = false
   os_type                 = "ubuntu"
   qemu_os                 = "l26"
-  ipconfig0               = "ip6=auto"
+  ipconfig0               = each.value.ip0
   ipconfig1               = "ip=${each.value.ipv4},gw=${each.value.gwv4}"
   cicustom                = "user=local:snippets/${local.web_prefix}.yaml,meta=local:snippets/${each.value.name}.metadata.yaml"
   cloudinit_cdrom_storage = var.proxmox_storage

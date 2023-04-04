@@ -42,10 +42,6 @@ machine:
       options:
         - no_read_workqueue
         - no_write_workqueue
-  disks:
-    - device: /dev/sdb
-      partitions:
-        - mountpoint: /var/data
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}

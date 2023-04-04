@@ -6,6 +6,7 @@ help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 create-config: ## Genereate talos configs
+	terraform apply -auto-approve -target=local_file.worker_patch
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false --config-patch-worker @templates/worker.patch.yaml ${CLUSTERNAME} https://${ENDPOINT}:6443
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 
@@ -30,7 +31,7 @@ create-controlplane-bootstrap:
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.48 bootstrap
 
 create-controlplane: ## Bootstrap first controlplane node
-	terraform apply -auto-approve -target=hcloud_server.controlplane
+	terraform apply -auto-approve -target=local_file.worker_patch
 
 create-kubeconfig: ## Prepare kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.48 kubeconfig .

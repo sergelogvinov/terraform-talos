@@ -81,12 +81,14 @@ variable "controlplane" {
       count = 0,
       cpu   = 2,
       mem   = 4096,
+      # ip0   = "ip6=1:2::3/64,gw6=1:2::1"
     },
     "node2" = {
       id    = 510
       count = 0,
       cpu   = 2,
       mem   = 4096,
+      # ip0   = "ip6=dhcp",
     }
   }
 }
@@ -100,10 +102,12 @@ variable "instances" {
       web_count    = 0,
       web_cpu      = 2,
       web_mem      = 4096,
+      web_ip0      = "", # ip=dhcp,ip6=dhcp
       worker_id    = 1050
       worker_count = 0,
       worker_cpu   = 2,
       worker_mem   = 4096,
+      worker_ip0   = "", # ip=dhcp,ip6=dhcp
     },
     "node2" = {
       web_id       = 2000
