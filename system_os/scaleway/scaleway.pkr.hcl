@@ -2,7 +2,7 @@
 packer {
   required_plugins {
     scaleway = {
-      version = "= 1.0.5"
+      version = "= 1.1.0"
       source  = "github.com/hashicorp/scaleway"
     }
   }
@@ -15,7 +15,7 @@ source "scaleway" "talos" {
 
   image           = "debian_buster"
   zone            = var.scaleway_zone
-  commercial_type = "DEV1-S"
+  commercial_type = "DEV1-M"
   boottype        = "rescue"
   remove_volume   = true
   ssh_username    = "root"
