@@ -1,0 +1,188 @@
+---
+# Source: local-path-provisioner/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: local-path-provisioner
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.25-dev
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.25-dev"
+    app.kubernetes.io/managed-by: Helm
+imagePullSecrets:
+---
+# Source: local-path-provisioner/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-path-config
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.25-dev
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.25-dev"
+    app.kubernetes.io/managed-by: Helm
+data:
+  config.json: |-
+    {
+      "nodePathMap": [
+        {
+          "node": "DEFAULT_PATH_FOR_NON_LISTED_NODES",
+          "paths": [
+            "/var/data"
+          ]
+        }
+      ]
+    }
+  setup: |-
+    #!/bin/sh
+    set -eu
+    mkdir -m 0777 -p "$VOL_DIR"
+  teardown: |-
+    #!/bin/sh
+    set -eu
+    rm -rf "$VOL_DIR"
+  helperPod.yaml: |-
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: helper-pod
+    spec:
+      priorityClassName: system-node-critical
+      tolerations:
+      - key: node.kubernetes.io/disk-pressure
+        operator: Exists
+        effect: NoSchedule
+      containers:
+        - name: helper-pod
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+---
+# Source: local-path-provisioner/templates/storageclass.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-path
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.25-dev
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.25-dev"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: rancher.io/local-path
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+---
+# Source: local-path-provisioner/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: local-path-provisioner
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.25-dev
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.25-dev"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "persistentvolumeclaims", "configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["endpoints", "persistentvolumes", "pods"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["get", "list", "watch"]
+---
+# Source: local-path-provisioner/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: local-path-provisioner
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.25-dev
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.25-dev"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: local-path-provisioner
+subjects:
+  - kind: ServiceAccount
+    name: local-path-provisioner
+    namespace: local-path-storage
+---
+# Source: local-path-provisioner/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: local-path-provisioner
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.25-dev
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.25-dev"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: local-path-provisioner
+      app.kubernetes.io/instance: local-path-provisioner
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: local-path-provisioner
+        app.kubernetes.io/instance: local-path-provisioner
+    spec:
+      serviceAccountName: local-path-provisioner
+      containers:
+        - name: local-path-provisioner
+          image: "rancher/local-path-provisioner:v0.0.24"
+          imagePullPolicy: IfNotPresent
+          command:
+            - local-path-provisioner
+            - --debug
+            - start
+            - --config
+            - /etc/config/config.json
+            - --service-account-name
+            - local-path-provisioner
+            - --provisioner-name
+            - rancher.io/local-path
+            - --helper-image
+            - "busybox:latest"
+            - --configmap-name
+            - local-path-config
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config/
+          env:
+            - name: POD_NAMESPACE
+              value: local-path-storage
+          resources:
+            limits:
+              cpu: 50m
+              memory: 64Mi
+            requests:
+              cpu: 50m
+              memory: 32Mi
+      volumes:
+        - name: config-volume
+          configMap:
+            name: local-path-config
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane

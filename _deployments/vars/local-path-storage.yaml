@@ -1,0 +1,31 @@
+
+image:
+  repository: rancher/local-path-provisioner
+  tag: v0.0.24
+
+storageClass:
+  create: true
+  defaultClass: true
+  provisionerName: rancher.io/local-path
+
+nodePathMap:
+  - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+    paths:
+      - /var/data
+
+configmap:
+  name: local-path-config
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 64Mi
+  requests:
+    cpu: 50m
+    memory: 32Mi
+
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""
+tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    effect: NoSchedule
