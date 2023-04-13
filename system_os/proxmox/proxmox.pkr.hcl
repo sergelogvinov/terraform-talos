@@ -21,7 +21,6 @@ source "proxmox" "talos" {
   # iso_storage_pool = "local"
   unmount_iso = true
 
-  scsi_controller = "virtio-scsi-pci"
   network_adapters {
     bridge   = "vmbr0"
     model    = "virtio"
@@ -31,12 +30,15 @@ source "proxmox" "talos" {
     bridge = "vmbr1"
     model  = "virtio"
   }
+
+  scsi_controller = "virtio-scsi-single"
   disks {
     type              = "scsi"
     storage_pool      = var.proxmox_storage
     storage_pool_type = var.proxmox_storage_type
     format            = "raw"
     disk_size         = "5G"
+    io_thread         = "true"
     cache_mode        = "writethrough"
   }
 

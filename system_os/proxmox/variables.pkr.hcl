@@ -25,7 +25,7 @@ variable "proxmox_storage_type" {
 
 variable "talos_version" {
   type    = string
-  default = "v1.3.6"
+  default = "v1.3.7"
 }
 
 locals {
