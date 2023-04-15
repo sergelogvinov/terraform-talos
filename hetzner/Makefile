@@ -1,5 +1,6 @@
 
-ENDPOINT:=${shell terraform output -raw controlplane_endpoint 2>/dev/null}
+ENDPOINT:=api.cluster.local
+# ENDPOINT:=${shell terraform output -raw controlplane_endpoint 2>/dev/null}
 CLUSTERNAME:="talos-k8s-hetzner"
 
 help:

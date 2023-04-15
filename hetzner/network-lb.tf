@@ -1,13 +1,13 @@
 
 locals {
-  lb_enable = lookup(var.controlplane, "type_lb", "") == "" ? false : true
+  lb_enable = try(var.controlplane["all"].type_lb, "") == "" ? false : true
 }
 
 locals {
-  ipv4_vip   = cidrhost(hcloud_network_subnet.core.ip_range, 10)
+  ipv4_vip   = cidrhost(hcloud_network_subnet.core.ip_range, 6)
   lbv4_local = cidrhost(hcloud_network_subnet.core.ip_range, 5)
   lbv4       = local.lb_enable ? hcloud_load_balancer.api[0].ipv4 : hcloud_floating_ip.api[0].ip_address
-  lbv6       = local.lb_enable ? hcloud_load_balancer.api[0].ipv6 : cidrhost(hcloud_network_subnet.core.ip_range, 10)
+  lbv6       = local.lb_enable ? hcloud_load_balancer.api[0].ipv6 : local.ipv4_vip
 }
 
 resource "hcloud_floating_ip" "api" {
@@ -22,7 +22,7 @@ resource "hcloud_load_balancer" "api" {
   count              = local.lb_enable ? 1 : 0
   name               = "api"
   location           = var.regions[0]
-  load_balancer_type = lookup(var.controlplane, "type_lb", "lb11")
+  load_balancer_type = try(var.controlplane["all"].type_lb, "lb11")
   labels             = merge(var.tags, { type = "infra" })
 }
 

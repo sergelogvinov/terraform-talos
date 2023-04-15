@@ -47,6 +47,12 @@ variable "vpc_main_cidr" {
   default     = "172.16.0.0/16"
 }
 
+variable "vpc_main_zone" {
+  description = "Network zone"
+  type        = string
+  default     = "eu-central"
+}
+
 variable "vpc_vswitch_id" {
   description = "vSwitch id"
   type        = number
@@ -54,12 +60,25 @@ variable "vpc_vswitch_id" {
 }
 
 variable "controlplane" {
-  description = "Property of controlplane"
+  description = "Controlplane scheme"
   type        = map(any)
   default = {
-    count   = 0,
-    type    = "cpx11"
-    type_lb = "" # lb11, if "" use floating-ip
+    "all" = {
+      type_lb = "" # lb11, if "" use floating-ip
+    },
+
+    "nbg1" = {
+      count = 0,
+      type  = "cpx11",
+    },
+    "fsn1" = {
+      count = 1,
+      type  = "cpx11",
+    },
+    "hel1" = {
+      count = 0,
+      type  = "cax11",
+    }
   }
 }
 
@@ -121,32 +140,3 @@ variable "whitelist_web" {
     "104.24.0.0/14",
   ]
 }
-
-# variable "robot_servers" {
-#   type = list(object({
-#     name         = string
-#     ipv4_address = string
-#     ipv6_address = string
-#     zone         = string
-#     location     = string
-#     params       = string
-#   }))
-
-#   default = []
-# }
-
-# variable "hosts" {
-#   type = list(object({
-#     name         = string
-#     ipv4_address = string
-#     ipv6_address = string
-#   }))
-
-#   default = [
-#     {
-#       name         = "api.local"
-#       ipv4_address = "123"
-#       ipv6_address = ""
-#     },
-#   ]
-# }

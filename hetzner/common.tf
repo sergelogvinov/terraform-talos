@@ -1,6 +1,8 @@
 
 data "hcloud_image" "talos" {
-  with_selector = "type=infra"
+  for_each          = toset(["amd64", "arm64"])
+  with_architecture = each.key == "amd64" ? "x86" : "arm"
+  with_selector     = "type=infra"
 }
 
 resource "hcloud_ssh_key" "infra" {
