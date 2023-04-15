@@ -110,6 +110,7 @@ cluster:
           user: ${base64encode(robot_user)}
           password: ${base64encode(robot_password)}
           image: ${base64encode(hcloud_image)}
+          sshkey: ${base64encode(hcloud_sshkey)}
   externalCloudProvider:
     enabled: true
     manifests:

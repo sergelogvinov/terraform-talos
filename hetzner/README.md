@@ -155,7 +155,8 @@ Cluster Autoscaler for [Hetzner Cloud](https://github.com/kubernetes/autoscaler/
 Create/deploy autoscaler:
 
 ```shell
-kubectl -n kube-system create secret generic hcloud-init --from-file=worker=_cfgs/worker-as.yaml.base64 --from-literal=ssh-key=${SSHID} --from-literal=image=${IMAGEID}
+cat _cfgs/worker-as.yaml | base64 > _cfgs/worker-as.yaml.base64
+kubectl -n kube-system create secret generic hcloud-init --from-file=worker=_cfgs/worker-as.yaml.base64 --from-literal=image="os=talos"
 
 kubectl apply -f deployments/hcloud-autoscaler.yaml
 ```

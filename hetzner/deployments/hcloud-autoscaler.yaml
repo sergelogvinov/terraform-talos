@@ -139,14 +139,14 @@ spec:
     spec:
       serviceAccountName: cluster-autoscaler
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ""
+        # node-role.kubernetes.io/control-plane: ""
         node.cloudprovider.kubernetes.io/platform: hcloud
       tolerations:
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
       containers:
         - name: cluster-autoscaler
-          image: k8s.gcr.io/autoscaling/cluster-autoscaler:v1.25.0
+          image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.26.2
           # image: ghcr.io/sergelogvinov/cluster-autoscaler-amd64:dev
           name: cluster-autoscaler
           resources:
@@ -167,7 +167,7 @@ spec:
             - --nodes=0:2:CPX31:NBG1:worker-nbg1
             - --nodes=0:2:CPX31:FSN1:worker-fsn1
             - --nodes=0:2:CPX31:HEL1:worker-hel1
-            - --v=1
+            - --v=2
           env:
           - name: HCLOUD_TOKEN
             valueFrom:
@@ -179,6 +179,11 @@ spec:
               secretKeyRef:
                 name: hcloud
                 key: network
+          - name: HCLOUD_SSH_KEY
+            valueFrom:
+              secretKeyRef:
+                name: hcloud
+                key: sshkey
           - name: HCLOUD_IMAGE
             valueFrom:
               secretKeyRef:
@@ -189,8 +194,3 @@ spec:
               secretKeyRef:
                 name: hcloud-init
                 key: worker
-          - name: HCLOUD_SSH_KEY
-            valueFrom:
-              secretKeyRef:
-                name: hcloud-init
-                key: ssh-key

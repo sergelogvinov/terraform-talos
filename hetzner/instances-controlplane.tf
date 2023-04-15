@@ -15,10 +15,6 @@ locals {
   ]) : k.name => k }
 }
 
-output "instances" {
-  value = local.controlplanes
-}
-
 resource "hcloud_server" "controlplane" {
   for_each    = local.controlplanes
   location    = each.value.region
@@ -81,19 +77,25 @@ resource "local_file" "controlplane" {
   for_each = local.controlplanes
 
   content = templatefile("${path.module}/templates/controlplane.yaml.tpl",
-    merge(var.kubernetes, {
+    {
       name           = each.value.name
+      apiDomain      = var.kubernetes["apiDomain"]
+      domain         = var.kubernetes["domain"]
+      podSubnets     = var.kubernetes["podSubnets"]
+      serviceSubnets = var.kubernetes["serviceSubnets"]
       ipv4_vip       = local.ipv4_vip
       ipv4_local     = each.value.ip
       lbv4_local     = local.lbv4_local
       lbv4           = local.lbv4
       lbv6           = local.lbv6
+      nodeSubnets    = hcloud_network_subnet.core.ip_range
       hcloud_network = hcloud_network.main.id
       hcloud_token   = var.hcloud_token
       hcloud_image   = data.hcloud_image.talos["amd64"].id
+      hcloud_sshkey  = hcloud_ssh_key.infra.id
       robot_user     = var.robot_user
       robot_password = var.robot_password
-    })
+    }
   )
   filename        = "_cfgs/${each.value.name}.yaml"
   file_permission = "0600"

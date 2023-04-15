@@ -25,10 +25,10 @@ Having a single Kubernetes control plane that spans multiple cloud providers can
 | [Azure](azure)         | 1.3.4  | CCM,CSI,Autoscaler | many regions, many zones | &check; | &check; |
 | [Exoscale](exoscale)   | 1.3.0  | CCM,Autoscaler     | many regions | &cross; | |
 | [GCP](gcp-zonal)       | 1.3.4  | CCM,CSI,Autoscaler | one region, many zones | &check; | &check; |
-| [Hetzner](hetzner)     | 1.3.4  | CCM,CSI,Autoscaler | many regions | &cross; | &check; |
+| [Hetzner](hetzner)     | 1.4.0  | CCM,CSI,Autoscaler | many regions, one network zone | &cross; | &check; |
 | [Openstack](openstack) | 1.3.4  | CCM,CSI            | many regions, many zones | &check; | &check; |
 | [Oracle](oracle)       | 1.3.4  | CCM,~~CSI~~,Autoscaler | one region, many zones | &check; | &check; |
-| [Proxmox](proxmox)     | 1.3.4  | TalosCCM           | one region, one zones | &check; | &check; |
+| [Proxmox](proxmox)     | 1.3.4  | CCM                | one region, one zones | &check; | &check; |
 | [Scaleway](scaleway)   | 1.3.4  | CCM,CSI            | one region | &check; | &check; |
 
 ## Known issues

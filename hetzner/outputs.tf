@@ -7,20 +7,5 @@ output "controlplane_endpoint" {
 
 output "controlplane_firstnode" {
   description = "Kubernetes controlplane first node"
-  value       = try(hcloud_server.controlplane[0].ipv4_address, "none")
-}
-
-output "controlplane_nodes" {
-  description = "Kubernetes controlplane nodes"
-  value = [
-    for s in hcloud_server.controlplane[*] :
-    {
-      name         = s.name
-      ipv4_address = s.ipv4_address
-      ipv6_address = s.ipv6_address
-      zone         = "hetzner"
-      location     = s.location
-      params       = ""
-    }
-  ]
+  value       = try(flatten([for c in hcloud_server.controlplane : c.ipv4_address])[0], "127.0.0.1")
 }
