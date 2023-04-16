@@ -4,6 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: local-path-provisioner
+  namespace: local-path-storage
   labels:
     app.kubernetes.io/name: local-path-provisioner
     helm.sh/chart: local-path-provisioner-0.0.25-dev
@@ -17,6 +18,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: local-path-config
+  namespace: local-path-storage
   labels:
     app.kubernetes.io/name: local-path-provisioner
     helm.sh/chart: local-path-provisioner-0.0.25-dev
@@ -51,9 +53,9 @@ data:
     spec:
       priorityClassName: system-node-critical
       tolerations:
-      - key: node.kubernetes.io/disk-pressure
-        operator: Exists
-        effect: NoSchedule
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
       containers:
         - name: helper-pod
           image: busybox:latest
@@ -127,6 +129,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: local-path-provisioner
+  namespace: local-path-storage
   labels:
     app.kubernetes.io/name: local-path-provisioner
     helm.sh/chart: local-path-provisioner-0.0.25-dev

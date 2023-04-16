@@ -37,41 +37,54 @@ Where:
 
 Use packer (system_os/hetzner) to upload image.
 
-## Create control plane lb
+## Create control plane
 
 open config file **terraform.tfvars** and add params.
 
 ```hcl
-# counts and type of kubernetes master nodes
-controlplane = {
-    count   = 1,
-    type    = "cpx11"
-    type_lb = ""
-}
-
 # regions to use
 regions = ["nbg1", "fsn1", "hel1"]
 
-# counts and type of worker nodes by redion
+# kubernetes control plane
+controlplane = {
+  "all" = {
+    type_lb = ""
+  },
+
+  "nbg1" = {
+    count = 1,
+    type  = "cpx21",
+  },
+  "fsn1" = {
+    count = 1,
+    type  = "cpx21",
+  },
+  "hel1" = {
+    count = 1,
+    type  = "cax21",
+  }
+}
+
+# Worker nodes by redion
 instances = {
-    "nbg1" = {
-      web_count            = 0,
-      web_instance_type    = "cx11",
-      worker_count         = 0,
-      worker_instance_type = "cx11",
-    },
-    "fsn1" = {
-      web_count            = 0,
-      web_instance_type    = "cx11",
-      worker_count         = 0,
-      worker_instance_type = "cx11",
-    }
-    "hel1" = {
-      web_count            = 1,
-      web_instance_type    = "cx11",
-      worker_count         = 1,
-      worker_instance_type = "cx11",
-    }
+  "nbg1" = {
+    web_count    = 0,
+    web_type     = "cx11",
+    worker_count = 1,
+    worker_type  = "cpx11",
+  },
+  "fsn1" = {
+    web_count    = 0,
+    web_type     = "cx11",
+    worker_count = 0,
+    worker_type  = "cpx11",
+  }
+  "hel1" = {
+    web_count    = 0,
+    web_type     = "cx21",
+    worker_count = 0,
+    worker_type  = "cpx11",
+  }
 }
 ```
 
@@ -96,8 +109,7 @@ make create-controlplane
 Bootstrap the first node
 
 ```shell
-talosctl --talosconfig _cfgs/talosconfig config endpoint $controlplane_firstnode
-talosctl --talosconfig _cfgs/talosconfig --nodes $controlplane_firstnode bootstrap
+make create-controlplane-bootstrap
 ```
 
 ```shell
@@ -115,7 +127,7 @@ make create-infrastructure
 Run server in [Rescue mode](https://docs.hetzner.com/robot/dedicated-server/troubleshooting/hetzner-rescue-system/).
 
 ```shell
-wget -O /tmp/metal-amd64.tar.gz https://github.com/siderolabs/talos/releases/download/v1.2.2/metal-amd64.tar.gz
+wget -O /tmp/metal-amd64.tar.gz https://github.com/siderolabs/talos/releases/download/v1.4.0/metal-amd64.tar.gz
 tar -Oxzf /tmp/talos-amd64.tar.gz > /dev/sda
 ```
 

@@ -46,10 +46,9 @@ create-controlplane-bootstrap:
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${CPFIRST} bootstrap
 
 create-controlplane: ## Bootstrap first controlplane node
-	terraform apply -auto-approve -target=hcloud_server.controlplane
+	terraform apply -auto-approve -target=hcloud_server.controlplane -target=null_resource.controlplane
 
 create-infrastructure: ## Bootstrap all nodes
-	cd modules/worker && terraform init
 	terraform apply
 
 create-kubeconfig: ## Prepare kubeconfig
