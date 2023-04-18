@@ -9,14 +9,17 @@ packer {
 }
 
 source "hcloud" "talos" {
-  token        = var.hcloud_token
-  rescue       = "linux64"
-  image        = "debian-11"
-  location     = var.hcloud_location
-  server_type  = var.hcloud_type
-  ssh_username = "root"
+  token       = var.hcloud_token
+  rescue      = "linux64"
+  image       = "debian-11"
+  location    = var.hcloud_location
+  server_type = var.hcloud_type
 
-  snapshot_name = "talos system disk"
+  ssh_username                 = "root"
+  ssh_timeout                  = "15m"
+  ssh_disable_agent_forwarding = true
+
+  snapshot_name = "talos system disk ${substr(var.hcloud_type, 0, 2) == "ca" ? "arm64" : "amd64"}"
   snapshot_labels = {
     type    = "infra",
     os      = "talos",

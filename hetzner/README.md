@@ -57,11 +57,11 @@ controlplane = {
   },
   "fsn1" = {
     count = 1,
-    type  = "cpx21",
+    type  = "cax21",
   },
   "hel1" = {
     count = 1,
-    type  = "cax21",
+    type  = "cpx21",
   }
 }
 
