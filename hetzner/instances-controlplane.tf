@@ -104,7 +104,7 @@ resource "local_file" "controlplane" {
 resource "null_resource" "controlplane" {
   for_each = local.controlplanes
   provisioner "local-exec" {
-    command = "sleep 60 && talosctl apply-config --insecure --nodes ${hcloud_server.controlplane[each.key].ipv4_address} --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
+    command = "sleep 30 && talosctl apply-config --insecure --nodes ${hcloud_server.controlplane[each.key].ipv4_address} --timeout 5m0s --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
   }
   depends_on = [hcloud_load_balancer_target.api, local_file.controlplane]
 }
