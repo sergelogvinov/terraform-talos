@@ -1,0 +1,88 @@
+---
+# Source: hcloud-cloud-controller-manager/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloud-controller-manager
+  namespace: kube-system
+---
+# Source: hcloud-cloud-controller-manager/templates/clusterrolebinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: system:cloud-controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: cloud-controller-manager
+    namespace: kube-system
+---
+# Source: hcloud-cloud-controller-manager/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hcloud-cloud-controller-manager
+  namespace: kube-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: 'hcloud-cloud-controller-manager'
+      app.kubernetes.io/name: 'hcloud-cloud-controller-manager'
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: 'hcloud-cloud-controller-manager'
+        app.kubernetes.io/name: 'hcloud-cloud-controller-manager'
+    spec:
+      serviceAccountName: cloud-controller-manager
+      dnsPolicy: Default
+      tolerations:
+        # Allow HCCM itself to schedule on nodes that have not yet been initialized by HCCM.
+        - key: "node.cloudprovider.kubernetes.io/uninitialized"
+          value: "true"
+          effect: "NoSchedule"
+        - key: "CriticalAddonsOnly"
+          operator: "Exists"
+
+        # Allow HCCM to schedule on control plane nodes.
+        - key: "node-role.kubernetes.io/master"
+          effect: NoSchedule
+          operator: Exists
+        - key: "node-role.kubernetes.io/control-plane"
+          effect: NoSchedule
+          operator: Exists
+
+        - key: "node.kubernetes.io/not-ready"
+          effect: "NoExecute"
+      containers:
+        - name: hcloud-cloud-controller-manager
+          command:
+            - "/bin/hcloud-cloud-controller-manager"
+            - "--allow-untagged-cloud"
+            - "--cloud-provider=hcloud"
+            - "--leader-elect=false"
+            - "--route-reconciliation-period=30s"
+          env:
+            - name: HCLOUD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: token
+                  name: hcloud
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: HCLOUD_METRICS_ENABLED
+              value: "false"
+          image: hetznercloud/hcloud-cloud-controller-manager:v1.15.0
+          ports:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 50Mi
+      priorityClassName: system-cluster-critical

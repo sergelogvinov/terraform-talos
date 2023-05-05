@@ -114,10 +114,9 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
-      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/talos-cloud-controller-manager-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-csi.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/kubelet-serving-cert-approver.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/metrics-server-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-ns.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-result.yaml

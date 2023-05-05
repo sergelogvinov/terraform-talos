@@ -48,8 +48,7 @@ spec:
         - key: "node-role.kubernetes.io/control-plane"
           effect: NoSchedule
       containers:
-        - image: hetznercloud/hcloud-cloud-controller-manager:v1.13.2
-        # - image: ghcr.io/sergelogvinov/hetzner-cloud-controller-manager:v1.13.2-dev
+        - image: hetznercloud/hcloud-cloud-controller-manager:v1.15.0
           name: hcloud-cloud-controller-manager
           args:
             - --cloud-provider=hcloud

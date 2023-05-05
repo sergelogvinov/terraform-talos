@@ -17,7 +17,7 @@ variable "hcloud_type" {
 
 variable "talos_version" {
   type    = string
-  default = "v1.4.0-beta.1"
+  default = "v1.4.1"
 }
 
 locals {

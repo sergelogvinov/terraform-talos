@@ -1,0 +1,6 @@
+
+image:
+  pullPolicy: Always
+  tag: edge
+
+logVerbosityLevel: 4

@@ -12,6 +12,9 @@ create-deployments: ## create templates
 	helm template --namespace=kube-system  --version=1.12.7 -f vars/cilium.yaml cilium \
 		cilium/cilium > vars/cilium-result.yaml
 
+	# helm template --namespace=kube-system -f vars/talos-cloud-controller-manager.yaml talos-cloud-controller-manager \
+	# 	~/work/sergelogvinov/talos-cloud-controller-manager/charts/talos-cloud-controller-manager > vars/talos-cloud-controller-manager-result.yaml
+
 	helm template --namespace=kube-system -f vars/metrics-server.yaml metrics-server \
 		metrics-server/metrics-server > vars/metrics-server-result.yaml
 
