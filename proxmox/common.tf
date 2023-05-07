@@ -8,6 +8,6 @@ resource "local_file" "worker_patch" {
     })
   )
 
-  filename        = "${path.module}/templates/worker.patch.yaml.tpl"
+  filename        = "${path.module}/templates/worker.patch.yaml"
   file_permission = "0600"
 }

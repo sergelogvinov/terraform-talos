@@ -59,7 +59,7 @@ cluster:
     cni:
       name: custom
       urls:
-        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/cilium-result.yaml
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/cilium-result.yaml
   proxy:
     disabled: true
   controllerManager:
@@ -74,10 +74,12 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
-      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/kubelet-serving-cert-approver.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/metrics-server.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/coredns-local.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/local-path-storage.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/ingress-ns.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/proxmox/deployments/ingress-result.yaml
+      # - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/talos-cloud-controller-manager-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/proxmox-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
+      # - https://raw.githubusercontent.com/sergelogvinov/proxmox-csi-plugin/main/docs/deploy/proxmox-csi-plugin-talos.yml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/metrics-server-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/coredns-local.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/ingress-result.yaml

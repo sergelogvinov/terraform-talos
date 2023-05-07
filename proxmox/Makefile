@@ -31,15 +31,9 @@ create-controlplane-bootstrap:
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.48 bootstrap
 
 create-controlplane: ## Bootstrap first controlplane node
-	terraform apply -auto-approve -target=local_file.worker_patch
+	terraform apply -auto-approve -target=null_resource.controlplane
 
 create-kubeconfig: ## Prepare kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.48 kubeconfig .
 	kubectl --kubeconfig=kubeconfig config set clusters.${CLUSTERNAME}.server https://${ENDPOINT}:6443
 	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
-
-create-deployments:
-	helm template --namespace=kube-system   --version=1.12.8 -f deployments/cilium.yaml cilium \
-		cilium/cilium > deployments/cilium-result.yaml
-	helm template --namespace=ingress-nginx --version=4.6.0 -f deployments/ingress.yaml ingress-nginx \
-		ingress-nginx/ingress-nginx > deployments/ingress-result.yaml

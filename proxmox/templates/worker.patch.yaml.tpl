@@ -6,18 +6,18 @@ machine:
       node-labels: "project.io/node-pool=worker"
     clusterDNS:
       - 169.254.2.53
-      - 10.200.0.10
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
     nodeIP:
-      validSubnets: ["172.16.0.0/24"]
+      validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
     interfaces:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
     extraHostEntries:
-      - ip: 172.16.0.10
+      - ip: ${lbv4}
         aliases:
-          - api.cluster.local
+          - ${apiDomain}
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
@@ -40,6 +40,6 @@ machine:
           slot: 0
 cluster:
   controlPlane:
-    endpoint: https://api.cluster.local:6443
+    endpoint: https://${apiDomain}:6443
   proxy:
     disabled: true
