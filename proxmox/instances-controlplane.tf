@@ -30,7 +30,8 @@ resource "null_resource" "controlplane_metadata" {
     content = templatefile("${path.module}/templates/metadata.yaml", {
       hostname : each.value.name,
       id : each.value.id,
-      type : "qemu",
+      providerID : "proxmox://${var.region}/${each.value.id}",
+      type : "${each.value.cpu}VCPU-${floor(each.value.mem / 1024)}GB",
       zone : each.value.zone,
       region : var.region,
     })
@@ -110,13 +111,23 @@ resource "proxmox_vm_qemu" "controlplane" {
   depends_on = [null_resource.controlplane_metadata]
 }
 
-resource "local_file" "controlplane" {
+resource "local_sensitive_file" "controlplane" {
   for_each = local.controlplanes
   content = templatefile("${path.module}/templates/controlplane.yaml.tpl",
     merge(var.kubernetes, {
       name        = each.value.name
       ipv4_vip    = local.ipv4_vip
       nodeSubnets = local.controlplane_subnet
+      clusters = yamlencode({
+        clusters = [
+          {
+            token_id     = var.proxmox_token_id
+            token_secret = var.proxmox_token_secret
+            url          = "https://${var.proxmox_host}:8006/api2/json"
+            region       = var.region
+          },
+        ]
+      })
     })
   )
   filename        = "_cfgs/${each.value.name}.yaml"
@@ -126,7 +137,7 @@ resource "local_file" "controlplane" {
 resource "null_resource" "controlplane" {
   for_each = local.controlplanes
   provisioner "local-exec" {
-    command = "sleep 60 && talosctl apply-config --insecure --nodes ${split("/", each.value.ipv4)[0]} --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
+    command = "echo talosctl apply-config --insecure --nodes ${split("/", each.value.ipv4)[0]} --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
   }
-  depends_on = [proxmox_vm_qemu.controlplane, local_file.controlplane]
+  depends_on = [proxmox_vm_qemu.controlplane, local_sensitive_file.controlplane]
 }

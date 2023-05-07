@@ -38,9 +38,9 @@ variable "proxmox_token_secret" {
 }
 
 variable "region" {
-  description = "Proxmox host"
+  description = "Proxmox Cluster Name"
   type        = string
-  default     = "nova"
+  default     = "cluster-1"
 }
 
 variable "kubernetes" {

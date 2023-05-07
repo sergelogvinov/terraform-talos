@@ -4,6 +4,11 @@ output "controlplane_endpoint" {
   value       = local.ipv4_vip
 }
 
+output "controlplane_firstnode" {
+  description = "Kubernetes controlplane first node"
+  value       = try(flatten([for s in local.controlplanes : split("/", s.ipv4)[0]])[0], "127.0.0.1")
+}
+
 output "controlplane_apply" {
   description = "Kubernetes controlplane apply command"
   value = [for cp in local.controlplanes :

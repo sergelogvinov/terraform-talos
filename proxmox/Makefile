@@ -1,6 +1,10 @@
 
-ENDPOINT=api.cluster.local
 CLUSTERNAME:="talos-k8s-proxmox"
+CPFIRST := ${shell terraform output -raw controlplane_firstnode 2>/dev/null}
+ENDPOINT := ${shell terraform output -raw controlplane_endpoint 2>/dev/null}
+ifneq (,$(findstring Warning,${ENDPOINT}))
+ENDPOINT := api.cluster.local
+endif
 
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -28,12 +32,12 @@ create-templates:
 
 create-controlplane-bootstrap:
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
-	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.48 bootstrap
+	talosctl --talosconfig _cfgs/talosconfig --nodes ${CPFIRST} bootstrap
 
 create-controlplane: ## Bootstrap first controlplane node
 	terraform apply -auto-approve -target=null_resource.controlplane
 
 create-kubeconfig: ## Prepare kubeconfig
-	talosctl --talosconfig _cfgs/talosconfig --nodes 172.16.0.48 kubeconfig .
+	talosctl --talosconfig _cfgs/talosconfig --nodes ${CPFIRST} kubeconfig .
 	kubectl --kubeconfig=kubeconfig config set clusters.${CLUSTERNAME}.server https://${ENDPOINT}:6443
 	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system

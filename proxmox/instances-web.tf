@@ -57,7 +57,8 @@ resource "null_resource" "web_metadata" {
     content = templatefile("${path.module}/templates/metadata.yaml", {
       hostname : each.value.name,
       id : each.value.id,
-      type : "qemu",
+      providerID : "proxmox://${var.region}/${each.value.id}",
+      type : "${each.value.cpu}VCPU-${floor(each.value.mem / 1024)}GB",
       zone : each.value.zone,
       region : var.region,
     })
