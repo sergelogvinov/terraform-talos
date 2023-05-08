@@ -62,6 +62,9 @@ Terraform will create the Talos machine config and upload it to the Proxmox serv
 It will also create a metadata file, which is a very important file that contains information such as region, zone, and providerID.
 This metadata is used by the Talos CCM to label the nodes and it also required by the Proxmox CCM/CSI.
 
+Contol-plane machine config uploads by command `talosctl apply-config`, because I do not want to store all kubernetes secrets in proxmox server.
+Terraform shows you command to launch.
+
 VM config looks like:
 
 ```yaml
