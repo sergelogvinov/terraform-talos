@@ -163,7 +163,7 @@ resource "proxmox_vm_qemu" "worker" {
   sockets = 1
   cores   = each.value.cpu
   memory  = each.value.mem
-  scsihw  = "virtio-scsi-pci"
+  scsihw  = "virtio-scsi-single"
 
   vga {
     memory = 0
@@ -194,12 +194,13 @@ resource "proxmox_vm_qemu" "worker" {
     backup  = false
   }
   disk {
-    type    = "scsi"
-    storage = var.proxmox_storage
-    size    = "128G"
-    cache   = "none"
-    ssd     = 1
-    backup  = false
+    type     = "scsi"
+    storage  = var.proxmox_storage
+    size     = "128G"
+    cache    = "none"
+    iothread = 1
+    ssd      = 1
+    backup   = false
   }
 
   lifecycle {

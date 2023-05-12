@@ -91,7 +91,7 @@ resource "proxmox_vm_qemu" "web" {
   sockets = 1
   cores   = each.value.cpu
   memory  = each.value.mem
-  scsihw  = "virtio-scsi-pci"
+  scsihw  = "virtio-scsi-single"
 
   vga {
     memory = 0
