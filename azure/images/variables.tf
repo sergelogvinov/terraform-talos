@@ -24,7 +24,7 @@ variable "name" {
 variable "release" {
   description = "The image name"
   type        = string
-  default     = "1.3.4"
+  default     = "1.4.5"
 }
 
 variable "arch" {

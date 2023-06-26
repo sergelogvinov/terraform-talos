@@ -1,5 +1,5 @@
 
-variable "ccm_role_definition" {
+variable "controlplane_role_definition" {
   default = "kubernetes-ccm"
 }
 
@@ -26,6 +26,12 @@ locals {
   network_secgroup     = data.terraform_remote_state.prepare.outputs.secgroups
 }
 
+variable "arch" {
+  description = "The Talos architecture list"
+  type        = list(string)
+  default     = ["x64", "Arm64"]
+}
+
 variable "tags" {
   description = "Tags of resources"
   type        = map(string)
@@ -39,12 +45,12 @@ variable "controlplane" {
   type        = map(any)
   default = {
     "uksouth" = {
-      count         = 0,
-      instance_type = "Standard_B2s",
+      count = 0,
+      type  = "Standard_B2ms",
     },
     "ukwest" = {
-      count         = 0,
-      instance_type = "Standard_B2s",
+      count = 0,
+      type  = "Standard_B2ms",
     },
   }
 }

@@ -17,7 +17,6 @@ resource "azurerm_subnet" "controlplane" {
   address_prefixes = [
     for cidr in azurerm_virtual_network.main[each.key].address_space : cidrsubnet(cidr, length(split(".", cidr)) > 1 ? 4 : 2, 0)
   ]
-  service_endpoints = ["Microsoft.ContainerRegistry", "Microsoft.Storage"]
 }
 
 resource "azurerm_subnet" "shared" {
@@ -36,7 +35,18 @@ resource "azurerm_subnet" "services" {
   resource_group_name  = var.resource_group
   virtual_network_name = azurerm_virtual_network.main[each.key].name
   address_prefixes = [
-    for cidr in azurerm_virtual_network.main[each.key].address_space : cidrsubnet(cidr, 3, 1) if length(split(".", cidr)) > 1
+    for cidr in azurerm_virtual_network.main[each.key].address_space : cidrsubnet(cidr, 4, 2) if length(split(".", cidr)) > 1
+  ]
+  service_endpoints = ["Microsoft.ContainerRegistry", "Microsoft.Storage", "Microsoft.KeyVault"]
+}
+
+resource "azurerm_subnet" "databases" {
+  for_each             = { for idx, name in var.regions : name => idx }
+  name                 = "databases"
+  resource_group_name  = var.resource_group
+  virtual_network_name = azurerm_virtual_network.main[each.key].name
+  address_prefixes = [
+    for cidr in azurerm_virtual_network.main[each.key].address_space : cidrsubnet(cidr, 4, 3) if length(split(".", cidr)) > 1
   ]
 }
 
@@ -48,7 +58,6 @@ resource "azurerm_subnet" "public" {
   address_prefixes = [
     for cidr in azurerm_virtual_network.main[each.key].address_space : cidrsubnet(cidr, 2, 2)
   ]
-  service_endpoints = ["Microsoft.ContainerRegistry", "Microsoft.Storage"]
 }
 
 resource "azurerm_subnet" "private" {
@@ -59,7 +68,6 @@ resource "azurerm_subnet" "private" {
   address_prefixes = [
     for cidr in azurerm_virtual_network.main[each.key].address_space : cidrsubnet(cidr, 2, 3)
   ]
-  service_endpoints = ["Microsoft.ContainerRegistry", "Microsoft.Storage"]
 }
 
 resource "azurerm_virtual_network_peering" "peering" {

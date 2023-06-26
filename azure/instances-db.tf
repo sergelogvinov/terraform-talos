@@ -20,25 +20,22 @@ resource "azurerm_linux_virtual_machine_scale_set" "db" {
     name                      = "db-${lower(each.key)}"
     primary                   = true
     network_security_group_id = local.network_secgroup[each.key].common
+
     ip_configuration {
       name      = "db-${lower(each.key)}-v4"
       primary   = true
       version   = "IPv4"
-      subnet_id = local.network_public[each.key].network_id
-      public_ip_address {
-        name    = "db-${lower(each.key)}-v4"
-        version = "IPv4"
-      }
+      subnet_id = local.network_private[each.key].network_id
     }
     ip_configuration {
       name      = "db-${lower(each.key)}-v6"
       version   = "IPv6"
-      subnet_id = local.network_public[each.key].network_id
+      subnet_id = local.network_private[each.key].network_id
 
       dynamic "public_ip_address" {
         for_each = local.network_public[each.key].sku == "Standard" ? ["IPv6"] : []
         content {
-          name    = "worker-${lower(each.key)}-v6"
+          name    = "db-${lower(each.key)}-v6"
           version = public_ip_address.value
         }
       }
@@ -65,7 +62,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "db" {
     disk_size_gb         = 50
   }
 
-  source_image_id = data.azurerm_shared_image_version.talos.id
+  source_image_id = data.azurerm_shared_image_version.talos[startswith(lookup(try(var.instances[each.key], {}), "db_type", ""), "Standard_D2p") ? "Arm64" : "x64"].id
   #   source_image_reference {
   #     publisher = "talos"
   #     offer     = "Talos"

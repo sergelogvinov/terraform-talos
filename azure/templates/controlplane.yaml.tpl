@@ -1,16 +1,5 @@
-version: v1alpha1
-debug: false
-persist: true
 machine:
-  type: controlplane
   certSANs: ${format("%#v",certSANs)}
-  features:
-    kubernetesTalosAPIAccess:
-      enabled: true
-      allowedRoles:
-        - os:reader
-      allowedKubernetesNamespaces:
-        - kube-system
   kubelet:
     extraArgs:
       node-labels: "${labels}"
@@ -36,36 +25,41 @@ machine:
         addresses:
           - 169.254.2.53/32
     extraHostEntries:
-      - ip: ${lbv4}
+      - ip: 127.0.0.1
         aliases:
           - ${apiDomain}
-  install:
-    wipe: false
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
   systemDiskEncryption:
     state:
       provider: luks2
+      options:
+        - no_read_workqueue
+        - no_write_workqueue
       keys:
         - nodeID: {}
           slot: 0
     ephemeral:
       provider: luks2
-      keys:
-        - nodeID: {}
-          slot: 0
       options:
         - no_read_workqueue
         - no_write_workqueue
+      keys:
+        - nodeID: {}
+          slot: 0
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:reader
+      allowedKubernetesNamespaces:
+        - kube-system
 cluster:
-  id: ${clusterID}
-  secret: ${clusterSecret}
+  adminKubeconfig:
+    certLifetime: 8h0m0s
   controlPlane:
     endpoint: https://${apiDomain}:6443
-  clusterName: ${clusterName}
-  discovery:
-    enabled: true
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
@@ -73,37 +67,15 @@ cluster:
     cni:
       name: custom
       urls:
-        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/cilium-result.yaml
+        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/cilium-result.yaml
   proxy:
     disabled: true
   apiServer:
     certSANs: ${format("%#v",certSANs)}
-    admissionControl:
-      - name: PodSecurity
-        configuration:
-          apiVersion: pod-security.admission.config.k8s.io/v1alpha1
-          defaults:
-            audit: restricted
-            audit-version: latest
-            enforce: baseline
-            enforce-version: latest
-            warn: restricted
-            warn-version: latest
-          exemptions:
-            namespaces:
-              - kube-system
-              - ingress-nginx
-              - monitoring
-              - local-path-storage
-              - local-lvm
-            runtimeClasses: []
-            usernames: []
-          kind: PodSecurityConfiguration
   controllerManager:
     extraArgs:
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
-  scheduler: {}
   etcd:
     advertisedSubnets:
       - ${nodeSubnets[0]}
@@ -126,14 +98,14 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
-      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/talos-cloud-controller-manager-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-csi-node.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-csi.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-storage.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/kubelet-serving-cert-approver.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/metrics-server.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/local-path-storage.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/coredns-local.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/ingress-ns.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/ingress-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/metrics-server-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/coredns-local.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/ingress-result.yaml

@@ -11,11 +11,11 @@ machine:
       cloud-provider: external
       rotate-server-certificates: true
       node-labels: "${labels}"
-    nodeIP:
-      validSubnets: ${format("%#v",nodeSubnets)}
     clusterDNS:
       - 169.254.2.53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
+    nodeIP:
+      validSubnets: ${format("%#v",nodeSubnets)}
   network:
     interfaces:
       - interface: eth0
@@ -32,11 +32,28 @@ machine:
       - ip: ${lbv4}
         aliases:
           - ${apiDomain}
+  install:
+    wipe: false
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
-  install:
-    wipe: false
+  systemDiskEncryption:
+    state:
+      provider: luks2
+      options:
+        - no_read_workqueue
+        - no_write_workqueue
+      keys:
+        - nodeID: {}
+          slot: 0
+    ephemeral:
+      provider: luks2
+      options:
+        - no_read_workqueue
+        - no_write_workqueue
+      keys:
+        - nodeID: {}
+          slot: 0
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}

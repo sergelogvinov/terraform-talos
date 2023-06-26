@@ -6,7 +6,6 @@ machine:
   token: ${tokenMachine}
   ca:
     crt: ${caMachine}
-  certSANs: []
   nodeLabels:
     node.kubernetes.io/disktype: ssd
   kubelet:
@@ -59,6 +58,8 @@ cluster:
   network:
     dnsDomain: ${domain}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
+  proxy:
+    disabled: true
   token: ${token}
   ca:
     crt: ${ca}

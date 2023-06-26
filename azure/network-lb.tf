@@ -11,7 +11,7 @@ resource "azurerm_public_ip" "web_v4" {
 }
 
 resource "azurerm_lb" "web" {
-  for_each            = { for idx, name in local.regions : name => idx }
+  for_each            = { for idx, name in local.regions : name => idx if lookup(try(var.instances[name], {}), "web_count", 0) > 0 }
   location            = each.key
   name                = "web-${lower(each.key)}"
   resource_group_name = local.resource_group
@@ -26,13 +26,13 @@ resource "azurerm_lb" "web" {
 }
 
 resource "azurerm_lb_backend_address_pool" "web_v4" {
-  for_each        = { for idx, name in local.regions : name => idx }
+  for_each        = { for idx, name in local.regions : name => idx if lookup(try(var.instances[name], {}), "web_count", 0) > 0 }
   loadbalancer_id = azurerm_lb.web[each.key].id
   name            = "web-pool-v4"
 }
 
 resource "azurerm_lb_probe" "web" {
-  for_each            = { for idx, name in local.regions : name => idx }
+  for_each            = { for idx, name in local.regions : name => idx if lookup(try(var.instances[name], {}), "web_count", 0) > 0 }
   name                = "web-http-probe"
   loadbalancer_id     = azurerm_lb.web[each.key].id
   interval_in_seconds = 30
@@ -42,7 +42,7 @@ resource "azurerm_lb_probe" "web" {
 }
 
 resource "azurerm_lb_rule" "web_http_v4" {
-  for_each                       = { for idx, name in local.regions : name => idx }
+  for_each                       = { for idx, name in local.regions : name => idx if lookup(try(var.instances[name], {}), "web_count", 0) > 0 }
   name                           = "web_http-v4"
   loadbalancer_id                = azurerm_lb.web[each.key].id
   frontend_ip_configuration_name = "web-lb-v4"
@@ -58,7 +58,7 @@ resource "azurerm_lb_rule" "web_http_v4" {
 }
 
 resource "azurerm_lb_rule" "web_https_v4" {
-  for_each                       = { for idx, name in local.regions : name => idx }
+  for_each                       = { for idx, name in local.regions : name => idx if lookup(try(var.instances[name], {}), "web_count", 0) > 0 }
   name                           = "web-https-v4"
   loadbalancer_id                = azurerm_lb.web[each.key].id
   frontend_ip_configuration_name = "web-lb-v4"
@@ -74,7 +74,7 @@ resource "azurerm_lb_rule" "web_https_v4" {
 }
 
 resource "azurerm_lb_outbound_rule" "web" {
-  for_each                 = { for idx, name in local.regions : name => idx if local.network_public[name].sku != "Basic" }
+  for_each                 = { for idx, name in local.regions : name => idx if lookup(try(var.instances[name], {}), "web_count", 0) > 0 && local.network_public[name].sku != "Basic" }
   name                     = "snat"
   loadbalancer_id          = azurerm_lb.web[each.key].id
   backend_address_pool_id  = azurerm_lb_backend_address_pool.web_v4[each.key].id

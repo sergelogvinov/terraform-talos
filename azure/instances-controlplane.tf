@@ -11,59 +11,195 @@ resource "azurerm_availability_set" "controlplane" {
   tags = merge(var.tags, { type = "infra" })
 }
 
-module "controlplane" {
-  source          = "./modules/controlplane"
-  for_each        = { for idx, name in local.regions : name => idx }
-  region          = each.key
-  subscription_id = local.subscription_id
+locals {
+  controlplane_labels = "kubernetes.azure.com/managed=false"
 
-  instance_availability_set = azurerm_availability_set.controlplane[each.key].id
-  instance_count            = lookup(try(var.controlplane[each.key], {}), "count", 0)
-  instance_resource_group   = local.resource_group
-  instance_type             = lookup(try(var.controlplane[each.key], {}), "instance_type", "Standard_B2ms")
-  instance_image            = data.azurerm_shared_image_version.talos.id
-  instance_tags             = merge(var.tags, { type = "infra" })
-  instance_secgroup         = local.network_secgroup[each.key].controlplane
-  instance_role_definition  = var.ccm_role_definition
-  instance_params = merge(var.kubernetes, {
-    lbv4   = local.network_controlplane[each.key].controlplane_lb[0]
-    lbv6   = try(local.network_controlplane[each.key].controlplane_lb[1], "")
-    region = each.key
+  controlplanes = { for k in flatten([
+    for region in local.regions : [
+      for inx in range(lookup(try(var.controlplane[region], {}), "count", 0)) : {
+        inx : inx
+        name : "controlplane-${region}-${1 + inx}"
+        region : region
+        availability_set : azurerm_availability_set.controlplane[region].id
 
-    ccm = templatefile("${path.module}/deployments/azure.json.tpl", {
-      subscriptionId = local.subscription_id
-      tenantId       = data.azurerm_client_config.terraform.tenant_id
-      region         = each.key
-      resourceGroup  = local.resource_group
-      vnetName       = local.network[each.key].name
-      tags           = join(",", [for k, v in var.tags : "${k}=${v}"])
-    })
-  })
+        image : data.azurerm_shared_image_version.talos[startswith(lookup(try(var.controlplane[region], {}), "type", ""), "Standard_D2p") ? "Arm64" : "x64"].id
+        type : lookup(try(var.controlplane[region], {}), "type", "Standard_B2ms")
 
-  network_internal = local.network_controlplane[each.key]
+        ip : 11 + inx
+        secgroup : local.network_secgroup[region].controlplane
+        network : local.network_controlplane[region]
+        vnetName : local.network[region].name
+      }
+    ]
+  ]) : k.name => k }
+
+  lbv4s = [for ip in flatten([for c in local.network_controlplane : c.controlplane_lb]) : ip if length(split(".", ip)) > 1]
+  lbv6s = [for ip in flatten([for c in local.network_controlplane : c.controlplane_lb]) : ip if length(split(":", ip)) > 1]
 }
 
-resource "local_file" "azure" {
-  content = templatefile("${path.module}/deployments/azure-as.json.tpl", {
-    subscriptionId = local.subscription_id
-    tenantId       = data.azurerm_client_config.terraform.tenant_id
-    region         = local.regions[0]
-    resourceGroup  = local.resource_group
-    tags           = join(",", [for k, v in var.tags : "${k}=${v}"])
-  })
-  filename        = "_cfgs/azure.json"
+resource "azurerm_public_ip" "controlplane_v4" {
+  for_each                = local.controlplanes
+  name                    = "${each.value.name}-v4"
+  resource_group_name     = local.resource_group
+  location                = each.value.region
+  ip_version              = "IPv4"
+  sku                     = each.value.network.sku
+  allocation_method       = each.value.network.sku == "Standard" ? "Static" : "Dynamic"
+  idle_timeout_in_minutes = 15
+
+  tags = merge(var.tags, { type = "infra" })
+}
+
+resource "azurerm_public_ip" "controlplane_v6" {
+  for_each                = { for k, v in local.controlplanes : k => v if v.network.sku == "Standard" }
+  name                    = "${each.value.name}-v6"
+  resource_group_name     = local.resource_group
+  location                = each.value.region
+  ip_version              = "IPv6"
+  sku                     = each.value.network.sku
+  allocation_method       = "Static"
+  idle_timeout_in_minutes = 15
+
+  tags = merge(var.tags, { type = "infra" })
+}
+
+resource "azurerm_network_interface" "controlplane" {
+  for_each            = local.controlplanes
+  name                = each.value.name
+  resource_group_name = local.resource_group
+  location            = each.value.region
+
+  dynamic "ip_configuration" {
+    for_each = each.value.network.cidr
+
+    content {
+      name                          = "${each.value.name}-v${length(split(".", ip_configuration.value)) > 1 ? "4" : "6"}"
+      primary                       = length(split(".", ip_configuration.value)) > 1
+      subnet_id                     = each.value.network.network_id
+      private_ip_address            = cidrhost(ip_configuration.value, each.value.ip)
+      private_ip_address_version    = length(split(".", ip_configuration.value)) > 1 ? "IPv4" : "IPv6"
+      private_ip_address_allocation = "Static"
+      public_ip_address_id          = length(split(".", ip_configuration.value)) > 1 ? azurerm_public_ip.controlplane_v4[each.key].id : try(azurerm_public_ip.controlplane_v6[each.key].id, null)
+    }
+  }
+
+  tags = merge(var.tags, { type = "infra" })
+}
+
+resource "azurerm_network_interface_security_group_association" "controlplane" {
+  for_each                  = { for k, v in local.controlplanes : k => v if length(v.secgroup) > 0 }
+  network_interface_id      = azurerm_network_interface.controlplane[each.key].id
+  network_security_group_id = each.value.secgroup
+}
+
+# Different basic sku and standard sku load balancer or public Ip resources in availability set is not allowed
+resource "azurerm_network_interface_backend_address_pool_association" "controlplane_v4" {
+  for_each                = { for k, v in local.controlplanes : k => v if length(v.network.controlplane_pool_v4) > 0 }
+  network_interface_id    = azurerm_network_interface.controlplane[each.key].id
+  ip_configuration_name   = "${each.value.name}-v4"
+  backend_address_pool_id = local.network_controlplane[each.value.region].controlplane_pool_v4
+}
+
+resource "azurerm_network_interface_backend_address_pool_association" "controlplane_v6" {
+  for_each                = { for k, v in local.controlplanes : k => v if length(v.network.controlplane_pool_v6) > 0 }
+  network_interface_id    = azurerm_network_interface.controlplane[each.key].id
+  ip_configuration_name   = "${each.value.name}-v6"
+  backend_address_pool_id = local.network_controlplane[each.value.region].controlplane_pool_v6
+}
+
+resource "local_file" "controlplane" {
+  for_each = local.controlplanes
+
+  content = templatefile("${path.module}/templates/controlplane.yaml.tpl",
+    merge(var.kubernetes, {
+      name   = each.value.name
+      labels = local.controlplane_labels
+      certSANs = flatten([
+        var.kubernetes["apiDomain"],
+        each.value.network.controlplane_lb,
+        azurerm_public_ip.controlplane_v4[each.key].ip_address,
+      ])
+      ipAliases   = compact(each.value.network.controlplane_lb)
+      nodeSubnets = [cidrsubnet(each.value.network.cidr[0], 1, 0), "!${each.value.network.controlplane_lb[0]}"]
+
+      ccm = templatefile("${path.module}/deployments/azure.json.tpl", {
+        subscriptionId = local.subscription_id
+        tenantId       = data.azurerm_client_config.terraform.tenant_id
+        region         = local.regions[0] # each.value.region
+        resourceGroup  = local.resource_group
+        vnetName       = local.network[each.value.region].name
+        tags           = join(",", [for k, v in var.tags : "${k}=${v}"])
+      })
+    })
+  )
+  filename        = "_cfgs/${each.value.name}.yaml"
   file_permission = "0600"
 }
 
+resource "azurerm_linux_virtual_machine" "controlplane" {
+  for_each                   = local.controlplanes
+  name                       = each.value.name
+  computer_name              = each.value.name
+  resource_group_name        = local.resource_group
+  location                   = each.value.region
+  size                       = each.value.type
+  allow_extension_operations = false
+  provision_vm_agent         = false
+  availability_set_id        = each.value.availability_set
+  network_interface_ids      = [azurerm_network_interface.controlplane[each.key].id]
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  # vtpm_enabled               = false
+  # encryption_at_host_enabled = true
+  os_disk {
+    name                 = each.value.name
+    caching              = "ReadOnly"
+    storage_account_type = "Premium_LRS"
+    disk_size_gb         = 48
+  }
+
+  admin_username = "talos"
+  admin_ssh_key {
+    username   = "talos"
+    public_key = file("~/.ssh/terraform.pub")
+  }
+
+  source_image_id = length(each.value.image) > 0 ? each.value.image : null
+  dynamic "source_image_reference" {
+    for_each = length(each.value.image) == 0 ? ["gallery"] : []
+    content {
+      publisher = "talos"
+      offer     = "Talos"
+      sku       = "MPL-2.0"
+      version   = "latest"
+    }
+  }
+
+  tags = merge(var.tags, { type = "infra" })
+
+  boot_diagnostics {}
+  lifecycle {
+    ignore_changes = [admin_username, admin_ssh_key, os_disk, custom_data, source_image_id, tags]
+  }
+}
+
+resource "azurerm_role_assignment" "controlplane" {
+  for_each             = local.controlplanes
+  scope                = "/subscriptions/${local.subscription_id}"
+  role_definition_name = var.controlplane_role_definition
+  principal_id         = azurerm_linux_virtual_machine.controlplane[each.key].identity[0].principal_id
+}
+
 locals {
-  lbv4s    = [for ip in flatten([for c in local.network_controlplane : c.controlplane_lb]) : ip if length(split(".", ip)) > 1]
-  lbv6s    = [for ip in flatten([for c in local.network_controlplane : c.controlplane_lb]) : ip if length(split(":", ip)) > 1]
-  endpoint = try(flatten([for c in module.controlplane : c.controlplane_endpoints])[0], "")
+  controlplane_endpoints = try([for ip in azurerm_public_ip.controlplane_v4 : ip.ip_address if ip.ip_address != ""], [])
 }
 
 resource "azurerm_private_dns_a_record" "controlplane" {
   for_each            = toset(values({ for zone, name in local.network : zone => name.dns if name.dns != "" }))
-  name                = "controlplane"
+  name                = split(".", var.kubernetes["apiDomain"])[0]
   resource_group_name = local.resource_group
   zone_name           = each.key
   ttl                 = 300
@@ -74,7 +210,7 @@ resource "azurerm_private_dns_a_record" "controlplane" {
 
 resource "azurerm_private_dns_aaaa_record" "controlplane" {
   for_each            = toset(values({ for zone, name in local.network : zone => name.dns if name.dns != "" && length(local.lbv6s) > 0 }))
-  name                = "controlplane"
+  name                = split(".", var.kubernetes["apiDomain"])[0]
   resource_group_name = local.resource_group
   zone_name           = each.key
   ttl                 = 300
@@ -84,12 +220,14 @@ resource "azurerm_private_dns_aaaa_record" "controlplane" {
 }
 
 resource "azurerm_private_dns_a_record" "controlplane_zonal" {
-  for_each            = { for idx, name in local.regions : name => idx if lookup(try(var.controlplane[name], {}), "count", 0) > 1 && local.network[name].dns != "" }
-  name                = "controlplane-${each.key}"
+  for_each            = { for idx, region in local.regions : region => idx if local.network[region].dns != "" }
+  name                = "${split(".", var.kubernetes["apiDomain"])[0]}-${each.key}"
   resource_group_name = local.resource_group
   zone_name           = local.network[each.key].dns
   ttl                 = 300
-  records             = flatten(module.controlplane[each.key].controlplane_endpoints)
+  records = flatten([for cp in azurerm_network_interface.controlplane :
+    [for ip in cp.ip_configuration : ip.private_ip_address if ip.private_ip_address_version == "IPv4"] if cp.location == each.key
+  ])
 
   tags = merge(var.tags, { type = "infra" })
 }

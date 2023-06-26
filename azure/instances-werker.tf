@@ -18,8 +18,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
   proximity_placement_group_id = azurerm_proximity_placement_group.common[each.key].id
 
   network_interface {
-    name    = "worker-${lower(each.key)}"
-    primary = true
+    name                      = "worker-${lower(each.key)}"
+    primary                   = true
+    network_security_group_id = local.network_secgroup[each.key].common
 
     enable_accelerated_networking = lookup(try(var.instances[each.key], {}), "worker_os_ephemeral", false)
     ip_configuration {
@@ -71,7 +72,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
     }
   }
 
-  source_image_id = data.azurerm_shared_image_version.talos.id
+  source_image_id = data.azurerm_shared_image_version.talos[startswith(lookup(try(var.instances[each.key], {}), "worker_type", ""), "Standard_D2p") ? "Arm64" : "x64"].id
   #   source_image_reference {
   #     publisher = "talos"
   #     offer     = "Talos"

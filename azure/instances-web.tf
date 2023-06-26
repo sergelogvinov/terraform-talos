@@ -17,11 +17,11 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
   platform_fault_domain_count  = 2
   proximity_placement_group_id = azurerm_proximity_placement_group.common[each.key].id
 
-  # health_probe_id = local.network_public[each.key].sku != "Basic" ? azurerm_lb_probe.web[each.key].id : null
-  # automatic_instance_repair {
-  #   enabled      = local.network_public[each.key].sku != "Basic"
-  #   grace_period = "PT60M"
-  # }
+  #   health_probe_id = local.network_public[each.key].sku != "Basic" ? azurerm_lb_probe.web[each.key].id : null
+  #   automatic_instance_repair {
+  #     enabled      = local.network_public[each.key].sku != "Basic"
+  #     grace_period = "PT60M"
+  #   }
 
   network_interface {
     name                      = "web-${lower(each.key)}"
@@ -32,7 +32,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
       primary                                = true
       version                                = "IPv4"
       subnet_id                              = local.network_public[each.key].network_id
-      load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.web_v4[each.key].id]
+      load_balancer_backend_address_pool_ids = lookup(try(var.instances[each.key], {}), "web_count", 0) > 0 ? [azurerm_lb_backend_address_pool.web_v4[each.key].id] : []
     }
     ip_configuration {
       name      = "web-${lower(each.key)}-v6"
@@ -42,7 +42,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
       dynamic "public_ip_address" {
         for_each = local.network_public[each.key].sku == "Standard" ? ["IPv6"] : []
         content {
-          name    = "worker-${lower(each.key)}-v6"
+          name    = "web-${lower(each.key)}-v6"
           version = public_ip_address.value
         }
       }
@@ -69,7 +69,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
     disk_size_gb         = 50
   }
 
-  source_image_id = data.azurerm_shared_image_version.talos.id
+  source_image_id = data.azurerm_shared_image_version.talos[startswith(lookup(try(var.instances[each.key], {}), "worker_type", ""), "Standard_D2p") ? "Arm64" : "x64"].id
   #   source_image_reference {
   #     publisher = "talos"
   #     offer     = "Talos"
