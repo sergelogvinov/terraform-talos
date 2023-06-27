@@ -1,6 +1,6 @@
 
 resource "azurerm_lb" "controlplane" {
-  for_each            = { for idx, name in var.regions : name => idx }
+  for_each            = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_enable, false) }
   location            = each.key
   name                = "controlplane-${each.key}"
   resource_group_name = var.resource_group
@@ -22,7 +22,7 @@ resource "azurerm_lb" "controlplane" {
 }
 
 resource "azurerm_lb_probe" "controlplane" {
-  for_each            = { for idx, name in var.regions : name => idx }
+  for_each            = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_enable, false) }
   name                = "controlplane-tcp-probe"
   loadbalancer_id     = azurerm_lb.controlplane[each.key].id
   interval_in_seconds = 30
@@ -31,19 +31,19 @@ resource "azurerm_lb_probe" "controlplane" {
 }
 
 resource "azurerm_lb_backend_address_pool" "controlplane_v4" {
-  for_each        = { for idx, name in var.regions : name => idx }
+  for_each        = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_enable, false) }
   loadbalancer_id = azurerm_lb.controlplane[each.key].id
   name            = "controlplane-pool-v4"
 }
 
 resource "azurerm_lb_backend_address_pool" "controlplane_v6" {
-  for_each        = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_sku, "Basic") != "Basic" }
+  for_each        = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_enable, false) && try(var.capabilities[name].network_lb_sku, "Basic") != "Basic" }
   loadbalancer_id = azurerm_lb.controlplane[each.key].id
   name            = "controlplane-pool-v6"
 }
 
 resource "azurerm_lb_rule" "kubernetes_v4" {
-  for_each                       = { for idx, name in var.regions : name => idx }
+  for_each                       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_enable, false) }
   name                           = "controlplane-v4"
   loadbalancer_id                = azurerm_lb.controlplane[each.key].id
   frontend_ip_configuration_name = "controlplane-lb-v4"
@@ -57,7 +57,7 @@ resource "azurerm_lb_rule" "kubernetes_v4" {
 }
 
 resource "azurerm_lb_rule" "kubernetes_v6" {
-  for_each                       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_sku, "Basic") != "Basic" }
+  for_each                       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_enable, false) && try(var.capabilities[name].network_lb_sku, "Basic") != "Basic" }
   name                           = "controlplane-v6"
   loadbalancer_id                = azurerm_lb.controlplane[each.key].id
   frontend_ip_configuration_name = "controlplane-lb-v6"
@@ -71,7 +71,7 @@ resource "azurerm_lb_rule" "kubernetes_v6" {
 }
 
 resource "azurerm_lb_rule" "talos" {
-  for_each                       = { for idx, name in var.regions : name => idx }
+  for_each                       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_enable, false) }
   name                           = "controlplane-talos-v4"
   loadbalancer_id                = azurerm_lb.controlplane[each.key].id
   frontend_ip_configuration_name = "controlplane-lb-v4"
@@ -85,7 +85,7 @@ resource "azurerm_lb_rule" "talos" {
 }
 
 resource "azurerm_lb_rule" "talos_v6" {
-  for_each                       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_sku, "Basic") != "Basic" }
+  for_each                       = { for idx, name in var.regions : name => idx if try(var.capabilities[name].network_lb_enable, false) && try(var.capabilities[name].network_lb_sku, "Basic") != "Basic" }
   name                           = "controlplane-talos-v6"
   loadbalancer_id                = azurerm_lb.controlplane[each.key].id
   frontend_ip_configuration_name = "controlplane-lb-v6"

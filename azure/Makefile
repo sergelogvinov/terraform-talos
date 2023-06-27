@@ -38,11 +38,14 @@ create-deployments:
 	helm template --namespace=kube-system -f deployments/azure-autoscaler.yaml cluster-autoscaler-azure \
 		autoscaler/cluster-autoscaler > deployments/azure-autoscaler-result.yaml
 
+	helm template --namespace=kube-system -f deployments/azuredisk-csi-driver.yaml azuredisk-csi-driver \
+		azuredisk-csi-driver/azuredisk-csi-driver > deployments/azuredisk-csi-driver-result.yaml
+
 create-network: ## Create networks
 	cd prepare && terraform init && terraform apply -auto-approve
 
 create-controlplane-bootstrap:
-	talosctl --talosconfig _cfgs/talosconfig config endpoint ${CPFIRST}
+	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${CPFIRST} bootstrap
 
 create-controlplane: ## Bootstrap controlplane

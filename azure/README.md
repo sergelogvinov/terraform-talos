@@ -37,7 +37,6 @@ kubectl -n kube-system create secret generic azure-csi --from-file=azure.json=_c
 * [Azure CSI](https://github.com/kubernetes-sigs/azuredisk-csi-driver)
 * [Azure Node AutoScaler](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/azure/README.md)
 * [cilium](https://github.com/cilium/cilium) 1.12.5
-* [kubelet-serving-cert-approver](https://github.com/alex1989hu/kubelet-serving-cert-approver)
 * [metrics-server](https://github.com/kubernetes-sigs/metrics-server) 0.5.0
 * [rancher.io/local-path](https://github.com/rancher/local-path-provisioner) 0.0.19
 * [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) 4.4.2

@@ -1,0 +1,25 @@
+
+controller:
+  cloudConfigSecretName: azure-managed-identity
+  cloudConfigSecretNamespace: kube-system
+
+  replicas: 1
+  vmType: vmss
+  allowEmptyCloudConfig: true
+
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+    node.cloudprovider.kubernetes.io/platform: azure
+
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      effect: NoSchedule
+
+linux:
+  enabled: true
+
+  nodeSelector:
+    node.cloudprovider.kubernetes.io/platform: azure
+
+windows:
+  enabled: false

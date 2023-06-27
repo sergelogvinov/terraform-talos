@@ -1,6 +1,6 @@
 
 variable "controlplane_role_definition" {
-  default = "kubernetes-ccm"
+  default = ["kubernetes-ccm", "kubernetes-csi", "kubernetes-node-autoscaler"]
 }
 
 variable "gallery_name" {

@@ -72,7 +72,6 @@ resource "azurerm_role_definition" "csi" {
   }
 }
 
-
 resource "azurerm_role_definition" "scaler" {
   name              = "kubernetes-node-autoscaler"
   description       = "This is a kubernetes role for node autoscaler system, created via Terraform"

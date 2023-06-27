@@ -28,10 +28,15 @@ machine:
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
+%{if lbv4 != "" }
     extraHostEntries:
       - ip: ${lbv4}
         aliases:
           - ${apiDomain}
+%{endif}
+  time:
+    servers:
+      - time.cloudflare.com
   install:
     wipe: false
   sysctls:

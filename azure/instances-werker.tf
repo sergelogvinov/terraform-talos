@@ -14,8 +14,28 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
   sku                          = lookup(try(var.instances[each.key], {}), "worker_type", "Standard_B2s")
   provision_vm_agent           = false
   overprovision                = false
-  platform_fault_domain_count  = 2
+  platform_fault_domain_count  = 5
   proximity_placement_group_id = azurerm_proximity_placement_group.common[each.key].id
+
+  # zone_balance = false
+  # zones        = ["1"]
+
+  # extension_operations_enabled = true
+  # extension {
+  #   name                       = "KubeletHealth"
+  #   publisher                  = "Microsoft.ManagedServices"
+  #   type                       = "ApplicationHealthLinux"
+  #   type_handler_version       = "1.0"
+  #   auto_upgrade_minor_version = false
+
+  #   settings = jsonencode({
+  #     protocol : "http"
+  #     port : "10248"
+  #     requestPath : "/healthz"
+  #     intervalInSeconds : 60
+  #     numberOfProbes : 3
+  #   })
+  # }
 
   network_interface {
     name                      = "worker-${lower(each.key)}"
@@ -46,7 +66,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
 
   custom_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
     merge(var.kubernetes, {
-      lbv4        = local.network_controlplane[each.key].controlplane_lb[0]
+      lbv4        = try(local.network_controlplane[each.key].controlplane_lb[0], "")
       labels      = local.worker_labels
       nodeSubnets = [local.network_private[each.key].cidr[0]]
     })
@@ -72,7 +92,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
     }
   }
 
-  source_image_id = data.azurerm_shared_image_version.talos[startswith(lookup(try(var.instances[each.key], {}), "worker_type", ""), "Standard_D2p") ? "Arm64" : "x64"].id
+  source_image_id = data.azurerm_shared_image_version.talos[length(regexall("^Standard_[DE][\\d+]p", lookup(try(var.instances[each.key], {}), "worker_type", ""))) > 0 ? "Arm64" : "x64"].id
   #   source_image_reference {
   #     publisher = "talos"
   #     offer     = "Talos"

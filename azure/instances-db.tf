@@ -7,14 +7,18 @@ resource "azurerm_linux_virtual_machine_scale_set" "db" {
   for_each = { for idx, name in local.regions : name => idx }
   location = each.key
 
-  instances                   = lookup(try(var.instances[each.key], {}), "db_count", 0)
-  name                        = "db-${lower(each.key)}"
-  computer_name_prefix        = "db-${lower(each.key)}-"
-  resource_group_name         = local.resource_group
-  sku                         = lookup(try(var.instances[each.key], {}), "db_type", "Standard_B2s")
-  provision_vm_agent          = false
-  overprovision               = false
-  platform_fault_domain_count = 2
+  instances                    = lookup(try(var.instances[each.key], {}), "db_count", 0)
+  name                         = "db-${lower(each.key)}"
+  computer_name_prefix         = "db-${lower(each.key)}-"
+  resource_group_name          = local.resource_group
+  sku                          = lookup(try(var.instances[each.key], {}), "db_type", "Standard_B2s")
+  provision_vm_agent           = false
+  overprovision                = false
+  platform_fault_domain_count  = 5
+  proximity_placement_group_id = azurerm_proximity_placement_group.common[each.key].id
+
+  # zone_balance = true
+  # zones        = ["0", "1", "2"]
 
   network_interface {
     name                      = "db-${lower(each.key)}"
@@ -44,7 +48,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "db" {
 
   custom_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
     merge(var.kubernetes, {
-      lbv4        = local.network_controlplane[each.key].controlplane_lb[0]
+      lbv4        = try(local.network_controlplane[each.key].controlplane_lb[0], "")
       labels      = local.db_labels
       nodeSubnets = [local.network_public[each.key].cidr[0]]
     })
@@ -62,7 +66,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "db" {
     disk_size_gb         = 50
   }
 
-  source_image_id = data.azurerm_shared_image_version.talos[startswith(lookup(try(var.instances[each.key], {}), "db_type", ""), "Standard_D2p") ? "Arm64" : "x64"].id
+  source_image_id = data.azurerm_shared_image_version.talos[length(regexall("^Standard_[DE][\\d+]p", lookup(try(var.instances[each.key], {}), "db_type", ""))) > 0 ? "Arm64" : "x64"].id
   #   source_image_reference {
   #     publisher = "talos"
   #     offer     = "Talos"

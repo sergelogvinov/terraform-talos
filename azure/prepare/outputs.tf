@@ -16,50 +16,50 @@ output "resource_group" {
 
 output "network" {
   description = "The network"
-  value = { for zone, net in azurerm_virtual_network.main : zone => {
+  value = { for region, net in azurerm_virtual_network.main : region => {
     name    = net.name
-    nat     = try(azurerm_public_ip.nat[zone].ip_address, "")
+    nat     = try(azurerm_public_ip.nat[region].ip_address, "")
     dns     = try(azurerm_private_dns_zone.main[0].name, "")
-    peering = try(azurerm_linux_virtual_machine.router[zone].private_ip_addresses, [])
+    peering = try(azurerm_linux_virtual_machine.router[region].private_ip_addresses, [])
   } }
 }
 
 output "network_controlplane" {
   description = "The controlplane network"
-  value = { for zone, subnet in azurerm_subnet.controlplane : zone => {
+  value = { for region, subnet in azurerm_subnet.controlplane : region => {
     network_id           = subnet.id
     cidr                 = subnet.address_prefixes
-    sku                  = azurerm_lb.controlplane[zone].sku
-    controlplane_pool_v4 = try(azurerm_lb_backend_address_pool.controlplane_v4[zone].id, "")
-    controlplane_pool_v6 = try(azurerm_lb_backend_address_pool.controlplane_v6[zone].id, "")
-    controlplane_lb      = azurerm_lb.controlplane[zone].private_ip_addresses
+    sku                  = try(var.capabilities[region].network_lb_sku, "Basic")
+    controlplane_pool_v4 = try(var.capabilities[region].network_lb_enable, false) ? try(azurerm_lb_backend_address_pool.controlplane_v4[region].id, "") : ""
+    controlplane_pool_v6 = try(var.capabilities[region].network_lb_enable, false) ? try(azurerm_lb_backend_address_pool.controlplane_v6[region].id, "") : ""
+    controlplane_lb      = try(var.capabilities[region].network_lb_enable, false) ? azurerm_lb.controlplane[region].private_ip_addresses : []
   } }
 }
 
 output "network_public" {
   description = "The public network"
-  value = { for zone, subnet in azurerm_subnet.public : zone => {
+  value = { for region, subnet in azurerm_subnet.public : region => {
     network_id = subnet.id
     cidr       = subnet.address_prefixes
-    sku        = var.capabilities[zone].network_gw_sku
+    sku        = var.capabilities[region].network_gw_sku
   } }
 }
 
 output "network_private" {
   description = "The private network"
-  value = { for zone, subnet in azurerm_subnet.private : zone => {
+  value = { for region, subnet in azurerm_subnet.private : region => {
     network_id = subnet.id
     cidr       = subnet.address_prefixes
-    nat        = try(azurerm_public_ip.nat[zone].ip_address, "")
-    sku        = try(azurerm_public_ip.nat[zone].ip_address, "") == "" ? "Standard" : var.capabilities[zone].network_gw_sku
+    nat        = try(azurerm_public_ip.nat[region].ip_address, "")
+    sku        = try(azurerm_public_ip.nat[region].ip_address, "") == "" ? "Standard" : var.capabilities[region].network_gw_sku
   } }
 }
 
 output "secgroups" {
   description = "List of secgroups"
-  value = { for zone, subnet in azurerm_subnet.private : zone => {
-    common       = azurerm_network_security_group.common[zone].id
-    controlplane = azurerm_network_security_group.controlplane[zone].id
-    web          = azurerm_network_security_group.web[zone].id
+  value = { for region, subnet in azurerm_subnet.private : region => {
+    common       = azurerm_network_security_group.common[region].id
+    controlplane = azurerm_network_security_group.controlplane[region].id
+    web          = azurerm_network_security_group.web[region].id
   } }
 }

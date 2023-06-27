@@ -173,4 +173,4 @@ spec:
       volumes:
         - name: cloud-config
           secret:
-            secretName: azure-cloud-controller-manager
+            secretName: azure-managed-identity

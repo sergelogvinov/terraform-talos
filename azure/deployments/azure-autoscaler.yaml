@@ -4,7 +4,7 @@
 
 fullnameOverride: cluster-autoscaler-azure
 image:
-  tag: v1.26.1
+  tag: v1.27.2
 
 cloudProvider: azure
 cloudConfigPath: /etc/azure/azure.json
@@ -21,7 +21,8 @@ extraArgs:
 
 extraVolumeSecrets:
   cloud-config:
-    name: azure-cluster-autoscaler
+    name: azure-managed-identity
+    # name: azure-cloud-controller-manager
     mountPath: /etc/azure
 
 priorityClassName: system-cluster-critical

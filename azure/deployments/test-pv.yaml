@@ -16,12 +16,12 @@ spec:
     spec:
       nodeSelector:
         node.cloudprovider.kubernetes.io/platform: azure
+        # project.io/node-pool: worker
       tolerations:
         - effect: NoSchedule
           key: node-role.kubernetes.io/control-plane
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: 0
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -31,11 +31,6 @@ spec:
           volumeMounts:
             - name: persistent-storage
               mountPath: /mnt/azuredisk
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
   updateStrategy:
     type: RollingUpdate
   selector:
@@ -49,4 +44,5 @@ spec:
         resources:
           requests:
             storage: 10Gi
-        storageClassName: csi-azure-ssd-xfs
+        # storageClassName: csi-azure-ssd-xfs
+        storageClassName: csi-azure-premium-2-xfs

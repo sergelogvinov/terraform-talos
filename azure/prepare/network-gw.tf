@@ -79,8 +79,8 @@ resource "azurerm_linux_virtual_machine" "router" {
 
   source_image_reference {
     publisher = "Debian"
-    offer     = "debian-11"
-    sku       = "11-gen2"
+    offer     = "debian-12"
+    sku       = "12-gen2"
     version   = "latest"
   }
 

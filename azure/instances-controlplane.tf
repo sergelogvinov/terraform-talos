@@ -6,7 +6,7 @@ resource "azurerm_availability_set" "controlplane" {
   resource_group_name = local.resource_group
 
   platform_update_domain_count = 1
-  platform_fault_domain_count  = 2
+  platform_fault_domain_count  = 3
 
   tags = merge(var.tags, { type = "infra" })
 }
@@ -22,7 +22,7 @@ locals {
         region : region
         availability_set : azurerm_availability_set.controlplane[region].id
 
-        image : data.azurerm_shared_image_version.talos[startswith(lookup(try(var.controlplane[region], {}), "type", ""), "Standard_D2p") ? "Arm64" : "x64"].id
+        image : data.azurerm_shared_image_version.talos[length(regexall("^Standard_[DE][\\d+]p", lookup(try(var.controlplane[region], {}), "db_type", ""))) > 0 ? "Arm64" : "x64"].id
         type : lookup(try(var.controlplane[region], {}), "type", "Standard_B2ms")
 
         ip : 11 + inx
@@ -35,6 +35,12 @@ locals {
 
   lbv4s = [for ip in flatten([for c in local.network_controlplane : c.controlplane_lb]) : ip if length(split(".", ip)) > 1]
   lbv6s = [for ip in flatten([for c in local.network_controlplane : c.controlplane_lb]) : ip if length(split(":", ip)) > 1]
+  cpv4s = flatten([for cp in azurerm_network_interface.controlplane :
+    [for ip in cp.ip_configuration : ip.private_ip_address if ip.private_ip_address_version == "IPv4"]
+  ])
+  cpv6s = flatten([for cp in azurerm_network_interface.controlplane :
+    [for ip in cp.ip_configuration : ip.private_ip_address if ip.private_ip_address_version == "IPv6"]
+  ])
 }
 
 resource "azurerm_public_ip" "controlplane_v4" {
@@ -120,7 +126,7 @@ resource "local_file" "controlplane" {
         azurerm_public_ip.controlplane_v4[each.key].ip_address,
       ])
       ipAliases   = compact(each.value.network.controlplane_lb)
-      nodeSubnets = [cidrsubnet(each.value.network.cidr[0], 1, 0), "!${each.value.network.controlplane_lb[0]}"]
+      nodeSubnets = [cidrsubnet(each.value.network.cidr[0], 1, 0)]
 
       ccm = templatefile("${path.module}/deployments/azure.json.tpl", {
         subscriptionId = local.subscription_id
@@ -187,10 +193,18 @@ resource "azurerm_linux_virtual_machine" "controlplane" {
 }
 
 resource "azurerm_role_assignment" "controlplane" {
-  for_each             = local.controlplanes
+  for_each = { for k in flatten([
+    for cp in azurerm_linux_virtual_machine.controlplane : [
+      for role in var.controlplane_role_definition : {
+        name : "role-${cp.name}-${role}"
+        role : role
+        principal : cp.identity[0].principal_id
+      }
+    ]
+  ]) : k.name => k }
   scope                = "/subscriptions/${local.subscription_id}"
-  role_definition_name = var.controlplane_role_definition
-  principal_id         = azurerm_linux_virtual_machine.controlplane[each.key].identity[0].principal_id
+  role_definition_name = each.value.role
+  principal_id         = each.value.principal
 }
 
 locals {
@@ -203,18 +217,18 @@ resource "azurerm_private_dns_a_record" "controlplane" {
   resource_group_name = local.resource_group
   zone_name           = each.key
   ttl                 = 300
-  records             = local.lbv4s
+  records             = length(local.lbv4s) > 0 ? local.lbv4s : local.cpv4s
 
   tags = merge(var.tags, { type = "infra" })
 }
 
 resource "azurerm_private_dns_aaaa_record" "controlplane" {
-  for_each            = toset(values({ for zone, name in local.network : zone => name.dns if name.dns != "" && length(local.lbv6s) > 0 }))
+  for_each            = toset(values({ for zone, name in local.network : zone => name.dns if name.dns != "" && length(local.cpv6s) > 0 }))
   name                = split(".", var.kubernetes["apiDomain"])[0]
   resource_group_name = local.resource_group
   zone_name           = each.key
   ttl                 = 300
-  records             = local.lbv6s
+  records             = length(local.lbv6s) > 0 ? local.lbv6s : local.cpv6s
 
   tags = merge(var.tags, { type = "infra" })
 }

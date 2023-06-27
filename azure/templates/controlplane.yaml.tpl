@@ -19,8 +19,10 @@ machine:
         routes:
           - network: ::/0
             gateway: fe80::1234:5678:9abc
+%{if length(ipAliases) > 0 }
       - interface: lo
         addresses: ${format("%#v",ipAliases)}
+%{endif}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -85,13 +87,13 @@ cluster:
       election-timeout: "5000"
       heartbeat-interval: "1000"
   inlineManifests:
-    - name: azure-cloud-controller-config
+    - name: azure-managed-identity
       contents: |-
         apiVersion: v1
         kind: Secret
         type: Opaque
         metadata:
-          name: azure-cloud-controller-manager
+          name: azure-managed-identity
           namespace: kube-system
         data:
           azure.json: ${base64encode(ccm)}
@@ -100,9 +102,8 @@ cluster:
     manifests:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/talos-cloud-controller-manager-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-cloud-controller-manager.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-csi-node.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-csi.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-storage.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azuredisk-csi-driver-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azuredisk-storage.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/metrics-server-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-ns.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-result.yaml
