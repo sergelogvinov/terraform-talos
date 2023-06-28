@@ -15,10 +15,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
   provision_vm_agent           = false
   overprovision                = false
   platform_fault_domain_count  = 5
-  proximity_placement_group_id = azurerm_proximity_placement_group.common[each.key].id
+  proximity_placement_group_id = length(var.zones) == 1 ? azurerm_proximity_placement_group.common[each.key].id : null
 
-  # zone_balance = false
-  # zones        = ["1"]
+  zone_balance = length(var.zones) > 0
+  zones        = var.zones
 
   #   health_probe_id = local.network_public[each.key].sku != "Basic" ? azurerm_lb_probe.web[each.key].id : null
   #   automatic_instance_repair {
@@ -53,7 +53,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
   }
 
   custom_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
-    merge(var.kubernetes, {
+    merge(var.kubernetes, var.acr, {
       lbv4        = try(local.network_controlplane[each.key].controlplane_lb[0], "")
       labels      = local.web_labels
       nodeSubnets = [local.network_public[each.key].cidr[0]]
@@ -63,7 +63,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
   admin_username = "talos"
   admin_ssh_key {
     username   = "talos"
-    public_key = file("~/.ssh/terraform.pub")
+    public_key = var.ssh_public_key
   }
 
   os_disk {

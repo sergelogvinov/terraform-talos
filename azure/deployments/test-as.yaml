@@ -22,8 +22,8 @@ spec:
         run: overprovisioning
     spec:
       nodeSelector:
-        node.cloudprovider.kubernetes.io/platform: azure
-        project.io/node-pool: web
+        # node.cloudprovider.kubernetes.io/platform: azure
+        project.io/node-pool: worker
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

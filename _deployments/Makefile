@@ -21,5 +21,5 @@ create-deployments: ## create templates
 	# helm template --namespace=local-path-storage -f vars/local-path-storage.yaml local-path-provisioner \
 	# 	~/work/sergelogvinov/local-path-provisioner/deploy/chart/local-path-provisioner > vars/local-path-storage-result.yaml
 
-	helm template --namespace=ingress-nginx --version=4.6.0 -f vars/ingress.yaml ingress-nginx \
+	helm template --namespace=ingress-nginx --version=4.7.0 -f vars/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > vars/ingress-result.yaml

@@ -25,7 +25,7 @@ output "controlplane_endpoint_public" {
   value       = try(one([for ip in azurerm_public_ip.controlplane_v4 : ip.ip_address if ip.ip_address != ""]), "127.0.0.1")
 }
 
-# output "web_endpoint" {
-#   description = "Kubernetes controlplane endpoint"
-#   value       = compact([for lb in azurerm_public_ip.web_v4 : lb.ip_address])
-# }
+output "web_endpoint" {
+  description = "Kubernetes controlplane endpoint"
+  value       = compact([for lb in azurerm_public_ip.web_v4 : lb.ip_address])
+}

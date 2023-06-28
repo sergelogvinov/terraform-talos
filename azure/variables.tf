@@ -73,6 +73,27 @@ variable "kubernetes" {
   sensitive = true
 }
 
+variable "acr" {
+  type = map(string)
+  default = {
+    acrRepo     = ""
+    acrUsername = ""
+    acrPassword = ""
+  }
+}
+
+variable "zones" {
+  description = "The Azure zones"
+  type        = list(string)
+  default     = ["1", "3"]
+}
+
+variable "ssh_public_key" {
+  description = "The SSH-RSA public key, ssh-keygen -t rsa -b 2048 -f ~/.ssh/terraform -C 'terraform'"
+  type        = string
+  default     = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDBx2qCSLlZ03TYqHm88pXZPyqZ3fvR1p2jWvsLt3uX+mBMr6B8S4vkX3oEBv43IEgi1bkIrdjJ50QvXNWS6fSOo6G0wZ0FHRCan3t4Kq2U+qoWkDsb5K0Kdgd9DZuaNM9412J2dWldYK7iD3hhQ3wh/E1gPlqrYb2AsPAarK+VA59n63QCDrpmGCW/Pki69e8Mt7HH/A1uw+4wvlrtaytrx6C3Y3/mQfBoas4XJliWHeTgEKeVdIzlOf9XrDnZ85pmvmQbFAtRtaRlfwCHMksVEwunYbg1RPrvQ8/YsSv6sFHwwvqjrJ7hdJcaa3afS3rUyAy7vkO0OXm4KdOEgE8X terraform"
+}
+
 variable "instances" {
   description = "Map of region's properties"
   type        = map(any)

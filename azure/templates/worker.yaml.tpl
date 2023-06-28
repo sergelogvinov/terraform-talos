@@ -59,6 +59,14 @@ machine:
       keys:
         - nodeID: {}
           slot: 0
+%{if acrRepo != "" }
+  registries:
+    config:
+      ${acrRepo}:
+        auth:
+          username: ${acrUsername}
+          password: ${acrPassword}
+%{endif}
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}

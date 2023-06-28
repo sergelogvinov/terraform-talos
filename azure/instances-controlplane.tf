@@ -6,7 +6,7 @@ resource "azurerm_availability_set" "controlplane" {
   resource_group_name = local.resource_group
 
   platform_update_domain_count = 1
-  platform_fault_domain_count  = 3
+  platform_fault_domain_count  = 2
 
   tags = merge(var.tags, { type = "infra" })
 }
@@ -22,7 +22,7 @@ locals {
         region : region
         availability_set : azurerm_availability_set.controlplane[region].id
 
-        image : data.azurerm_shared_image_version.talos[length(regexall("^Standard_[DE][\\d+]p", lookup(try(var.controlplane[region], {}), "db_type", ""))) > 0 ? "Arm64" : "x64"].id
+        image : data.azurerm_shared_image_version.talos[length(regexall("^Standard_[DE][\\d+]p", lookup(try(var.controlplane[region], {}), "type", ""))) > 0 ? "Arm64" : "x64"].id
         type : lookup(try(var.controlplane[region], {}), "type", "Standard_B2ms")
 
         ip : 11 + inx
@@ -117,7 +117,7 @@ resource "local_file" "controlplane" {
   for_each = local.controlplanes
 
   content = templatefile("${path.module}/templates/controlplane.yaml.tpl",
-    merge(var.kubernetes, {
+    merge(var.kubernetes, var.acr, {
       name   = each.value.name
       labels = local.controlplane_labels
       certSANs = flatten([
@@ -170,7 +170,7 @@ resource "azurerm_linux_virtual_machine" "controlplane" {
   admin_username = "talos"
   admin_ssh_key {
     username   = "talos"
-    public_key = file("~/.ssh/terraform.pub")
+    public_key = var.ssh_public_key
   }
 
   source_image_id = length(each.value.image) > 0 ? each.value.image : null

@@ -298,8 +298,10 @@ spec:
             - --cloud-provider=azure
             - --namespace=kube-system
             - --node-group-auto-discovery=label:cluster-autoscaler-enabled=true,cluster-autoscaler-name=talos-uksouth
+            - --balance-similar-node-groups=true
             - --cloud-config=/etc/azure/azure.json
             - --logtostderr=true
+            - --node-delete-delay-after-taint=30s
             - --regional=true
             - --stderrthreshold=info
             - --v=3

@@ -6,8 +6,13 @@ resource "azurerm_public_ip" "web_v4" {
   resource_group_name = local.resource_group
   sku                 = local.network_public[each.key].sku
   allocation_method   = local.network_public[each.key].sku == "Standard" ? "Static" : "Dynamic"
+  zones               = local.network_public[each.key].sku == "Standard" ? var.zones : []
 
   tags = merge(var.tags, { type = "web" })
+
+  lifecycle {
+    ignore_changes = [zones]
+  }
 }
 
 resource "azurerm_lb" "web" {

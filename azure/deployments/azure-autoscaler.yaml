@@ -15,6 +15,8 @@ autoDiscovery:
 extraArgs:
   cloud-config: /etc/azure/azure.json
   regional: true
+  balance-similar-node-groups: true
+  node-delete-delay-after-taint: 30s
   logtostderr: true
   stderrthreshold: info
   v: 3

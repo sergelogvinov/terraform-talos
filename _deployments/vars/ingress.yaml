@@ -66,6 +66,11 @@ controller:
     prometheus.io/scrape: "true"
     prometheus.io/port: "10254"
 
+  extraArgs:
+    report-node-internal-ip-address: "true"
+    enable-topology-aware-routing: "true"
+    post-shutdown-grace-period: 30
+
   extraEnvs:
     - name: NODE_NAME
       valueFrom:

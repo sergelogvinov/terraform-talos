@@ -57,6 +57,14 @@ machine:
         - os:reader
       allowedKubernetesNamespaces:
         - kube-system
+%{if acrRepo != "" }
+  registries:
+    config:
+      ${acrRepo}:
+        auth:
+          username: ${acrUsername}
+          password: ${acrPassword}
+%{endif}
 cluster:
   adminKubeconfig:
     certLifetime: 8h0m0s
@@ -102,6 +110,7 @@ cluster:
     manifests:
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/talos-cloud-controller-manager-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-cloud-controller-manager.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azure-autoscaler-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azuredisk-csi-driver-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/azure/deployments/azuredisk-storage.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/metrics-server-result.yaml
