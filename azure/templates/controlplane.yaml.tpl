@@ -1,6 +1,16 @@
 machine:
   certSANs: ${format("%#v",certSANs)}
+%{if repository != "registry.k8s.io"}
+  files:
+    - content: |
+        [plugins]
+          [plugins."io.containerd.grpc.v1.cri"]
+            sandbox_image = "${ repository }/pause:3.8"
+      path: /etc/cri/conf.d/20-customization.part
+      op: create
+%{endif}
   kubelet:
+    image: %{if repository == "registry.k8s.io"}ghcr.io/siderolabs%{else}${ repository }%{endif}/kubelet:${ version }
     extraArgs:
       node-labels: "${labels}"
       rotate-server-certificates: true
@@ -81,11 +91,15 @@ cluster:
   proxy:
     disabled: true
   apiServer:
+    image: ${ repository }/kube-apiserver:${ version }
     certSANs: ${format("%#v",certSANs)}
   controllerManager:
+    image: ${ repository }/kube-controller-manager:${ version }
     extraArgs:
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
+  scheduler:
+    image: ${ repository }/kube-scheduler:${ version }
   etcd:
     advertisedSubnets:
       - ${nodeSubnets[0]}

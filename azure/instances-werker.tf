@@ -65,7 +65,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
   }
 
   custom_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
-    merge(var.kubernetes, var.acr, {
+    merge(var.kubernetes, var.acr, try(var.instances["all"], {}), {
       lbv4        = try(local.network_controlplane[each.key].controlplane_lb[0], "")
       labels      = local.worker_labels
       nodeSubnets = [local.network_private[each.key].cidr[0]]
@@ -104,7 +104,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker" {
     type                         = "worker",
     "cluster-autoscaler-enabled" = "true",
     "cluster-autoscaler-name"    = "${local.resource_group}-${lower(each.key)}",
-    "min"                        = 0,
+    "min"                        = lookup(try(var.instances[each.key], {}), "worker_count", 0),
     "max"                        = 3,
 
     "k8s.io_cluster-autoscaler_node-template_label_project.io_node-pool" = "worker"
@@ -164,7 +164,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "worker_as" {
   }
 
   custom_data = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
-    merge(var.kubernetes, var.acr, {
+    merge(var.kubernetes, var.acr, try(var.instances["all"], {}), {
       lbv4        = try(local.network_controlplane[each.key].controlplane_lb[0], "")
       labels      = local.worker_labels
       nodeSubnets = [local.network_private[each.key].cidr[0]]

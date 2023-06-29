@@ -117,7 +117,7 @@ resource "local_file" "controlplane" {
   for_each = local.controlplanes
 
   content = templatefile("${path.module}/templates/controlplane.yaml.tpl",
-    merge(var.kubernetes, var.acr, {
+    merge(var.kubernetes, var.acr, try(var.controlplane["all"], {}), {
       name   = each.value.name
       labels = local.controlplane_labels
       certSANs = flatten([

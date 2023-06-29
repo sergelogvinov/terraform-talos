@@ -6,7 +6,18 @@ machine:
   token: ${tokenMachine}
   ca:
     crt: ${caMachine}
+%{if repository != "registry.k8s.io"}
+  files:
+    - content: |
+        [plugins]
+          [plugins."io.containerd.grpc.v1.cri"]
+            sandbox_image = "${ repository }/pause:3.8"
+      path: /etc/cri/conf.d/20-customization.part
+      op: create
+%{endif}
   kubelet:
+    image: %{if repository == "registry.k8s.io"}ghcr.io/siderolabs%{else}${ repository }%{endif}/kubelet:${ version }
+    defaultRuntimeSeccompProfileEnabled: true
     extraArgs:
       cloud-provider: external
       rotate-server-certificates: true
@@ -59,6 +70,10 @@ machine:
       keys:
         - nodeID: {}
           slot: 0
+  features:
+    rbac: true
+    stableHostname: true
+    apidCheckExtKeyUsage: true
 %{if acrRepo != "" }
   registries:
     config:

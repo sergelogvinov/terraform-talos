@@ -44,6 +44,10 @@ variable "controlplane" {
   description = "Controlplane config"
   type        = map(any)
   default = {
+    "all" = {
+      repository = "registry.k8s.io"
+      version    = "v1.27.3"
+    }
     "uksouth" = {
       count = 0,
       type  = "Standard_B2ms",
@@ -98,6 +102,10 @@ variable "instances" {
   description = "Map of region's properties"
   type        = map(any)
   default = {
+    "all" = {
+      repository = "registry.k8s.io"
+      version    = "v1.27.3"
+    }
     "uksouth" = {
       web_count    = 0,
       web_type     = "Standard_B2s",
