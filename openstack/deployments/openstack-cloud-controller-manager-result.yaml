@@ -177,7 +177,7 @@ spec:
             - --use-service-account-credentials=true
             - --controllers=cloud-node-lifecycle
             - --bind-address=127.0.0.1
-            - --leader-elect-resource-name=cloud-controller-manager-openstack
+            - --leader-elect-resource-name=openstack-cloud-controller-manager
           volumeMounts:
             - mountPath: /etc/config
               name: cloud-config-volume

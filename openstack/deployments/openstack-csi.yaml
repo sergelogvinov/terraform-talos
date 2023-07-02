@@ -1,6 +1,7 @@
 
 secret:
   enabled: true
+  hostMount: false
   create: false
   name: openstack-cloud-controller-manager
 
@@ -9,10 +10,19 @@ storageClass:
 
 csi:
   plugin:
-    # volumes: []
-    # volumeMounts: []
+    volumes: []
+    volumeMounts:
+      - mountPath: /etc/kubernetes
+        name: cloud-config
+        readOnly: true
 
     nodePlugin:
+      securityContext:
+        capabilities:
+          drop:
+          - ALL
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         node.cloudprovider.kubernetes.io/platform: openstack
       tolerations:
