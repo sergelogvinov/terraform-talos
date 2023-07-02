@@ -1,15 +1,15 @@
 
 output "controlplane_endpoint" {
   description = "Kubernetes controlplane endpoint"
-  value       = module.controlplane
+  value       = one([for ip in local.ips : ip if length(split(".", ip)) > 1])
 }
 
 output "controlplane_endpoint_public" {
   description = "Kubernetes controlplane endpoint public"
-  value       = try(local.endpoint[0], "127.0.0.1")
+  value       = one([for ip in local.endpoint : ip if length(split(".", ip)) > 1])
 }
 
 output "web_endpoint" {
-  description = "Kubernetes controlplane endpoint"
-  value       = module.web
+  description = "Kubernetes web endpoint"
+  value       = local.web_endpoint
 }

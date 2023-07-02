@@ -47,6 +47,7 @@ machine:
 %{endif}
   time:
     servers:
+      - 2.europe.pool.ntp.org
       - time.cloudflare.com
   install:
     wipe: false

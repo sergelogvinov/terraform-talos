@@ -66,6 +66,8 @@ resource "openstack_networking_port_v2" "router" {
   name           = "router-${lower(each.key)}-${openstack_networking_subnet_v2.private[each.key].name}"
   network_id     = local.network_id[each.key].id
   admin_state_up = "true"
+
+  port_security_enabled = false
   fixed_ip {
     subnet_id  = openstack_networking_subnet_v2.private[each.key].id
     ip_address = cidrhost(openstack_networking_subnet_v2.private[each.key].cidr, try(var.capabilities[each.key].gateway, false) && data.openstack_networking_quota_v2.quota[each.key].router > 0 ? 2 : 1)

@@ -129,6 +129,17 @@ resource "openstack_networking_secgroup_rule_v2" "controlplane_talos_admins" {
   remote_ip_prefix  = var.whitelist_admins[0]
 }
 
+# resource "openstack_networking_secgroup_rule_v2" "controlplane_talos_admins_ipv6" {
+#   for_each          = { for idx, name in var.regions : name => idx }
+#   region            = each.key
+#   security_group_id = openstack_networking_secgroup_v2.controlplane[each.key].id
+#   direction         = "ingress"
+#   ethertype         = "IPv6"
+#   protocol          = "tcp"
+#   port_range_min    = 50000
+#   port_range_max    = 50000
+# }
+
 resource "openstack_networking_secgroup_rule_v2" "controlplane_etcd_ipv4" {
   for_each          = { for idx, name in var.regions : name => idx }
   region            = each.key
@@ -203,6 +214,17 @@ resource "openstack_networking_secgroup_rule_v2" "web_https_v4" {
   security_group_id = openstack_networking_secgroup_v2.web[each.key].id
   direction         = "ingress"
   ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 443
+  port_range_max    = 443
+}
+
+resource "openstack_networking_secgroup_rule_v2" "web_https_v6" {
+  for_each          = { for idx, name in var.regions : name => idx }
+  region            = each.key
+  security_group_id = openstack_networking_secgroup_v2.web[each.key].id
+  direction         = "ingress"
+  ethertype         = "IPv6"
   protocol          = "tcp"
   port_range_min    = 443
   port_range_max    = 443

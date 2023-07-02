@@ -77,10 +77,10 @@ variable "instances" {
   type        = map(any)
   default = {
     "REGION" = {
-      web_count            = 0,
-      web_instance_type    = "d2-2",
-      worker_count         = 0,
-      worker_instance_type = "d2-2",
+      web_count    = 0,
+      web_type     = "d2-2",
+      worker_count = 0,
+      worker_type  = "d2-2",
     },
   }
 }

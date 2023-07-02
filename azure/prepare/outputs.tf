@@ -21,6 +21,7 @@ output "network" {
     nat     = try(azurerm_public_ip.nat[region].ip_address, "")
     dns     = try(azurerm_private_dns_zone.main[0].name, "")
     peering = try(azurerm_linux_virtual_machine.router[region].private_ip_addresses, [])
+    cidr    = azurerm_virtual_network.main[region].address_space
   } }
 }
 

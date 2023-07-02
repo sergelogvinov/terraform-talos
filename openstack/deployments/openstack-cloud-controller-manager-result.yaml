@@ -1,0 +1,197 @@
+---
+# Source: openstack-cloud-controller-manager/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: openstack-cloud-controller-manager
+  namespace: kube-system
+  annotations:
+---
+# Source: openstack-cloud-controller-manager/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:openstack-cloud-controller-manager
+  annotations:
+rules:
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - create
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - nodes/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts/token
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - list
+  - get
+  - watch
+---
+# Source: openstack-cloud-controller-manager/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:openstack-cloud-controller-manager
+  annotations:
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openstack-cloud-controller-manager
+subjects:
+- kind: ServiceAccount
+  name: openstack-cloud-controller-manager
+  namespace: "kube-system"
+---
+# Source: openstack-cloud-controller-manager/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: openstack-cloud-controller-manager
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: openstack-cloud-controller-manager
+    helm.sh/chart: openstack-cloud-controller-manager-2.28.0-alpha.6
+    app.kubernetes.io/instance: openstack-cloud-controller-manager
+    app.kubernetes.io/version: "v1.27.1"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+spec:
+  selector:
+    matchLabels:
+      component: controllermanager
+      app: openstack-cloud-controller-manager
+      release: openstack-cloud-controller-manager
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: bf42776b3c976e5762a25c440c7615361c3faf25106844e44870eb6ce9a9f4f1
+      labels:
+        component: controllermanager
+        app: openstack-cloud-controller-manager
+        release: openstack-cloud-controller-manager
+        chart: openstack-cloud-controller-manager-2.28.0-alpha.6
+        heritage: Helm
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+        node.cloudprovider.kubernetes.io/platform: openstack
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      tolerations:
+        - effect: NoSchedule
+          key: node.cloudprovider.kubernetes.io/uninitialized
+          value: "true"
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+      serviceAccountName: openstack-cloud-controller-manager
+      containers:
+        - name: openstack-cloud-controller-manager
+          image: "registry.k8s.io/provider-os/openstack-cloud-controller-manager:v1.27.1"
+          args:
+            - /bin/openstack-cloud-controller-manager
+            - --v=2
+            - --cloud-config=$(CLOUD_CONFIG)
+            - --cluster-name=$(CLUSTER_NAME)
+            - --cloud-provider=openstack
+            - --use-service-account-credentials=true
+            - --controllers=cloud-node-lifecycle
+            - --bind-address=127.0.0.1
+            - --leader-elect-resource-name=cloud-controller-manager-openstack
+          volumeMounts:
+            - mountPath: /etc/config
+              name: cloud-config-volume
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+          env:
+            - name: CLOUD_CONFIG
+              value: /etc/config/cloud.conf
+            - name: CLUSTER_NAME
+              value: kubernetes
+      hostNetwork: true
+      volumes:
+      - name: cloud-config-volume
+        secret:
+          secretName: openstack-cloud-controller-manager

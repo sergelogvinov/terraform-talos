@@ -9,7 +9,7 @@ resource "openstack_compute_keypair_v2" "keypair" {
   for_each   = { for idx, name in var.regions : name => idx }
   region     = each.key
   name       = "Terraform"
-  public_key = file("~/.ssh/id_rsa.pub")
+  public_key = file("~/.ssh/terraform.pub")
 }
 
 data "openstack_images_image_v2" "debian" {

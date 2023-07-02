@@ -4,6 +4,10 @@ output "regions" {
   value       = var.regions
 }
 
+output "peers" {
+  value = { for idx, name in var.regions : name => openstack_networking_port_v2.router_external[name].all_fixed_ips if try(var.capabilities[name].peering, false) }
+}
+
 output "network" {
   value = { for zone, network in local.network_id : zone => {
     name    = var.network_name

@@ -19,6 +19,10 @@ spec:
         node.cloudprovider.kubernetes.io/platform: openstack
       tolerations:
         - operator: Exists
+      securityContext:
+        runAsUser: 0
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: statefulset-openstack
           image: ubuntu
