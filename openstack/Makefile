@@ -54,7 +54,7 @@ create-controlplane: ## Bootstrap controlplane
 
 create-kubeconfig: ## Download kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${CPFIRST} kubeconfig .
-	kubectl --kubeconfig=kubeconfig config set clusters.talos-k8s-openstack.server https://${ENDPOINT}:6443
+	kubectl --kubeconfig=kubeconfig config set clusters.${CLUSTERNAME}.server https://${ENDPOINT}:6443
 	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
 
 create-infrastructure: ## Bootstrap all nodes
