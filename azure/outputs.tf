@@ -26,6 +26,6 @@ output "controlplane_endpoint_public" {
 }
 
 output "web_endpoint" {
-  description = "Kubernetes controlplane endpoint"
+  description = "Web endpoint"
   value       = compact([for lb in azurerm_public_ip.web_v4 : lb.ip_address])
 }

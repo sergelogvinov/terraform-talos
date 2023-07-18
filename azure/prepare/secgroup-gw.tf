@@ -61,6 +61,20 @@ resource "azurerm_network_security_group" "router" {
       destination_address_prefix = security_rule.value
     }
   }
+  dynamic "security_rule" {
+    for_each = var.network_cidr
+    content {
+      name                       = "Peering-external-${security_rule.key}"
+      priority                   = 1700 + security_rule.key
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      source_address_prefix      = security_rule.value
+      destination_port_range     = "*"
+      destination_address_prefix = security_rule.value
+    }
+  }
 
   dynamic "security_rule" {
     for_each = var.network_cidr

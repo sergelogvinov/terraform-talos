@@ -17,7 +17,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
   platform_fault_domain_count  = 5
   proximity_placement_group_id = length(var.zones) == 1 ? azurerm_proximity_placement_group.common[each.key].id : null
 
-  zone_balance = length(var.zones) > 0
+  zone_balance = length(var.zones) > 1
   zones        = var.zones
 
   #   health_probe_id = local.network_public[each.key].sku != "Basic" ? azurerm_lb_probe.web[each.key].id : null
