@@ -48,7 +48,7 @@ spec:
         - key: "node-role.kubernetes.io/control-plane"
           effect: NoSchedule
       containers:
-        - image: hetznercloud/hcloud-cloud-controller-manager:v1.15.0
+        - image: hetznercloud/hcloud-cloud-controller-manager:v1.17.2
           name: hcloud-cloud-controller-manager
           args:
             - --cloud-provider=hcloud
@@ -78,10 +78,12 @@ spec:
             - name: ROBOT_USER_NAME
               valueFrom:
                 secretKeyRef:
+                  optional: true
                   name: hcloud
                   key: user
             - name: ROBOT_PASSWORD
               valueFrom:
                 secretKeyRef:
+                  optional: true
                   name: hcloud
                   key: password

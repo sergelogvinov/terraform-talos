@@ -63,8 +63,12 @@ create-secrets:
 
 helm-repos: ## add helm repos
 	helm repo add hcloud               https://charts.hetzner.cloud
+	helm repo add autoscaler           https://kubernetes.github.io/autoscaler
 	helm repo update
 
 create-deployments:
-	helm template --namespace=kube-system -f deployments/hcloud-cloud-controller-manager.yaml \
+	helm template --namespace=kube-system -f deployments/hcloud-ccm.yaml \
 		hcloud-cloud-controller-manager hcloud/hcloud-cloud-controller-manager > deployments/hcloud-cloud-controller-manager-result.yaml
+
+	helm template --namespace=kube-system -f deployments/hcloud-autoscaler.yaml cluster-autoscaler-hcloud \
+		autoscaler/cluster-autoscaler > deployments/hcloud-autoscaler-result.yaml

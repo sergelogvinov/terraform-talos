@@ -1,13 +1,20 @@
+---
+# Source: cloud-provider-azure/templates/cloud-provider-azure.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: azure-cloud-controller-manager
   namespace: kube-system
 ---
+# Source: cloud-provider-azure/templates/cloud-provider-azure.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: system:azure-cloud-controller-manager
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  labels:
+    k8s-app: azure-cloud-controller-manager
 rules:
   - apiGroups:
       - ""
@@ -60,12 +67,6 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - serviceaccounts/token
-    verbs:
-      - create
-  - apiGroups:
-      - ""
-    resources:
       - persistentvolumes
     verbs:
       - get
@@ -98,9 +99,18 @@ rules:
       - get
       - create
       - update
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - get
+      - list
+      - watch
 ---
-apiVersion: rbac.authorization.k8s.io/v1
+# Source: cloud-provider-azure/templates/cloud-provider-azure.yaml
 kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: system:azure-cloud-controller-manager
 roleRef:
@@ -112,6 +122,7 @@ subjects:
     name: azure-cloud-controller-manager
     namespace: kube-system
 ---
+# Source: cloud-provider-azure/templates/cloud-provider-azure.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -126,6 +137,7 @@ subjects:
     name: azure-cloud-controller-manager
     namespace: kube-system
 ---
+# Source: cloud-provider-azure/templates/cloud-provider-azure.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -134,62 +146,62 @@ metadata:
   labels:
     component: azure-cloud-controller-manager
 spec:
-  replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       tier: control-plane
       component: azure-cloud-controller-manager
+  replicas: 1
   template:
     metadata:
       labels:
-        tier: control-plane
         component: azure-cloud-controller-manager
+        tier: control-plane
     spec:
       priorityClassName: system-cluster-critical
       hostNetwork: true
-      serviceAccountName: azure-cloud-controller-manager
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
-        node.cloudprovider.kubernetes.io/platform: azure
+      serviceAccountName: azure-cloud-controller-manager
       tolerations:
-        - key: "node.cloudprovider.kubernetes.io/uninitialized"
-          value: "true"
-          effect: "NoSchedule"
-        - key: "node-role.kubernetes.io/control-plane"
-          effect: NoSchedule
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            tier: control-plane
+            component: azure-cloud-controller-manager
       containers:
         - name: azure-cloud-controller-manager
-          image: mcr.microsoft.com/oss/kubernetes/azure-cloud-controller-manager:v1.26.5
+          image: mcr.microsoft.com/oss/kubernetes/azure-cloud-controller-manager:v1.27.8
           imagePullPolicy: IfNotPresent
           command: ["cloud-controller-manager"]
           args:
-            - --v=2
-            - --cluster-name=$(CLUSTER_NAME)
-            - --cloud-config=/etc/azure/azure.json
-            - --cloud-provider=azure
-            - --allocate-node-cidrs=false
+            - "--allocate-node-cidrs=false"
+            - "--cloud-config=/etc/azure/azure.json"
+            - "--cloud-provider=azure"
+            - "--cluster-cidr=10.244.0.0/16"
+            - "--cluster-name=kubernetes"
+            - "--configure-cloud-routes=false"
             - --controllers=cloud-node-lifecycle # disable cloud-node controller
-            - --configure-cloud-routes=false
+            - "--leader-elect=true"
             - --leader-elect-resource-name=cloud-controller-manager-azure
-            - --use-service-account-credentials
-            # - --bind-address=127.0.0.1
-            - --secure-port=10267
-          env:
-            - name: CLUSTER_NAME
-              value: kubernetes
+            - "--route-reconciliation-period=10s"
+            - "--secure-port=10268"
+            - "--v=2"
           resources:
             requests:
               cpu: 100m
               memory: 128Mi
             limits:
-              cpu: "1"
-              memory: 512Mi
+              cpu: 100m
+              memory: 128Mi
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 10267
+              port: 10268
               scheme: HTTPS
             initialDelaySeconds: 20
             periodSeconds: 10

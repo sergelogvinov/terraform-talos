@@ -35,6 +35,9 @@ create-templates:
 	@yq eval -o=json '{"kubernetes": .}' _cfgs/tfstate.vars > terraform.tfvars.json
 
 create-deployments:
+	helm template --namespace=kube-system -f deployments/azure-ccm.yaml azure-cloud-controller-manager \
+		cloud-provider-azure > deployments/azure-cloud-controller-manager.yaml
+
 	helm template --namespace=kube-system -f deployments/azure-autoscaler.yaml cluster-autoscaler-azure \
 		autoscaler/cluster-autoscaler > deployments/azure-autoscaler-result.yaml
 
