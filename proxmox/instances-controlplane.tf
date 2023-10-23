@@ -50,12 +50,12 @@ resource "proxmox_vm_qemu" "controlplane" {
   target_node = each.value.node_name
   clone       = var.proxmox_image
 
-  agent                   = 0
-  define_connection_info  = false
-  os_type                 = "ubuntu"
-  qemu_os                 = "l26"
-  ipconfig0               = each.value.ip0
-  ipconfig1               = "ip=${each.value.ipv4},gw=${each.value.gwv4}"
+  agent                  = 0
+  define_connection_info = false
+  os_type                = "ubuntu"
+  qemu_os                = "l26"
+  # ipconfig1               = each.value.ip0
+  ipconfig0               = "ip=${each.value.ipv4},gw=${each.value.gwv4}"
   cicustom                = "meta=local:snippets/${each.value.name}.metadata.yaml"
   cloudinit_cdrom_storage = var.proxmox_storage
 
@@ -76,14 +76,14 @@ resource "proxmox_vm_qemu" "controlplane" {
   }
 
   network {
-    model    = "virtio"
-    bridge   = "vmbr0"
-    firewall = true
-  }
-  network {
     model  = "virtio"
-    bridge = "vmbr1"
+    bridge = "vmbr0"
+    # firewall = true
   }
+  # network {
+  #   model  = "virtio"
+  #   bridge = "vmbr1"
+  # }
 
   boot = "order=scsi0"
   disk {

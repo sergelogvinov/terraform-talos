@@ -31,9 +31,10 @@ resource "null_resource" "web_machineconfig" {
   provisioner "file" {
     # source      = "${path.module}/_cfgs/worker.yaml"
     content = templatefile("${path.module}/templates/web.yaml.tpl",
-      merge(var.kubernetes, {
+      merge(var.kubernetes, try(var.instances["all"], {}), {
         lbv4        = local.ipv4_vip
         nodeSubnets = var.vpc_main_cidr
+        clusterDns  = cidrhost(split(",", var.kubernetes["serviceSubnets"])[0], 10)
         labels      = local.web_labels
     }))
 
@@ -77,12 +78,12 @@ resource "proxmox_vm_qemu" "web" {
   target_node = each.value.node_name
   clone       = var.proxmox_image
 
-  agent                   = 0
-  define_connection_info  = false
-  os_type                 = "ubuntu"
-  qemu_os                 = "l26"
-  ipconfig0               = each.value.ip0
-  ipconfig1               = "ip=${each.value.ipv4},gw=${each.value.gwv4}"
+  agent                  = 0
+  define_connection_info = false
+  os_type                = "ubuntu"
+  qemu_os                = "l26"
+  # ipconfig0               = each.value.ip0
+  ipconfig0               = "ip=${each.value.ipv4},gw=${each.value.gwv4}"
   cicustom                = "user=local:snippets/${local.web_prefix}.yaml,meta=local:snippets/${each.value.name}.metadata.yaml"
   cloudinit_cdrom_storage = var.proxmox_storage
 
@@ -91,6 +92,7 @@ resource "proxmox_vm_qemu" "web" {
   sockets = 1
   cores   = each.value.cpu
   memory  = each.value.mem
+  numa    = true
   scsihw  = "virtio-scsi-single"
 
   vga {
@@ -107,10 +109,10 @@ resource "proxmox_vm_qemu" "web" {
     bridge   = "vmbr0"
     firewall = true
   }
-  network {
-    model  = "virtio"
-    bridge = "vmbr1"
-  }
+  # network {
+  #   model  = "virtio"
+  #   bridge = "vmbr1"
+  # }
 
   boot = "order=scsi0"
   disk {

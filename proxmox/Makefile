@@ -9,6 +9,7 @@ endif
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+.PHONY: init
 init: ## Initialize terraform
 	terraform init -upgrade
 
@@ -20,7 +21,6 @@ create-config: ## Genereate talos configs
 create-templates:
 	@echo 'podSubnets: "10.32.0.0/12,fd00:10:32::/102"'        >  _cfgs/tfstate.vars
 	@echo 'serviceSubnets: "10.200.0.0/22,fd40:10:200::/112"'  >> _cfgs/tfstate.vars
-	@echo 'nodeSubnets: "172.16.0.0/12"'                       >> _cfgs/tfstate.vars
 	@echo 'apiDomain: api.cluster.local'                       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.network.dnsDomain' _cfgs/controlplane.yaml | awk '{ print "domain: "$$1}'       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.clusterName' _cfgs/controlplane.yaml       | awk '{ print "clusterName: "$$1}'  >> _cfgs/tfstate.vars

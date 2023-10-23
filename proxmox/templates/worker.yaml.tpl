@@ -7,13 +7,15 @@ machine:
   ca:
     crt: ${caMachine}
   kubelet:
+    image: ghcr.io/siderolabs/kubelet:${version}
+    defaultRuntimeSeccompProfileEnabled: true
     extraArgs:
       cloud-provider: external
       rotate-server-certificates: true
-      node-labels: "${labels}"
+      node-labels: ${labels}
     clusterDNS:
       - 169.254.2.53
-      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
+      - ${clusterDns}
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
@@ -25,27 +27,45 @@ machine:
       - ip: ${lbv4}
         aliases:
           - ${apiDomain}
+    nameservers:
+      - 2606:4700:4700::1111
+      - 1.1.1.1
+      - 2001:4860:4860::8888
+  time:
+    servers:
+      - 2.europe.pool.ntp.org
+      - time.cloudflare.com
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
+    net.ipv4.tcp_keepalive_intvl: 60
+    net.ipv4.tcp_keepalive_time: 600
+    vm.max_map_count: 128000
+  install:
+    wipe: true
+    extraKernelArgs:
+      - talos.dashboard.disabled=1
   systemDiskEncryption:
     state:
       provider: luks2
+      options:
+        - no_read_workqueue
+        - no_write_workqueue
       keys:
         - nodeID: {}
           slot: 0
     ephemeral:
       provider: luks2
-      keys:
-        - nodeID: {}
-          slot: 0
       options:
         - no_read_workqueue
         - no_write_workqueue
-  disks:
-    - device: /dev/sdb
-      partitions:
-        - mountpoint: /var/data
+      keys:
+        - nodeID: {}
+          slot: 0
+  features:
+    rbac: true
+    stableHostname: true
+    apidCheckExtKeyUsage: true
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
@@ -57,6 +77,8 @@ cluster:
   network:
     dnsDomain: ${domain}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
+  proxy:
+    disabled: false
   token: ${token}
   ca:
     crt: ${ca}

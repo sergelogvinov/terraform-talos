@@ -6,7 +6,7 @@ terraform {
     }
     # proxmox = {
     #   source  = "bpg/proxmox"
-    #   version = "0.17.0-rc1"
+    #   version = "~> 0.35.1"
     # }
   }
   required_version = ">= 1.0"

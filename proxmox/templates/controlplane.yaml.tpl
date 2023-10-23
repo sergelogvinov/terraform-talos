@@ -10,7 +10,7 @@ machine:
   network:
     hostname: "${name}"
     interfaces:
-      - interface: eth1
+      - interface: eth0
         vip:
           ip: ${ipv4_vip}
       - interface: dummy0
@@ -49,7 +49,7 @@ machine:
         - kube-system
 cluster:
   adminKubeconfig:
-    certLifetime: 8h0m0s
+    certLifetime: 48h0m0s
   controlPlane:
     endpoint: https://${apiDomain}:6443
   network:
