@@ -26,11 +26,7 @@ It creats:
 ## Upload images
 
 ```shell
-cd images
-
-# fixme, url does not exist yet
-wget https://$url -O oracle-amd64.qcow2
-wget https://$url -O oracle-arm64.qcow2
+./scripts/download
 
 terraform init
 terraform apply
