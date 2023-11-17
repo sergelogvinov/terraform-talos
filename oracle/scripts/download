@@ -1,0 +1,16 @@
+#!/bin/bash 
+
+dest="./images"
+version="1.5.5"
+url=https://github.com/siderolabs/talos/releases/download/v${version}/
+
+for arch in amd64 arm64
+do
+  file=oracle-${arch}.qcow2.xz
+
+  echo "Downloading ${file} to ${dest}/${file}"
+  curl -L ${url}/${file} -o ${dest}/${file}
+  echo "Extracting: ${dest}/${file}"
+  xz -df ${dest}/${file}
+  echo
+done
