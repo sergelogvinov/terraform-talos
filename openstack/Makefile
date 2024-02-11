@@ -9,6 +9,11 @@ endif
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+clean:
+	rm -rf _cfgs/ terraform.tfvars.json
+	rm -f kubeconfig talosctl
+	rm -rf .terraform.lock.hcl .terraform/ terraform.tfstate terraform.tfstate.backup
+
 create-lb: ## Create load balancer
 	terraform init
 	terraform apply -target=output.controlplane_endpoint_public --refresh -auto-approve

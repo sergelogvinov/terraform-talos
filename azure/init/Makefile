@@ -1,0 +1,3 @@
+
+clean:
+	rm -rf .terraform.lock.hcl .terraform/ terraform.tfstate terraform.tfstate.backup
