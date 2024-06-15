@@ -1,7 +1,7 @@
 
 image:
   repository: rancher/local-path-provisioner
-  tag: v0.0.24
+  tag: v0.0.26
 
 storageClass:
   create: true
@@ -15,6 +15,16 @@ nodePathMap:
 
 configmap:
   name: local-path-config
+
+securityContext:
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
+  capabilities:
+    drop: ["ALL"]
+  runAsUser: 65534
+  runAsGroup: 65534
+  readOnlyRootFilesystem: true
 
 resources:
   limits:

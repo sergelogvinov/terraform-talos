@@ -1,0 +1,15 @@
+
+existingConfigSecret: proxmox-cloud-controller-manager
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+
+logVerbosityLevel: 3
+
+enabledControllers:
+  - cloud-node-lifecycle

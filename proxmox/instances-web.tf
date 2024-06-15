@@ -1,61 +1,65 @@
 
 locals {
   web_prefix = "web"
-  web_labels = "project.io/node-pool=web"
+  web_labels = "node-pool=web"
 
   webs = { for k in flatten([
     for zone in local.zones : [
       for inx in range(lookup(try(var.instances[zone], {}), "web_count", 0)) : {
         id : lookup(try(var.instances[zone], {}), "web_id", 9000) + inx
-        name : "${local.web_prefix}-${lower(substr(zone, -1, -1))}${1 + inx}"
+        name : "${local.web_prefix}-${format("%02d", index(local.zones, zone))}${format("%x", 10 + inx)}"
         zone : zone
-        node_name : zone
         cpu : lookup(try(var.instances[zone], {}), "web_cpu", 1)
+        cpus : join(",", slice(
+          flatten(local.cpus[zone]),
+          inx * lookup(try(var.instances[zone], {}), "web_cpu", 1), (inx + 1) * lookup(try(var.instances[zone], {}), "web_cpu", 1)
+        ))
+        numas : [0] # [inx]
         mem : lookup(try(var.instances[zone], {}), "web_mem", 2048)
-        ip0 : lookup(try(var.instances[zone], {}), "web_ip0", "ip6=auto")
-        ipv4 : "${cidrhost(local.subnets[zone], inx)}/24"
-        gwv4 : local.gwv4
+
+        hvv4 = cidrhost(local.subnets[zone], 0)
+        ipv4 : cidrhost(local.subnets[zone], 1 + inx)
+        gwv4 : cidrhost(local.subnets[zone], 0)
+
+        ipv6ula : cidrhost(cidrsubnet(var.vpc_main_cidr[1], 16, index(local.zones, zone)), 256 + lookup(try(var.instances[zone], {}), "web_id", 9000) + inx)
+        ipv6 : cidrhost(cidrsubnet(lookup(try(var.nodes[zone], {}), "ip6", "fe80::/64"), 16, 1 + index(local.zones, zone)), 256 + lookup(try(var.instances[zone], {}), "web_id", 9000) + inx)
+        gwv6 : lookup(try(var.nodes[zone], {}), "gw6", "fe80::1")
       }
     ]
   ]) : k.name => k }
 }
 
-resource "null_resource" "web_machineconfig" {
-  for_each = { for k, v in var.instances : k => v if lookup(try(var.instances[k], {}), "web_count", 0) > 0 }
-  connection {
-    type = "ssh"
-    user = "root"
-    host = "${each.key}.${var.proxmox_domain}"
-  }
+resource "proxmox_virtual_environment_file" "web_machineconfig" {
+  for_each     = local.webs
+  node_name    = each.value.zone
+  content_type = "snippets"
+  datastore_id = "local"
 
-  provisioner "file" {
-    # source      = "${path.module}/_cfgs/worker.yaml"
-    content = templatefile("${path.module}/templates/web.yaml.tpl",
-      merge(var.kubernetes, try(var.instances["all"], {}), {
-        lbv4        = local.ipv4_vip
-        nodeSubnets = var.vpc_main_cidr
-        clusterDns  = cidrhost(split(",", var.kubernetes["serviceSubnets"])[0], 10)
-        labels      = local.web_labels
+  source_raw {
+    data = templatefile("${path.module}/templates/${lookup(var.instances[each.value.zone], "web_template", "worker.yaml.tpl")}",
+      merge(local.kubernetes, try(var.instances["all"], {}), {
+        labels      = join(",", [local.web_labels, lookup(var.instances[each.value.zone], "web_labels", "")])
+        nodeSubnets = [local.subnets[each.value.zone], var.vpc_main_cidr[1]]
+        lbv4        = local.lbv4
+        ipv4        = each.value.ipv4
+        gwv4        = each.value.gwv4
+        hvv4        = each.value.hvv4
+        ipv6        = "${each.value.ipv6}/64"
+        gwv6        = each.value.gwv6
+        kernelArgs  = []
     }))
-
-    destination = "/var/lib/vz/snippets/${local.web_prefix}.yaml"
-  }
-
-  triggers = {
-    params = filemd5("${path.module}/templates/web.yaml.tpl")
+    file_name = "${each.value.name}.yaml"
   }
 }
 
-resource "null_resource" "web_metadata" {
-  for_each = local.webs
-  connection {
-    type = "ssh"
-    user = "root"
-    host = "${each.value.node_name}.${var.proxmox_domain}"
-  }
+resource "proxmox_virtual_environment_file" "web_metadata" {
+  for_each     = local.webs
+  node_name    = each.value.zone
+  content_type = "snippets"
+  datastore_id = "local"
 
-  provisioner "file" {
-    content = templatefile("${path.module}/templates/metadata.yaml", {
+  source_raw {
+    data = templatefile("${path.module}/templates/metadata.yaml", {
       hostname : each.value.name,
       id : each.value.id,
       providerID : "proxmox://${var.region}/${each.value.id}",
@@ -63,79 +67,181 @@ resource "null_resource" "web_metadata" {
       zone : each.value.zone,
       region : var.region,
     })
-    destination = "/var/lib/vz/snippets/${each.value.name}.metadata.yaml"
-  }
-
-  triggers = {
-    params = join(",", [for k, v in local.webs[each.key] : "${k}-${v}"])
+    file_name = "${each.value.name}.metadata.yaml"
   }
 }
 
-resource "proxmox_vm_qemu" "web" {
+# resource "null_resource" "web_nlb_forward" {
+#   for_each = { for k, v in var.instances : k => v if lookup(try(var.instances[k], {}), "web_count", 0) > 0 }
+#   connection {
+#     type = "ssh"
+#     user = "root"
+#     host = "${each.key}.${var.proxmox_domain}"
+#   }
+
+#   provisioner "file" {
+#     content = jsonencode(yamldecode(templatefile("${path.module}/templates/nlb_forward.tpl", {
+#       node : each.key
+#       webs : local.webs
+#     })))
+#     destination = "/etc/ansible/facts.d/nlb_forward.fact"
+#   }
+
+#   triggers = {
+#     params = filemd5("${path.module}/templates/nlb_forward.tpl")
+#     webs   = md5(jsonencode([for w in local.webs : w.ipv4 if w.zone == each.key]))
+#   }
+# }
+
+resource "proxmox_virtual_environment_vm" "web" {
   for_each    = local.webs
   name        = each.value.name
-  vmid        = each.value.id
-  target_node = each.value.node_name
-  clone       = var.proxmox_image
+  node_name   = each.value.zone
+  vm_id       = each.value.id
+  description = "Talos web node"
 
-  agent                  = 0
-  define_connection_info = false
-  os_type                = "ubuntu"
-  qemu_os                = "l26"
-  # ipconfig0               = each.value.ip0
-  ipconfig0               = "ip=${each.value.ipv4},gw=${each.value.gwv4}"
-  cicustom                = "user=local:snippets/${local.web_prefix}.yaml,meta=local:snippets/${each.value.name}.metadata.yaml"
-  cloudinit_cdrom_storage = var.proxmox_storage
-
-  onboot  = false
-  cpu     = "host,flags=+aes"
-  sockets = 1
-  cores   = each.value.cpu
-  memory  = each.value.mem
-  numa    = true
-  scsihw  = "virtio-scsi-single"
-
-  vga {
-    memory = 0
-    type   = "serial0"
-  }
-  serial {
-    id   = 0
-    type = "socket"
+  startup {
+    order    = 3
+    up_delay = 5
   }
 
-  network {
-    model    = "virtio"
-    bridge   = "vmbr0"
-    firewall = true
+  machine = "pc"
+  cpu {
+    architecture = "x86_64"
+    cores        = each.value.cpu
+    affinity     = each.value.cpus
+    sockets      = 1
+    numa         = true
+    type         = "host"
   }
-  # network {
-  #   model  = "virtio"
-  #   bridge = "vmbr1"
-  # }
+  memory {
+    dedicated = each.value.mem
+    # hugepages      = "1024"
+    # keep_hugepages = true
+  }
+  dynamic "numa" {
+    for_each = { for idx, numa in each.value.numas : numa => {
+      device = "numa${idx}"
+      cpus   = "0-${each.value.cpu - 1}"
+      mem    = each.value.mem
+    } }
+    content {
+      device    = numa.value.device
+      cpus      = numa.value.cpus
+      hostnodes = numa.key
+      memory    = numa.value.mem
+      policy    = "bind"
+    }
+  }
 
-  boot = "order=scsi0"
+  scsi_hardware = "virtio-scsi-single"
   disk {
-    type    = "scsi"
-    storage = var.proxmox_storage
-    size    = "32G"
-    cache   = "writethrough"
-    ssd     = 1
-    backup  = false
+    datastore_id = lookup(try(var.nodes[each.value.zone], {}), "storage", "local")
+    interface    = "scsi0"
+    iothread     = true
+    ssd          = true
+    cache        = "none"
+    size         = 32
+    file_format  = "raw"
+  }
+  clone {
+    vm_id = proxmox_virtual_environment_vm.template[each.value.zone].id
+  }
+
+  initialization {
+    dns {
+      servers = [each.value.gwv4, "2001:4860:4860::8888"]
+    }
+    ip_config {
+      ipv6 {
+        address = "${each.value.ipv6}/64"
+        gateway = each.value.gwv6
+      }
+    }
+    ip_config {
+      ipv4 {
+        address = "${each.value.ipv4}/24"
+        gateway = each.value.hvv4
+      }
+      ipv6 {
+        address = "${each.value.ipv6ula}/64"
+      }
+    }
+
+    datastore_id      = "local"
+    meta_data_file_id = proxmox_virtual_environment_file.web_metadata[each.key].id
+    user_data_file_id = proxmox_virtual_environment_file.web_machineconfig[each.key].id
+  }
+
+  network_device {
+    bridge      = "vmbr0"
+    queues      = each.value.cpu
+    mtu         = 1500
+    mac_address = "32:90:${join(":", formatlist("%02X", split(".", each.value.ipv4)))}"
+    firewall    = true
+  }
+  network_device {
+    bridge   = "vmbr1"
+    queues   = each.value.cpu
+    mtu      = 1400
+    firewall = false
+  }
+
+  operating_system {
+    type = "l26"
+  }
+
+  serial_device {}
+  vga {
+    type = "serial0"
   }
 
   lifecycle {
     ignore_changes = [
-      boot,
-      network,
-      desc,
-      numa,
-      agent,
-      ipconfig0,
-      ipconfig1,
-      define_connection_info,
+      started,
+      clone,
+      ipv4_addresses,
+      ipv6_addresses,
+      network_interface_names,
+      initialization,
+      disk,
+      # memory,
+      # numa,
     ]
   }
 
-  depends_on = [null_resource.web_machineconfig, null_resource.web_metadata]
+  tags       = [local.kubernetes["clusterName"]]
+  depends_on = [proxmox_virtual_environment_file.web_machineconfig]
+}
+
+resource "proxmox_virtual_environment_firewall_options" "web" {
+  for_each  = local.webs
+  node_name = each.value.zone
+  vm_id     = each.value.id
+  enabled   = true
+
+  dhcp          = false
+  ipfilter      = false
+  log_level_in  = "nolog"
+  log_level_out = "nolog"
+  macfilter     = false
+  ndp           = true
+  input_policy  = "DROP"
+  output_policy = "ACCEPT"
+  radv          = false
+
+  depends_on = [proxmox_virtual_environment_vm.web]
+}
+
+resource "proxmox_virtual_environment_firewall_rules" "web" {
+  for_each  = { for k, v in local.webs : k => v if lookup(try(var.instances[v.zone], {}), "web_sg", "") != "" }
+  node_name = each.value.zone
+  vm_id     = each.value.id
+
+  rule {
+    enabled        = true
+    security_group = lookup(var.instances[each.value.zone], "web_sg")
+  }
+
+  depends_on = [proxmox_virtual_environment_vm.web, proxmox_virtual_environment_firewall_options.web]
 }

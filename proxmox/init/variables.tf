@@ -5,11 +5,6 @@ variable "proxmox_host" {
   default     = "192.168.1.1"
 }
 
-variable "proxmox_nodename" {
-  description = "Proxmox node name"
-  type        = string
-}
-
 variable "proxmox_token_id" {
   description = "Proxmox token id"
   type        = string

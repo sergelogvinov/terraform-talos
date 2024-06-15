@@ -20,6 +20,19 @@ reclaimPolicy: Delete
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
+  name: oci-bv-high
+provisioner: blockvolume.csi.oraclecloud.com
+parameters:
+  csi.storage.k8s.io/fstype: xfs
+  attachment-type: "paravirtualized"
+  vpusPerGB: "20"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
   name: oci-bv-encrypted
 provisioner: blockvolume.csi.oraclecloud.com
 parameters:

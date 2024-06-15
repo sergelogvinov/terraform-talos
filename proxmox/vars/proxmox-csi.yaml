@@ -1,0 +1,23 @@
+
+storageClass:
+  - name: proxmox
+    storage: zfs
+    cache: none
+    ssd: true
+    fstype: ext4
+    reclaimPolicy: Delete
+
+replicaCount: 1
+
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""
+  node.cloudprovider.kubernetes.io/platform: nocloud
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    effect: NoSchedule
+
+node:
+  nodeSelector:
+    node.cloudprovider.kubernetes.io/platform: nocloud
+  tolerations:
+    - operator: Exists

@@ -114,8 +114,6 @@ spec:
           volumeMounts:
             - mountPath: /csi
               name: plugin-dir
-            - mountPath: /fss
-              name: fss-plugin-dir
             - mountPath: /var/lib/kubelet
               mountPropagation: Bidirectional
               name: pods-mount-dir
@@ -157,25 +155,6 @@ spec:
               name: plugin-dir
             - mountPath: /registration
               name: registration-dir
-        - name: csi-node-registrar-fss
-          args:
-            - --csi-address=/fss/csi.sock
-            - --kubelet-registration-path=/var/lib/kubelet/plugins/fss.csi.oraclecloud.com/csi.sock
-          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
-          securityContext:
-            privileged: true
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                  - /bin/sh
-                  - -c
-                  - rm -rf /registration/fss.csi.oraclecloud.com /registration/fss.csi.oraclecloud.com-reg.sock
-          volumeMounts:
-            - mountPath: /fss
-              name: fss-plugin-dir
-            - mountPath: /registration
-              name: registration-dir
       dnsPolicy: ClusterFirst
       hostNetwork: true
       restartPolicy: Always
@@ -192,10 +171,6 @@ spec:
             path: /var/lib/kubelet/plugins/blockvolume.csi.oraclecloud.com
             type: DirectoryOrCreate
           name: plugin-dir
-        - hostPath:
-            path: /var/lib/kubelet/plugins/fss.csi.oraclecloud.com
-            type: DirectoryOrCreate
-          name: fss-plugin-dir
         - hostPath:
             path: /var/lib/kubelet
             type: Directory

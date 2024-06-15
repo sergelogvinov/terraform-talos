@@ -1,45 +1,49 @@
 
 locals {
-  worker_prefix = "worker"
-  worker_labels = "node-pool=worker"
+  db_prefix = "db"
+  db_labels = "node-pool=db"
 
-  workers = { for k in flatten([
+  dbs = { for k in flatten([
     for zone in local.zones : [
-      for inx in range(lookup(try(var.instances[zone], {}), "worker_count", 0)) : {
-        id : lookup(try(var.instances[zone], {}), "worker_id", 9000) + inx
-        name : "${local.worker_prefix}-${format("%02d", index(local.zones, zone))}${format("%x", 10 + inx)}"
+      for inx in range(lookup(try(var.instances[zone], {}), "db_count", 0)) : {
+        id : lookup(try(var.instances[zone], {}), "db_id", 9000) + inx
+        name : "${local.db_prefix}-${format("%02d", index(local.zones, zone))}${format("%x", 10 + inx)}"
         zone : zone
-        node_name : zone
-        cpu : lookup(try(var.instances[zone], {}), "worker_cpu", 1)
-        cpus : join(",", slice(
+        cpu : lookup(try(var.instances[zone], {}), "db_cpu", 1)
+        cpus : lookup(try(var.instances[zone], {}), "db_affinity", "") != "" ? lookup(var.instances[zone], "db_affinity") : join(",", slice(
           flatten(local.cpus[zone]),
-          (inx + 2) * lookup(try(var.instances[zone], {}), "worker_cpu", 1), (inx + 3) * lookup(try(var.instances[zone], {}), "worker_cpu", 1)
+          2 * data.proxmox_virtual_environment_node.node[zone].cpu_count - (inx + 1) * lookup(try(var.instances[zone], {}), "db_cpu", 1),
+          2 * data.proxmox_virtual_environment_node.node[zone].cpu_count - inx * lookup(try(var.instances[zone], {}), "db_cpu", 1)
         ))
-        numas : [0] # [2 + inx]
-        mem : lookup(try(var.instances[zone], {}), "worker_mem", 2048)
+        numas : [0]
+        # range(
+        #   length(local.cpu_numa[zone]) - (inx + 1) * lookup(try(var.instances[zone], {}), "db_numas", 1),
+        #   length(local.cpu_numa[zone]) - inx * lookup(try(var.instances[zone], {}), "db_numas", 1)
+        # )
+        mem : lookup(try(var.instances[zone], {}), "db_mem", 2048)
 
         hvv4 = cidrhost(local.subnets[zone], 0)
-        ipv4 : cidrhost(local.subnets[zone], 7 + inx)
+        ipv4 : cidrhost(local.subnets[zone], 5 + inx)
         gwv4 : cidrhost(local.subnets[zone], 0)
 
-        ipv6ula : cidrhost(cidrsubnet(var.vpc_main_cidr[1], 16, index(local.zones, zone)), 384 + lookup(try(var.instances[zone], {}), "worker_id", 9000) + inx)
-        ipv6 : cidrhost(cidrsubnet(lookup(try(var.nodes[zone], {}), "ip6", "fe80::/64"), 16, 1 + index(local.zones, zone)), 384 + lookup(try(var.instances[zone], {}), "worker_id", 9000) + inx)
+        ipv6ula : cidrhost(cidrsubnet(var.vpc_main_cidr[1], 16, index(local.zones, zone)), 512 + lookup(try(var.instances[zone], {}), "db_id", 9000) + inx)
+        ipv6 : cidrhost(cidrsubnet(lookup(try(var.nodes[zone], {}), "ip6", "fe80::/64"), 16, 1 + index(local.zones, zone)), 512 + lookup(try(var.instances[zone], {}), "db_id", 9000) + inx)
         gwv6 : lookup(try(var.nodes[zone], {}), "gw6", "fe80::1")
       }
     ]
   ]) : k.name => k }
 }
 
-resource "proxmox_virtual_environment_file" "worker_machineconfig" {
-  for_each     = local.workers
-  node_name    = each.value.node_name
+resource "proxmox_virtual_environment_file" "db_machineconfig" {
+  for_each     = local.dbs
+  node_name    = each.value.zone
   content_type = "snippets"
   datastore_id = "local"
 
   source_raw {
-    data = templatefile("${path.module}/templates/${lookup(var.instances[each.value.zone], "worker_template", "worker.yaml.tpl")}",
+    data = templatefile("${path.module}/templates/${lookup(var.instances[each.value.zone], "db_template", "worker.yaml.tpl")}",
       merge(local.kubernetes, try(var.instances["all"], {}), {
-        labels      = join(",", [local.web_labels, lookup(var.instances[each.value.zone], "worker_labels", "")])
+        labels      = join(",", [local.web_labels, lookup(var.instances[each.value.zone], "db_labels", "")])
         nodeSubnets = [local.subnets[each.value.zone], var.vpc_main_cidr[1]]
         lbv4        = local.lbv4
         ipv4        = each.value.ipv4
@@ -53,9 +57,9 @@ resource "proxmox_virtual_environment_file" "worker_machineconfig" {
   }
 }
 
-resource "proxmox_virtual_environment_file" "worker_metadata" {
-  for_each     = local.workers
-  node_name    = each.value.node_name
+resource "proxmox_virtual_environment_file" "db_metadata" {
+  for_each     = local.dbs
+  node_name    = each.value.zone
   content_type = "snippets"
   datastore_id = "local"
 
@@ -72,16 +76,16 @@ resource "proxmox_virtual_environment_file" "worker_metadata" {
   }
 }
 
-resource "proxmox_virtual_environment_vm" "worker" {
-  for_each    = local.workers
+resource "proxmox_virtual_environment_vm" "db" {
+  for_each    = local.dbs
   name        = each.value.name
-  node_name   = each.value.node_name
+  node_name   = each.value.zone
   vm_id       = each.value.id
-  description = "Talos worker node"
+  description = "Talos database node"
 
   startup {
-    order    = 7
-    up_delay = 15
+    order    = 5
+    up_delay = 5
   }
 
   machine = "pc"
@@ -101,8 +105,8 @@ resource "proxmox_virtual_environment_vm" "worker" {
   dynamic "numa" {
     for_each = { for idx, numa in each.value.numas : numa => {
       device = "numa${idx}"
-      cpus   = "0-${each.value.cpu - 1}"
-      mem    = each.value.mem
+      cpus   = "${idx * (each.value.cpu / length(each.value.numas))}-${(idx + 1) * (each.value.cpu / length(each.value.numas)) - 1}"
+      mem    = each.value.mem / length(each.value.numas)
     } }
     content {
       device    = numa.value.device
@@ -118,9 +122,9 @@ resource "proxmox_virtual_environment_vm" "worker" {
     datastore_id = lookup(try(var.nodes[each.value.zone], {}), "storage", "local")
     interface    = "scsi0"
     iothread     = true
-    ssd          = true
     cache        = "none"
     size         = 32
+    ssd          = true
     file_format  = "raw"
   }
   clone {
@@ -148,8 +152,8 @@ resource "proxmox_virtual_environment_vm" "worker" {
     }
 
     datastore_id      = "local"
-    meta_data_file_id = proxmox_virtual_environment_file.worker_metadata[each.key].id
-    user_data_file_id = proxmox_virtual_environment_file.worker_machineconfig[each.key].id
+    meta_data_file_id = proxmox_virtual_environment_file.db_metadata[each.key].id
+    user_data_file_id = proxmox_virtual_environment_file.db_machineconfig[each.key].id
   }
 
   network_device {
@@ -190,12 +194,12 @@ resource "proxmox_virtual_environment_vm" "worker" {
   }
 
   tags       = [local.kubernetes["clusterName"]]
-  depends_on = [proxmox_virtual_environment_file.worker_machineconfig]
+  depends_on = [proxmox_virtual_environment_file.db_machineconfig]
 }
 
-resource "proxmox_virtual_environment_firewall_options" "worker" {
-  for_each  = local.workers
-  node_name = each.value.node_name
+resource "proxmox_virtual_environment_firewall_options" "db" {
+  for_each  = local.dbs
+  node_name = each.value.zone
   vm_id     = each.value.id
   enabled   = true
 
@@ -209,18 +213,18 @@ resource "proxmox_virtual_environment_firewall_options" "worker" {
   output_policy = "ACCEPT"
   radv          = false
 
-  depends_on = [proxmox_virtual_environment_vm.worker]
+  depends_on = [proxmox_virtual_environment_vm.db]
 }
 
-resource "proxmox_virtual_environment_firewall_rules" "worker" {
-  for_each  = { for k, v in local.workers : k => v if lookup(try(var.instances[v.zone], {}), "worker_sg", "") != "" }
-  node_name = each.value.node_name
+resource "proxmox_virtual_environment_firewall_rules" "db" {
+  for_each  = { for k, v in local.dbs : k => v if lookup(try(var.instances[v.zone], {}), "db_sg", "") != "" }
+  node_name = each.value.zone
   vm_id     = each.value.id
 
   rule {
     enabled        = true
-    security_group = lookup(var.instances[each.value.zone], "worker_sg")
+    security_group = lookup(var.instances[each.value.zone], "db_sg")
   }
 
-  depends_on = [proxmox_virtual_environment_vm.worker, proxmox_virtual_environment_firewall_options.worker]
+  depends_on = [proxmox_virtual_environment_vm.db, proxmox_virtual_environment_firewall_options.db]
 }

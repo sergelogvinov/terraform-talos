@@ -74,6 +74,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
+    defaultVolumeType: "hostPath"
 provisioner: rancher.io/local-path
 volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Delete
@@ -91,18 +92,18 @@ metadata:
     app.kubernetes.io/version: "v0.0.25-dev"
     app.kubernetes.io/managed-by: Helm
 rules:
-- apiGroups: [""]
-  resources: ["nodes", "persistentvolumeclaims", "configmaps"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["endpoints", "persistentvolumes", "pods"]
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["events"]
-  verbs: ["create", "patch"]
-- apiGroups: ["storage.k8s.io"]
-  resources: ["storageclasses"]
-  verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes", "persistentvolumeclaims", "configmaps", "pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "create", "patch", "update", "delete"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
 ---
 # Source: local-path-provisioner/templates/clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -118,6 +119,44 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
+  name: local-path-provisioner
+subjects:
+  - kind: ServiceAccount
+    name: local-path-provisioner
+    namespace: local-path-storage
+---
+# Source: local-path-provisioner/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: local-path-provisioner
+  namespace: local-path-storage
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.25-dev
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.25-dev"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "create", "patch", "update", "delete"]
+---
+# Source: local-path-provisioner/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: local-path-provisioner
+  namespace: local-path-storage
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.25-dev
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.25-dev"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
   name: local-path-provisioner
 subjects:
   - kind: ServiceAccount
@@ -141,17 +180,35 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: local-path-provisioner
+      helm.sh/chart: local-path-provisioner-0.0.25-dev
       app.kubernetes.io/instance: local-path-provisioner
+      app.kubernetes.io/version: "v0.0.25-dev"
+      app.kubernetes.io/managed-by: Helm
   template:
     metadata:
       labels:
         app.kubernetes.io/name: local-path-provisioner
+        helm.sh/chart: local-path-provisioner-0.0.25-dev
         app.kubernetes.io/instance: local-path-provisioner
+        app.kubernetes.io/version: "v0.0.25-dev"
+        app.kubernetes.io/managed-by: Helm
     spec:
       serviceAccountName: local-path-provisioner
+      securityContext:
+        {}
       containers:
         - name: local-path-provisioner
-          image: "rancher/local-path-provisioner:v0.0.24"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 65534
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          image: "rancher/local-path-provisioner:v0.0.26"
           imagePullPolicy: IfNotPresent
           command:
             - local-path-provisioner

@@ -1,18 +1,19 @@
 machine:
   kubelet:
+    image: ghcr.io/siderolabs/kubelet:${version}
     extraArgs:
       rotate-server-certificates: true
     clusterDNS:
       - 169.254.2.53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
     nodeIP:
-      validSubnets: ${format("%#v",split(",",nodeSubnets))}
+      validSubnets: ${format("%#v",nodeSubnets)}
   network:
-    hostname: "${name}"
+    hostname: ${name}
     interfaces:
-      - interface: eth0
+      - interface: eth1
         vip:
-          ip: ${ipv4_vip}
+          ip: ${lbv4}
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
@@ -57,20 +58,31 @@ cluster:
     podSubnets: ${format("%#v",split(",",podSubnets))}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
     cni:
-      name: custom
-      urls:
-        - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/cilium-result.yaml
+      name: none
   proxy:
     disabled: true
+  apiServer:
+    image: registry.k8s.io/kube-apiserver:${version}
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+    certSANs:
+      - ${apiDomain}
   controllerManager:
+    image: registry.k8s.io/kube-controller-manager:${version}
     extraArgs:
         node-cidr-mask-size-ipv4: 24
         node-cidr-mask-size-ipv6: 112
+  scheduler:
+    image: registry.k8s.io/kube-scheduler:${version}
   etcd:
     advertisedSubnets:
-      - ${nodeSubnets}
+      - ${nodeSubnets[0]}
     listenSubnets:
-      - ${nodeSubnets}
+      - ${nodeSubnets[0]}
+  externalCloudProvider:
+    enabled: true
   inlineManifests:
     - name: proxmox-cloud-controller-manager
       contents: |-
@@ -82,15 +94,3 @@ cluster:
           namespace: kube-system
         data:
           config.yaml: ${base64encode(clusters)}
-  externalCloudProvider:
-    enabled: true
-    manifests:
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/talos-cloud-controller-manager-result.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/proxmox-cloud-controller-manager/main/docs/deploy/cloud-controller-manager-talos.yml
-      - https://raw.githubusercontent.com/sergelogvinov/proxmox-csi-plugin/main/docs/deploy/proxmox-csi-plugin-talos.yml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/metrics-server-result.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-ns.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-result.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/coredns-local.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/ingress-ns.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/ingress-result.yaml

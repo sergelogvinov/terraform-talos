@@ -21,6 +21,16 @@ spec:
       nodeSelector:
         # kubernetes.io/hostname: kube-21
         # topology.kubernetes.io/zone: hvm-1
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - controlplane-41
+            weight: 100
       containers:
         - name: alpine
           image: alpine
@@ -46,4 +56,4 @@ spec:
         resources:
           requests:
             storage: 5Gi
-        storageClassName: proxmox-zfs
+        storageClassName: proxmox

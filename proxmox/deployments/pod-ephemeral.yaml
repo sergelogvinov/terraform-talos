@@ -38,7 +38,7 @@ spec:
               type: pvc-volume
           spec:
             accessModes: [ "ReadWriteOnce" ]
-            storageClassName: proxmox-zfs
+            storageClassName: proxmox
             resources:
               requests:
                 storage: 5Gi

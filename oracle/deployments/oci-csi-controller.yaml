@@ -131,18 +131,12 @@ spec:
             - name: config
               mountPath: /etc/oci/
               readOnly: true
-            - name: kubernetes
-              mountPath: /etc/kubernetes
-              readOnly: true
             - mountPath: /var/run/shared-tmpfs
               name: shared-tmpfs
       volumes:
         - name: config
           secret:
             secretName: oci-volume-provisioner
-        - name: kubernetes
-          hostPath:
-            path: /etc/kubernetes
         - name: shared-tmpfs
           emptyDir: {}
       dnsPolicy: ClusterFirst

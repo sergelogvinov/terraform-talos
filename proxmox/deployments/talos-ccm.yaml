@@ -1,0 +1,38 @@
+
+service:
+  containerPort: 50258
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/scheme: "https"
+    prometheus.io/port: "50258"
+
+logVerbosityLevel: 4
+
+transformations:
+  - name: web
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^web-.+$
+    labels:
+      node-role.kubernetes.io/web: ""
+  - name: worker
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^worker-.+$
+    labels:
+      node-role.kubernetes.io/worker: ""
+  - name: db
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^db-.+$
+    labels:
+      node-role.kubernetes.io/db: ""

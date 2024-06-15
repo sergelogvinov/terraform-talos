@@ -1,0 +1,21 @@
+---
+creation_rules:
+  - path_regex: \.env\.yaml$
+    key_groups:
+      - age:
+          - age1ngvggfld4elq68926uczkes9rcqfjhnqn0tr6l8avyp4h46qzucqvx3sdf
+  - path_regex: terraform\.tfvars\.sops\.json$
+    encrypted_regex: "(token|Secret|ID)"
+    key_groups:
+      - age:
+          - age1ngvggfld4elq68926uczkes9rcqfjhnqn0tr6l8avyp4h46qzucqvx3sdf
+  - path_regex: _cfgs/controlplane.yaml$
+    encrypted_regex: "(token|key|secret|id)"
+    key_groups:
+      - age:
+          - age1ngvggfld4elq68926uczkes9rcqfjhnqn0tr6l8avyp4h46qzucqvx3sdf
+  - path_regex: _cfgs/talosconfig$
+    encrypted_regex: "key"
+    key_groups:
+      - age:
+          - age1ngvggfld4elq68926uczkes9rcqfjhnqn0tr6l8avyp4h46qzucqvx3sdf

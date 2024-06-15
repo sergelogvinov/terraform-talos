@@ -17,7 +17,7 @@ machine:
       - 169.254.2.53
       - ${clusterDns}
     nodeIP:
-      validSubnets: ${format("%#v",split(",",nodeSubnets))}
+      validSubnets: ${format("%#v",nodeSubnets)}
   network:
     interfaces:
       - interface: dummy0
@@ -27,24 +27,21 @@ machine:
       - ip: ${lbv4}
         aliases:
           - ${apiDomain}
-    nameservers:
-      - 2606:4700:4700::1111
-      - 1.1.1.1
-      - 2001:4860:4860::8888
-  time:
-    servers:
-      - 2.europe.pool.ntp.org
-      - time.cloudflare.com
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
     net.ipv4.tcp_keepalive_intvl: 60
     net.ipv4.tcp_keepalive_time: 600
+    net.ipv4.tcp_fin_timeout: 10
+    net.ipv4.tcp_tw_reuse: 1
     vm.max_map_count: 128000
   install:
     wipe: true
     extraKernelArgs:
       - talos.dashboard.disabled=1
+%{ for arg in kernelArgs ~}
+      - ${arg}
+%{ endfor ~}
   systemDiskEncryption:
     state:
       provider: luks2
@@ -73,12 +70,13 @@ cluster:
     endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
   discovery:
-    enabled: true
+    enabled: false
   network:
     dnsDomain: ${domain}
+    podSubnets: ${format("%#v",split(",",podSubnets))}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}
   proxy:
-    disabled: false
+    disabled: true
   token: ${token}
   ca:
     crt: ${ca}
