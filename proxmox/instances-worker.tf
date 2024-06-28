@@ -39,7 +39,7 @@ resource "proxmox_virtual_environment_file" "worker_machineconfig" {
   source_raw {
     data = templatefile("${path.module}/templates/${lookup(var.instances[each.value.zone], "worker_template", "worker.yaml.tpl")}",
       merge(local.kubernetes, try(var.instances["all"], {}), {
-        labels      = join(",", [local.web_labels, lookup(var.instances[each.value.zone], "worker_labels", "")])
+        labels      = join(",", [local.worker_labels, lookup(var.instances[each.value.zone], "worker_labels", "")])
         nodeSubnets = [local.subnets[each.value.zone], var.vpc_main_cidr[1]]
         lbv4        = local.lbv4
         ipv4        = each.value.ipv4

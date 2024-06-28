@@ -13,6 +13,8 @@ system_sysctl:
   - { name: net.ipv6.conf.all.autoconf,   value: 0 }
   - { name: net.ipv6.conf.all.accept_ra,  value: 0 }
 
+  - { name: kernel.sched_autogroup_enabled, value: 0 }
+
 #
 
 dnsmasq_configs: ["proxmox"]
