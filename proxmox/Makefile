@@ -24,8 +24,8 @@ create-config: ## Genereate talos configs
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 
 create-templates:
-	@echo 'podSubnets: "10.32.0.0/12,fd00:10:32::/102"'        >  _cfgs/tfstate.vars
-	@echo 'serviceSubnets: "10.200.0.0/22,fd40:10:200::/112"'  >> _cfgs/tfstate.vars
+	@echo 'podSubnets: "10.32.0.0/12,fd00:10:32::/64"'         >  _cfgs/tfstate.vars
+	@echo 'serviceSubnets: "10.200.0.0/22,fd40:10:200::/108"'  >> _cfgs/tfstate.vars
 	@echo 'apiDomain: api.cluster.local'                       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.network.dnsDomain' _cfgs/controlplane.yaml | awk '{ print "domain: "$$1}'       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.clusterName' _cfgs/controlplane.yaml       | awk '{ print "clusterName: "$$1}'  >> _cfgs/tfstate.vars
@@ -42,7 +42,7 @@ create-templates:
 	@sops --encrypt --input-type=yaml --output-type=yaml _cfgs/talosconfig > _cfgs/talosconfig.sops.yaml
 	@git add -f _cfgs/talosconfig.sops.yaml _cfgs/ca.crt terraform.tfvars.sops.json
 
-create-controlplane-bootstrap: ## Bootstrap controlplane
+bootstrap: ## Bootstrap controlplane
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${CPFIRST} bootstrap
 
@@ -60,7 +60,7 @@ nodes: ## Show kubernetes nodes
 	@kubectl get nodes -owide --sort-by '{.metadata.name}' --label-columns topology.kubernetes.io/region,topology.kubernetes.io/zone,node.kubernetes.io/instance-type
 
 system:
-	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.15.6 -f ../_deployments/vars/cilium.yaml \
+	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.15.6 -f deployments/cilium.yaml \
 		cilium cilium/cilium
 
 	kubectl --kubeconfig=kubeconfig -n kube-system delete svc cilium-agent
@@ -71,7 +71,6 @@ system:
 		metrics-server metrics-server/metrics-server
 
 	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system -f deployments/talos-ccm.yaml \
-		--set-string image.tag=edge \
 		--set useDaemonSet=true \
 		talos-cloud-controller-manager \
 		oci://ghcr.io/siderolabs/charts/talos-cloud-controller-manager

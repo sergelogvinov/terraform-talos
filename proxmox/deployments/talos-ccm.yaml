@@ -1,4 +1,8 @@
 
+image:
+  repository: ghcr.io/sergelogvinov/talos-cloud-controller-manager
+  tag: nodeipam
+
 service:
   containerPort: 50258
   annotations:
@@ -7,6 +11,20 @@ service:
     prometheus.io/port: "50258"
 
 logVerbosityLevel: 4
+
+enabledControllers:
+  - cloud-node
+  - node-ipam-controller
+
+extraArgs:
+  - --allocate-node-cidrs
+  - --cidr-allocator-type=CloudAllocator
+  - --node-cidr-mask-size-ipv4=24
+  - --node-cidr-mask-size-ipv6=80
+
+# tolerations:
+#   - effect: NoSchedule
+#     operator: Exists
 
 transformations:
   - name: web
