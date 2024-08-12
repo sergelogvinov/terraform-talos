@@ -35,6 +35,9 @@ k8s:
   requireIPv4PodCIDR: true
   requireIPv6PodCIDR: true
 
+enableIPv6Masquerade: true
+enableIPv4Masquerade: true
+
 bpf:
   masquerade: false
 ipv4:

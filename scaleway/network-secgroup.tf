@@ -60,6 +60,12 @@ resource "scaleway_instance_security_group" "controlplane" {
     ip_range = "::/0"
   }
 
+  # inbound_rule {
+  #   action   = "accept"
+  #   protocol = "TCP"
+  #   port     = 22
+  # }
+
   inbound_rule {
     action   = "accept"
     protocol = "ICMP"

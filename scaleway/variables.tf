@@ -23,12 +23,17 @@ variable "regions" {
   default     = ["fr-par-1", "fr-par-2", "nl-ams-1"]
 }
 
+variable "arch" {
+  description = "The Talos architecture list"
+  type        = list(string)
+  default     = ["amd64", "arm64"]
+}
+
 variable "kubernetes" {
   type = map(string)
   default = {
     podSubnets     = "10.32.0.0/12,fd40:10:32::/102"
     serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
-    nodeSubnets    = "192.168.0.0/16"
     domain         = "cluster.local"
     apiDomain      = "api.cluster.local"
     clusterName    = "talos-k8s-scaleway"
@@ -52,9 +57,9 @@ variable "controlplane" {
   description = "Property of controlplane"
   type        = map(any)
   default = {
-    count   = 0,
-    type    = "DEV1-L"
-    type_lb = ""
+    count   = 1,
+    type    = "COPARM1-2C-8G" # "DEV1-L",
+    type_lb = ""              # "LB-S"
   }
 }
 
@@ -62,10 +67,13 @@ variable "instances" {
   description = "Map of instance properties"
   type        = map(any)
   default = {
-    web_count    = 0,
-    web_type     = "DEV1-L",
-    worker_count = 0,
-    worker_type  = "DEV1-L",
+    "all" = {
+      version = "v1.30.2"
+    },
+    # web_count    = 0,
+    # web_type     = "DEV1-L",
+    # worker_count = 0,
+    # worker_type  = "DEV1-L",
   }
 }
 

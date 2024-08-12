@@ -47,7 +47,7 @@ bootstrap: ## Bootstrap controlplane
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${CPFIRST} bootstrap
 
 .PHONY: kubeconfig
-kubeconfig: ## Prepare kubeconfig
+kubeconfig: ## Download kubeconfig
 	rm -f kubeconfig
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${CPFIRST} kubeconfig .
