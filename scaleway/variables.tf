@@ -47,7 +47,7 @@ variable "controlplane" {
   description = "Property of controlplane"
   type        = map(any)
   default = {
-    count   = 1,
+    count   = 0,
     type    = "COPARM1-2C-8G" # "DEV1-L",
     type_lb = ""              # "LB-S"
   }

@@ -12,7 +12,7 @@ help:
 
 clean:
 	rm -rf .terraform.lock.hcl .terraform/ terraform.tfstate terraform.tfstate.backup
-	rm -f kubeconfig
+	rm -f kubeconfig terraform.tfvars.sops.json
 
 create-config: ## Genereate talos configs
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false ${CLUSTERNAME} https://${ENDPOINT}:6443

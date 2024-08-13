@@ -100,8 +100,6 @@ cluster:
       - ${nodeSubnets[0]}
     listenSubnets:
       - ${nodeSubnets[0]}
-  externalCloudProvider:
-    enabled: true
   inlineManifests:
     - name: scaleway-secret
       contents: |-
