@@ -29,22 +29,12 @@ variable "arch" {
   default     = ["amd64", "arm64"]
 }
 
-variable "kubernetes" {
-  type = map(string)
-  default = {
-    podSubnets     = "10.32.0.0/12,fd40:10:32::/102"
-    serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
-    domain         = "cluster.local"
-    apiDomain      = "api.cluster.local"
-    clusterName    = "talos-k8s-scaleway"
-    clusterID      = ""
-    clusterSecret  = ""
-    tokenMachine   = ""
-    caMachine      = ""
-    token          = ""
-    ca             = ""
-  }
-  sensitive = true
+data "sops_file" "tfvars" {
+  source_file = "terraform.tfvars.sops.json"
+}
+
+locals {
+  kubernetes = jsondecode(data.sops_file.tfvars.raw)["kubernetes"]
 }
 
 variable "vpc_main_cidr" {
@@ -57,7 +47,7 @@ variable "controlplane" {
   description = "Property of controlplane"
   type        = map(any)
   default = {
-    count   = 1,
+    count   = 0,
     type    = "COPARM1-2C-8G" # "DEV1-L",
     type_lb = ""              # "LB-S"
   }
@@ -70,10 +60,12 @@ variable "instances" {
     "all" = {
       version = "v1.30.2"
     },
-    # web_count    = 0,
-    # web_type     = "DEV1-L",
-    # worker_count = 0,
-    # worker_type  = "DEV1-L",
+    "fr-par-2" = {
+      web_count    = 0,
+      web_type     = "DEV1-L",
+      worker_count = 0,
+      worker_type  = "COPARM1-2C-8G",
+    },
   }
 }
 

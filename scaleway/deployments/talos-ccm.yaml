@@ -1,7 +1,7 @@
 
-# image:
-#   repository: ghcr.io/sergelogvinov/talos-cloud-controller-manager
-#   tag: nodeipam
+image:
+  # repository: ghcr.io/sergelogvinov/talos-cloud-controller-manager
+  tag: edge
 
 service:
   containerPort: 50258

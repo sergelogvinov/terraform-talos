@@ -1,33 +1,46 @@
 
 locals {
-  web_labels = "topology.kubernetes.io/region=fr-par,topology.kubernetes.io/zone=${var.regions[0]},project.io/node-pool=web"
+  web_prefix = "web"
+  web_labels = "node-pool=web"
+}
+
+resource "scaleway_instance_placement_group" "web" {
+  name        = "web"
+  policy_type = "max_availability"
+  policy_mode = "enforced"
+}
+
+resource "scaleway_instance_ip" "web_v6" {
+  count = lookup(try(var.instances[var.regions[0]], {}), "web_count", 0)
+  type  = "routed_ipv6"
 }
 
 resource "scaleway_instance_server" "web" {
-  count              = lookup(var.instances, "web_count", 0)
-  name               = "web-${count.index + 1}"
-  image              = data.scaleway_instance_image.talos.id
-  type               = lookup(var.instances, "web_type", "DEV1-M")
-  enable_ipv6        = true
-  enable_dynamic_ip  = false
+  count              = lookup(try(var.instances[var.regions[0]], {}), "web_count", 0)
+  name               = "${local.web_prefix}-${count.index + 1}"
+  image              = data.scaleway_instance_image.talos[length(regexall("^COPARM1", lookup(try(var.instances[var.regions[0]], {}), "web_type", 0))) > 0 ? "arm64" : "amd64"].id
+  type               = lookup(var.instances[var.regions[0]], "web_type", "DEV1-M")
   security_group_id  = scaleway_instance_security_group.web.id
   placement_group_id = scaleway_instance_placement_group.web.id
   tags               = concat(var.tags, ["web"])
+
+  routed_ip_enabled = true
+  ip_ids            = [scaleway_instance_ip.web_v6[count.index].id]
 
   private_network {
     pn_id = scaleway_vpc_private_network.main.id
   }
 
+  root_volume {
+    size_in_gb = 20
+  }
+
   user_data = {
     cloud-init = templatefile("${path.module}/templates/worker.yaml.tpl",
-      merge(var.kubernetes, {
-        name        = "web-${count.index + 1}"
+      merge(local.kubernetes, try(var.instances["all"], {}), {
         ipv4_vip    = local.ipv4_vip
-        ipv4        = cidrhost(local.main_subnet, 21 + count.index)
-        ipv4_gw     = cidrhost(local.main_subnet, 1)
-        clusterDns  = cidrhost(split(",", var.kubernetes["serviceSubnets"])[0], 10)
-        nodeSubnets = local.main_subnet
-        labels      = "${local.web_labels},node.kubernetes.io/instance-type=${lookup(var.instances, "web_type", "DEV1-M")}"
+        nodeSubnets = [one(scaleway_vpc_private_network.main.ipv4_subnet).subnet, one(scaleway_vpc_private_network.main.ipv6_subnets).subnet]
+        labels      = local.web_labels
       })
     )
   }
@@ -39,17 +52,4 @@ resource "scaleway_instance_server" "web" {
       user_data,
     ]
   }
-}
-
-resource "scaleway_instance_placement_group" "web" {
-  name        = "web"
-  policy_type = "max_availability"
-  policy_mode = "enforced"
-}
-
-resource "scaleway_vpc_public_gateway_dhcp_reservation" "web" {
-  count              = lookup(var.instances, "web_count", 0)
-  gateway_network_id = scaleway_vpc_gateway_network.main.id
-  mac_address        = scaleway_instance_server.web[count.index].private_network.0.mac_address
-  ip_address         = cidrhost(local.main_subnet, 21 + count.index)
 }

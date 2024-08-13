@@ -1,3 +1,10 @@
 _cfgs/
-templates/controlplane.yaml
-*.patch
+.terraform.lock.hcl
+.terraform.tfstate.lock.info
+/terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+terraform.tfvars.json
+terraform.tfvars.sops.json
+#
+age.key.txt

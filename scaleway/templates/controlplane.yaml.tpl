@@ -25,6 +25,11 @@ machine:
     kubespan:
       enabled: false
       allowDownPeerBypass: true
+      filters:
+        endpoints:
+          - 0.0.0.0/0
+          - "!${ipv4_vip}/32"
+          - "!${ipv4_local}/32"
     extraHostEntries:
       - ip: 127.0.0.1
         aliases:
@@ -83,7 +88,7 @@ cluster:
     image: registry.k8s.io/kube-controller-manager:${version}
     extraArgs:
         node-cidr-mask-size-ipv4: "24"
-        node-cidr-mask-size-ipv6: "80"
+        node-cidr-mask-size-ipv6: "112"
   scheduler:
     image: registry.k8s.io/kube-scheduler:${version}
   etcd:

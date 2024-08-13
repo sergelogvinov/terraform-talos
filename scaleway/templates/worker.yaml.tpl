@@ -6,40 +6,24 @@ machine:
   token: ${tokenMachine}
   ca:
     crt: ${caMachine}
-  nodeLabels:
-    node.kubernetes.io/disktype: ssd
   kubelet:
+    image: ghcr.io/siderolabs/kubelet:${version}
     extraArgs:
       cloud-provider: external
       rotate-server-certificates: true
       node-labels: ${labels}
     clusterDNS:
       - 169.254.2.53
-      - ${clusterDns}
+      - ${cidrhost(split(",",serviceSubnets)[0], 10)}
     nodeIP:
-      validSubnets: ${format("%#v",split(",",nodeSubnets))}
+      validSubnets: ${format("%#v",nodeSubnets)}
   network:
-    hostname: "${name}"
     interfaces:
-      - interface: eth0
-        dhcp: true
-        dhcpOptions:
-          routeMetric: 2048
-        routes:
-          - network: 169.254.42.42/32
-            metric: 1024
-      - interface: eth1
-        addresses:
-          - ${ipv4}/24
-        routes:
-          - network: 0.0.0.0/0
-            gateway: ${ipv4_gw}
-            metric: 512
       - interface: dummy0
         addresses:
           - 169.254.2.53/32
     kubespan:
-      enabled: true
+      enabled: false
       allowDownPeerBypass: true
     extraHostEntries:
       - ip: ${ipv4_vip}
@@ -71,7 +55,7 @@ cluster:
     endpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
   discovery:
-    enabled: true
+    enabled: false
   network:
     dnsDomain: ${domain}
     serviceSubnets: ${format("%#v",split(",",serviceSubnets))}

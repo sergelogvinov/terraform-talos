@@ -57,10 +57,11 @@ resource "scaleway_instance_server" "controlplane" {
 resource "local_sensitive_file" "controlplane" {
   count = lookup(var.controlplane, "count", 0)
   content = templatefile("${path.module}/templates/controlplane.yaml.tpl",
-    merge(var.kubernetes, try(var.instances["all"], {}), {
+    merge(local.kubernetes, try(var.instances["all"], {}), {
       name = "controlplane-${count.index + 1}"
       # labels      = local.controlplane_labels
-      nodeSubnets = [one(scaleway_vpc_private_network.main.ipv4_subnet).subnet, one(scaleway_vpc_private_network.main.ipv6_subnets).subnet]
+      # nodeSubnets = [one(scaleway_vpc_private_network.main.ipv4_subnet).subnet, one(scaleway_vpc_private_network.main.ipv6_subnets).subnet]
+      nodeSubnets = ["${split("/", scaleway_ipam_ip.controlplane_v4[count.index].address)[0]}/32", one(scaleway_vpc_private_network.main.ipv6_subnets).subnet]
       ipv4_local  = scaleway_ipam_ip.controlplane_v4[count.index].address
       ipv4_vip    = local.ipv4_vip
 
@@ -74,6 +75,8 @@ resource "local_sensitive_file" "controlplane" {
   )
   filename        = "_cfgs/controlplane-${count.index + 1}.yaml"
   file_permission = "0600"
+
+  depends_on = [scaleway_instance_server.controlplane]
 }
 
 locals {
