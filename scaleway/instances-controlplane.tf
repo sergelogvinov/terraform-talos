@@ -69,8 +69,8 @@ resource "local_sensitive_file" "controlplane" {
       access     = var.scaleway_access
       secret     = var.scaleway_secret
       project_id = var.scaleway_project_id
-      region     = substr(var.regions[0], 0, 6)
-      zone       = scaleway_vpc_private_network.main.region
+      region     = scaleway_vpc_private_network.main.region
+      zone       = scaleway_vpc_private_network.main.zone
       vpc_id     = split("/", scaleway_vpc_private_network.main.id)[1]
     })
   )

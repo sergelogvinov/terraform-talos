@@ -61,7 +61,7 @@ variable "instances" {
       version = "v1.30.2"
     },
     "fr-par-2" = {
-      web_count    = 1,
+      web_count    = 0,
       web_type     = "DEV1-L",
       worker_count = 0,
       worker_type  = "COPARM1-2C-8G",

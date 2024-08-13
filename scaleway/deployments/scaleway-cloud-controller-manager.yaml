@@ -127,7 +127,7 @@ spec:
         app: scaleway-cloud-controller-manager
     spec:
       dnsPolicy: Default
-      hostNetwork: true
+      # hostNetwork: true
       serviceAccountName: cloud-controller-manager
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
@@ -140,7 +140,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: scaleway-cloud-controller-manager
-          image: scaleway/scaleway-cloud-controller-manager:v0.21.6
+          image: scaleway/scaleway-cloud-controller-manager:v0.28.5
           # image: ghcr.io/sergelogvinov/scaleway-cloud-controller-manager:1fa94b15f6d87e1f951331a7dca148302fe7318b
           imagePullPolicy: IfNotPresent
           args:

@@ -121,6 +121,7 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/scaleway/deployments/scaleway-cloud-controller-manager.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-ns.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/coredns-local.yaml
