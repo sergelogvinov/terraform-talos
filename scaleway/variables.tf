@@ -47,7 +47,7 @@ variable "controlplane" {
   description = "Property of controlplane"
   type        = map(any)
   default = {
-    count   = 0,
+    count   = 1,
     type    = "COPARM1-2C-8G" # "DEV1-L",
     type_lb = ""              # "LB-S"
   }
@@ -61,7 +61,7 @@ variable "instances" {
       version = "v1.30.2"
     },
     "fr-par-2" = {
-      web_count    = 0,
+      web_count    = 1,
       web_type     = "DEV1-L",
       worker_count = 0,
       worker_type  = "COPARM1-2C-8G",
@@ -80,8 +80,9 @@ variable "whitelist_admins" {
   default     = ["0.0.0.0/0", "::/0"]
 }
 
+# curl https://www.cloudflare.com/ips-v4 2>/dev/null | awk '{ print "\""$1"\"," }'
 variable "whitelist_web" {
-  description = "Whitelist for web (default Cloudflare network)"
+  description = "Cloudflare subnets"
   default = [
     "173.245.48.0/20",
     "103.21.244.0/22",
@@ -94,9 +95,9 @@ variable "whitelist_web" {
     "197.234.240.0/22",
     "198.41.128.0/17",
     "162.158.0.0/15",
-    "172.64.0.0/13",
-    "131.0.72.0/22",
     "104.16.0.0/13",
     "104.24.0.0/14",
+    "172.64.0.0/13",
+    "131.0.72.0/22",
   ]
 }

@@ -6,10 +6,10 @@ metadata:
   name: metrics-server
   namespace: kube-system
   labels:
-    helm.sh/chart: metrics-server-3.9.0
+    helm.sh/chart: metrics-server-3.12.1
     app.kubernetes.io/name: metrics-server
     app.kubernetes.io/instance: metrics-server
-    app.kubernetes.io/version: "0.6.3"
+    app.kubernetes.io/version: "0.7.1"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: metrics-server/templates/clusterrole-aggregated-reader.yaml
@@ -18,10 +18,10 @@ kind: ClusterRole
 metadata:
   name: system:metrics-server-aggregated-reader
   labels:
-    helm.sh/chart: metrics-server-3.9.0
+    helm.sh/chart: metrics-server-3.12.1
     app.kubernetes.io/name: metrics-server
     app.kubernetes.io/instance: metrics-server
-    app.kubernetes.io/version: "0.6.3"
+    app.kubernetes.io/version: "0.7.1"
     app.kubernetes.io/managed-by: Helm
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
@@ -43,10 +43,10 @@ kind: ClusterRole
 metadata:
   name: system:metrics-server
   labels:
-    helm.sh/chart: metrics-server-3.9.0
+    helm.sh/chart: metrics-server-3.12.1
     app.kubernetes.io/name: metrics-server
     app.kubernetes.io/instance: metrics-server
-    app.kubernetes.io/version: "0.6.3"
+    app.kubernetes.io/version: "0.7.1"
     app.kubernetes.io/managed-by: Helm
 rules:
   - apiGroups:
@@ -73,10 +73,10 @@ kind: ClusterRoleBinding
 metadata:
   name: metrics-server:system:auth-delegator
   labels:
-    helm.sh/chart: metrics-server-3.9.0
+    helm.sh/chart: metrics-server-3.12.1
     app.kubernetes.io/name: metrics-server
     app.kubernetes.io/instance: metrics-server
-    app.kubernetes.io/version: "0.6.3"
+    app.kubernetes.io/version: "0.7.1"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -93,10 +93,10 @@ kind: ClusterRoleBinding
 metadata:
   name: system:metrics-server
   labels:
-    helm.sh/chart: metrics-server-3.9.0
+    helm.sh/chart: metrics-server-3.12.1
     app.kubernetes.io/name: metrics-server
     app.kubernetes.io/instance: metrics-server
-    app.kubernetes.io/version: "0.6.3"
+    app.kubernetes.io/version: "0.7.1"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -114,10 +114,10 @@ metadata:
   name: metrics-server-auth-reader
   namespace: kube-system
   labels:
-    helm.sh/chart: metrics-server-3.9.0
+    helm.sh/chart: metrics-server-3.12.1
     app.kubernetes.io/name: metrics-server
     app.kubernetes.io/instance: metrics-server
-    app.kubernetes.io/version: "0.6.3"
+    app.kubernetes.io/version: "0.7.1"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -135,10 +135,10 @@ metadata:
   name: metrics-server
   namespace: kube-system
   labels:
-    helm.sh/chart: metrics-server-3.9.0
+    helm.sh/chart: metrics-server-3.12.1
     app.kubernetes.io/name: metrics-server
     app.kubernetes.io/instance: metrics-server
-    app.kubernetes.io/version: "0.6.3"
+    app.kubernetes.io/version: "0.7.1"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -158,10 +158,10 @@ metadata:
   name: metrics-server
   namespace: kube-system
   labels:
-    helm.sh/chart: metrics-server-3.9.0
+    helm.sh/chart: metrics-server-3.12.1
     app.kubernetes.io/name: metrics-server
     app.kubernetes.io/instance: metrics-server
-    app.kubernetes.io/version: "0.6.3"
+    app.kubernetes.io/version: "0.7.1"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -196,10 +196,10 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: registry.k8s.io/metrics-server/metrics-server:v0.6.3
+          image: registry.k8s.io/metrics-server/metrics-server:v0.7.1
           imagePullPolicy: IfNotPresent
           args:
-            - --secure-port=4443
+            - --secure-port=10250
             - --cert-dir=/tmp
             - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
             - --kubelet-use-node-status-port
@@ -207,7 +207,7 @@ spec:
           ports:
           - name: https
             protocol: TCP
-            containerPort: 4443
+            containerPort: 10250
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -249,10 +249,10 @@ kind: APIService
 metadata:
   name: v1beta1.metrics.k8s.io
   labels:
-    helm.sh/chart: metrics-server-3.9.0
+    helm.sh/chart: metrics-server-3.12.1
     app.kubernetes.io/name: metrics-server
     app.kubernetes.io/instance: metrics-server
-    app.kubernetes.io/version: "0.6.3"
+    app.kubernetes.io/version: "0.7.1"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: metrics.k8s.io

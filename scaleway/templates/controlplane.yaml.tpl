@@ -1,4 +1,7 @@
 machine:
+  certSANs:
+    - ${lbv4}
+    - ${apiDomain}
   kubelet:
     image: ghcr.io/siderolabs/kubelet:${version}
     extraArgs:
@@ -83,6 +86,7 @@ cluster:
         cpu: 500m
         memory: 1Gi
     certSANs:
+      - ${lbv4}
       - ${apiDomain}
   controllerManager:
     image: registry.k8s.io/kube-controller-manager:${version}
@@ -114,3 +118,11 @@ cluster:
           SCW_DEFAULT_REGION: ${base64encode(region)}
           SCW_DEFAULT_ZONE: ${base64encode(zone)}
           SCW_VPC_ID: ${base64encode(vpc_id)}
+  externalCloudProvider:
+    enabled: true
+    manifests:
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/coredns-local.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/ingress-ns.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/ingress-result.yaml

@@ -1,7 +1,7 @@
 
 locals {
   web_prefix = "web"
-  web_labels = "node-pool=web"
+  web_labels = "project.io/node-pool=web"
 }
 
 resource "scaleway_instance_placement_group" "web" {
@@ -14,6 +14,14 @@ resource "scaleway_instance_ip" "web_v6" {
   count = lookup(try(var.instances[var.regions[0]], {}), "web_count", 0)
   type  = "routed_ipv6"
 }
+
+# resource "scaleway_ipam_ip" "web_v4" {
+#   count   = lookup(try(var.instances[var.regions[0]], {}), "web_count", 0)
+#   address = cidrhost(local.main_subnet, 21 + count.index)
+#   source {
+#     private_network_id = scaleway_vpc_private_network.main.id
+#   }
+# }
 
 resource "scaleway_instance_server" "web" {
   count              = lookup(try(var.instances[var.regions[0]], {}), "web_count", 0)

@@ -1,7 +1,7 @@
 
 locals {
   worker_prefix = "worker"
-  worker_labels = "node-pool=worker"
+  worker_labels = "project.io/node-pool=worker"
 }
 
 resource "scaleway_instance_ip" "worker_v6" {

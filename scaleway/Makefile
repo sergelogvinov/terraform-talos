@@ -19,8 +19,8 @@ create-config: ## Genereate talos configs
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 
 create-templates:
-	@echo 'podSubnets: "10.80.0.0/12,fd40:10:80::/64"'         >  _cfgs/tfstate.vars
-	@echo 'serviceSubnets: "10.200.0.0/22,fd40:10:200::/108"'  >> _cfgs/tfstate.vars
+	@echo 'podSubnets: "10.80.0.0/12,fd40:10:80::/96"'         >  _cfgs/tfstate.vars
+	@echo 'serviceSubnets: "10.200.0.0/22,fd40:10:200::/112"'  >> _cfgs/tfstate.vars
 	@echo 'apiDomain: api.cluster.local'                       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.network.dnsDomain' _cfgs/controlplane.yaml | awk '{ print "domain: "$$1}'       >> _cfgs/tfstate.vars
 	@yq eval '.cluster.clusterName' _cfgs/controlplane.yaml       | awk '{ print "clusterName: "$$1}'  >> _cfgs/tfstate.vars
@@ -42,6 +42,9 @@ create-lb: ## Create load balancer
 	terraform apply -auto-approve -target=output.controlplane_endpoint
 	terraform refresh
 
+create-infrastructure: ## Bootstrap all nodes
+	terraform apply
+
 bootstrap: ## Bootstrap controlplane
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${ENDPOINT} bootstrap
@@ -54,8 +57,9 @@ kubeconfig: ## Download kubeconfig
 	kubectl --kubeconfig=kubeconfig config set clusters.${CLUSTERNAME}.server https://[${ENDPOINT}]:6443
 	kubectl --kubeconfig=kubeconfig config set-context --current --namespace=kube-system
 
-create-infrastructure: ## Bootstrap all nodes
-	terraform apply
+system-static:
+	helm template --namespace=kube-system --version=1.15.7 -f deployments/cilium.yaml \
+		cilium cilium/cilium > deployments/cilium-result.yaml
 
 system:
 	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.15.7 -f deployments/cilium.yaml \

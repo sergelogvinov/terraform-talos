@@ -64,6 +64,7 @@ resource "local_sensitive_file" "controlplane" {
       nodeSubnets = ["${split("/", scaleway_ipam_ip.controlplane_v4[count.index].address)[0]}/32", one(scaleway_vpc_private_network.main.ipv6_subnets).subnet]
       ipv4_local  = scaleway_ipam_ip.controlplane_v4[count.index].address
       ipv4_vip    = local.ipv4_vip
+      lbv4        = local.lbv4
 
       access     = var.scaleway_access
       secret     = var.scaleway_secret
@@ -76,7 +77,7 @@ resource "local_sensitive_file" "controlplane" {
   filename        = "_cfgs/controlplane-${count.index + 1}.yaml"
   file_permission = "0600"
 
-  depends_on = [scaleway_instance_server.controlplane]
+  depends_on = [scaleway_instance_server.controlplane, scaleway_ipam_ip.controlplane_v4]
 }
 
 locals {
