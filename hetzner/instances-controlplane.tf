@@ -1,11 +1,12 @@
 
 locals {
+  contolplane_prefix = "controlplane"
   contolplane_labels = ""
 
   controlplanes = { for k in flatten([
     for regions in var.regions : [
       for inx in range(lookup(try(var.controlplane[regions], {}), "count", 0)) : {
-        name : "controlplane-${regions}-${1 + inx}"
+        name : "${local.contolplane_prefix}-${regions}-${1 + inx}"
         image : data.hcloud_image.talos[startswith(lookup(try(var.controlplane[regions], {}), "type", "cpx11"), "ca") ? "arm64" : "amd64"].id
         region : regions
         type : lookup(try(var.controlplane[regions], {}), "type", "cpx11")

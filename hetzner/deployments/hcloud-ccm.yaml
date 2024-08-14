@@ -1,0 +1,5 @@
+args:
+  controllers: cloud-node-lifecycle
+
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""

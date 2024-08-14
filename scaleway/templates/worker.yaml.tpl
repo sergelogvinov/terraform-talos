@@ -8,10 +8,15 @@ machine:
     crt: ${caMachine}
   kubelet:
     image: ghcr.io/siderolabs/kubelet:${version}
+    defaultRuntimeSeccompProfileEnabled: true
     extraArgs:
       cloud-provider: external
       rotate-server-certificates: true
       node-labels: ${labels}
+    extraConfig:
+      imageGCHighThresholdPercent: 70
+      imageGCLowThresholdPercent: 50
+      allowedUnsafeSysctls: [net.core.somaxconn]
     clusterDNS:
       - 169.254.2.53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}
@@ -48,6 +53,10 @@ machine:
       options:
         - no_read_workqueue
         - no_write_workqueue
+  features:
+    rbac: true
+    stableHostname: true
+    apidCheckExtKeyUsage: true
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}

@@ -59,11 +59,15 @@ spec:
 
         - key: "node.kubernetes.io/not-ready"
           effect: "NoExecute"
+      nodeSelector: 
+        
+        node-role.kubernetes.io/control-plane: ""
       containers:
         - name: hcloud-cloud-controller-manager
           args:
             - "--allow-untagged-cloud"
             - "--cloud-provider=hcloud"
+            - "--controllers=cloud-node-lifecycle"
             - "--route-reconciliation-period=30s"
             - "--webhook-secure-port=0"
             - "--leader-elect=false"
