@@ -35,22 +35,6 @@ resource "hcloud_server" "controlplane" {
     ip         = each.value.ip
   }
 
-  #   user_data = templatefile("${path.module}/templates/controlplane.yaml",
-  #     merge(var.kubernetes, {
-  #       name           = each.value.name
-  #       ipv4_vip       = local.ipv4_vip
-  #       ipv4_local     = each.value.ip
-  #       lbv4_local     = local.lbv4_local
-  #       lbv4           = local.lbv4
-  #       lbv6           = local.lbv6
-  #       hcloud_network = hcloud_network.main.id
-  #       hcloud_token   = var.hcloud_token
-  #       hcloud_image   = data.hcloud_image.talos["amd64"].id
-  #       robot_user     = var.robot_user
-  #       robot_password = var.robot_password
-  #     })
-  #   )
-
   lifecycle {
     ignore_changes = [
       network,
@@ -73,38 +57,34 @@ resource "hcloud_load_balancer_target" "api" {
 # Secure push talos config to the controlplane
 #
 
-resource "local_file" "controlplane" {
+resource "local_sensitive_file" "controlplane" {
   for_each = local.controlplanes
-
   content = templatefile("${path.module}/templates/controlplane.yaml.tpl",
-    {
-      name           = each.value.name
-      apiDomain      = var.kubernetes["apiDomain"]
-      domain         = var.kubernetes["domain"]
-      podSubnets     = var.kubernetes["podSubnets"]
-      serviceSubnets = var.kubernetes["serviceSubnets"]
-      ipv4_vip       = local.ipv4_vip
-      ipv4_local     = each.value.ip
-      lbv4_local     = local.lbv4_local
-      lbv4           = local.lbv4
-      lbv6           = local.lbv6
-      nodeSubnets    = hcloud_network_subnet.core.ip_range
+    merge(local.kubernetes, try(var.instances["all"], {}), {
+      name        = each.value.name
+      nodeSubnets = hcloud_network_subnet.core.ip_range
+      ipv4_vip    = local.ipv4_vip
+      ipv4_local  = each.value.ip
+      lbv4_local  = local.lbv4_local
+      lbv4        = local.lbv4
+      lbv6        = local.lbv6
+
       hcloud_network = hcloud_network.main.id
       hcloud_token   = var.hcloud_token
       hcloud_image   = data.hcloud_image.talos["amd64"].id
       hcloud_sshkey  = hcloud_ssh_key.infra.id
       robot_user     = var.robot_user
       robot_password = var.robot_password
-    }
+    })
   )
   filename        = "_cfgs/${each.value.name}.yaml"
   file_permission = "0600"
 }
 
-resource "null_resource" "controlplane" {
-  for_each = local.controlplanes
-  provisioner "local-exec" {
-    command = "sleep 30 && talosctl apply-config --insecure --nodes ${hcloud_server.controlplane[each.key].ipv4_address} --timeout 5m0s --config-patch @_cfgs/${each.value.name}.yaml --file _cfgs/controlplane.yaml"
-  }
-  depends_on = [hcloud_load_balancer_target.api, local_file.controlplane]
+locals {
+  controlplane_config = { for k, v in local.controlplanes : v.name => "talosctl apply-config --insecure --nodes ${hcloud_server.controlplane[k].ipv4_address} --config-patch @_cfgs/${v.name}.yaml --file _cfgs/controlplane.yaml" }
+}
+
+output "controlplane_config" {
+  value = local.controlplane_config
 }

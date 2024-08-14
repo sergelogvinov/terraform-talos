@@ -2,8 +2,8 @@
 packer {
   required_plugins {
     hcloud = {
-      version = ">= 1.0.5"
-      source  = "github.com/hashicorp/hcloud"
+      version = ">= 1.5.0"
+      source  = "github.com/hetznercloud/hcloud"
     }
   }
 }
@@ -11,7 +11,7 @@ packer {
 source "hcloud" "talos" {
   token       = var.hcloud_token
   rescue      = "linux64"
-  image       = "debian-11"
+  image       = "debian-12"
   location    = var.hcloud_location
   server_type = var.hcloud_type
 

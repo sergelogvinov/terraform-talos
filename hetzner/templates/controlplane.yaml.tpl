@@ -7,6 +7,7 @@ machine:
     - "${ipv4_vip}"
     - "${apiDomain}"
   kubelet:
+    image: ghcr.io/siderolabs/kubelet:${version}
     extraArgs:
       rotate-server-certificates: true
     clusterDNS:
@@ -15,7 +16,7 @@ machine:
     nodeIP:
       validSubnets: ${format("%#v",split(",",nodeSubnets))}
   network:
-    hostname: "${name}"
+    hostname: ${name}
     interfaces:
       - interface: eth0
         dhcp: true
@@ -65,9 +66,11 @@ machine:
         - kube-system
 cluster:
   adminKubeconfig:
-    certLifetime: 8h0m0s
+    certLifetime: 48h0m0s
   controlPlane:
     endpoint: https://${apiDomain}:6443
+  discovery:
+    enabled: false
   network:
     dnsDomain: ${domain}
     podSubnets: ${format("%#v",split(",",podSubnets))}
@@ -79,6 +82,7 @@ cluster:
   proxy:
     disabled: true
   apiServer:
+    image: registry.k8s.io/kube-apiserver:${version}
     certSANs:
       - "${lbv4}"
       - "${lbv6}"
@@ -87,9 +91,12 @@ cluster:
       - "${ipv4_vip}"
       - "${apiDomain}"
   controllerManager:
+    image: registry.k8s.io/kube-controller-manager:${version}
     extraArgs:
-        node-cidr-mask-size-ipv4: 24
-        node-cidr-mask-size-ipv6: 112
+        node-cidr-mask-size-ipv4: "24"
+        node-cidr-mask-size-ipv6: "112"
+  scheduler:
+    image: registry.k8s.io/kube-scheduler:${version}
   etcd:
     advertisedSubnets:
       - ${nodeSubnets}
@@ -114,10 +121,8 @@ cluster:
   externalCloudProvider:
     enabled: true
     manifests:
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/talos-cloud-controller-manager-result.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-cloud-controller-manager.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-csi.yaml
-      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/metrics-server-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/talos-cloud-controller-manager-result.yaml
+      - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/hetzner/deployments/hcloud-cloud-controller-manager-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-ns.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/local-path-storage-result.yaml
       - https://raw.githubusercontent.com/sergelogvinov/terraform-talos/main/_deployments/vars/coredns-local.yaml

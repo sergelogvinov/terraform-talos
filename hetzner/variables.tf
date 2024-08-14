@@ -25,19 +25,18 @@ variable "regions" {
   default     = ["nbg1", "fsn1", "hel1"]
 }
 
-variable "kubernetes" {
-  type = map(string)
-  default = {
-    podSubnets     = "10.32.0.0/12,fd40:10:32::/102"
-    serviceSubnets = "10.200.0.0/22,fd40:10:200::/112"
-    apiDomain      = "api.cluster.local"
-    domain         = "cluster.local"
-    clusterName    = "talos-k8s-hetzner"
-    tokenMachine   = ""
-    caMachine      = ""
-    token          = ""
-    ca             = ""
-  }
+variable "arch" {
+  description = "The Talos architecture list"
+  type        = list(string)
+  default     = ["amd64", "arm64"]
+}
+
+data "sops_file" "tfvars" {
+  source_file = "terraform.tfvars.sops.json"
+}
+
+locals {
+  kubernetes = jsondecode(data.sops_file.tfvars.raw)["kubernetes"]
 }
 
 variable "vpc_main_cidr" {
@@ -65,7 +64,6 @@ variable "controlplane" {
     "all" = {
       type_lb = "" # lb11, if "" use floating-ip
     },
-
     "nbg1" = {
       count = 0,
       type  = "cpx11",
@@ -85,6 +83,9 @@ variable "instances" {
   description = "Map of region's properties"
   type        = map(any)
   default = {
+    "all" = {
+      version = "v1.30.2"
+    },
     "nbg1" = {
       web_count    = 0,
       web_type     = "cx11",

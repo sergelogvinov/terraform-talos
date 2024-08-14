@@ -1,0 +1,56 @@
+
+image:
+  # repository: ghcr.io/sergelogvinov/talos-cloud-controller-manager
+  tag: edge
+
+service:
+  containerPort: 50258
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/scheme: "https"
+    prometheus.io/port: "50258"
+
+logVerbosityLevel: 4
+
+enabledControllers:
+  - cloud-node
+  # - node-ipam-controller
+
+# extraArgs:
+#   - --allocate-node-cidrs
+#   - --cidr-allocator-type=CloudAllocator
+#   - --node-cidr-mask-size-ipv4=24
+#   - --node-cidr-mask-size-ipv6=80
+
+tolerations:
+  - effect: NoSchedule
+    operator: Exists
+
+transformations:
+  - name: web
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^web-.+$
+    labels:
+      node-role.kubernetes.io/web: ""
+  - name: worker
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^worker-.+$
+    labels:
+      node-role.kubernetes.io/worker: ""
+  - name: db
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^db-.+$
+    labels:
+      node-role.kubernetes.io/db: ""

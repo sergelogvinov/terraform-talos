@@ -29,7 +29,7 @@ variable "scaleway_type" {
 
 variable "talos_version" {
   type    = string
-  default = "v1.7.6"
+  default = "v1.8.0"
 }
 
 locals {

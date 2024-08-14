@@ -1,6 +1,6 @@
 
 data "hcloud_image" "talos" {
-  for_each          = toset(["amd64", "arm64"])
+  for_each          = toset(var.arch)
   with_architecture = each.key == "amd64" ? "x86" : "arm"
   with_selector     = "type=infra"
 }

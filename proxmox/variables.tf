@@ -38,7 +38,7 @@ variable "vpc_main_cidr" {
 variable "release" {
   type        = string
   description = "The version of the Talos image"
-  default     = "1.7.4"
+  default     = "1.8.0"
 }
 
 data "sops_file" "tfvars" {
@@ -97,7 +97,7 @@ variable "instances" {
   type        = map(any)
   default = {
     "all" = {
-      version = "v1.30.2"
+      version = "v1.31.0"
     },
     "hvm-1" = {
       enabled         = false,

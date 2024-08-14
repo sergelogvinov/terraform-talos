@@ -12,12 +12,12 @@ variable "hcloud_location" {
 
 variable "hcloud_type" {
   type      = string
-  default   = "cx11" # cx11|cax11 (arm)
+  default   = "cax11" # cx11|cax11 (arm)
 }
 
 variable "talos_version" {
   type    = string
-  default = "v1.4.1"
+  default = "v1.7.6"
 }
 
 locals {

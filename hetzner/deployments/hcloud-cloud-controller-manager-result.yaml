@@ -61,8 +61,7 @@ spec:
           effect: "NoExecute"
       containers:
         - name: hcloud-cloud-controller-manager
-          command:
-            - "/bin/hcloud-cloud-controller-manager"
+          args:
             - "--allow-untagged-cloud"
             - "--cloud-provider=hcloud"
             - "--route-reconciliation-period=30s"
@@ -74,11 +73,19 @@ spec:
                 secretKeyRef:
                   key: token
                   name: hcloud
-            - name: NODE_NAME
+            - name: ROBOT_PASSWORD
               valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-          image: hetznercloud/hcloud-cloud-controller-manager:v1.17.2 # x-release-please-version
+                secretKeyRef:
+                  key: robot-password
+                  name: hcloud
+                  optional: true
+            - name: ROBOT_USER
+              valueFrom:
+                secretKeyRef:
+                  key: robot-user
+                  name: hcloud
+                  optional: true
+          image: docker.io/hetznercloud/hcloud-cloud-controller-manager:v1.20.0 # x-release-please-version
           ports:
             - name: metrics
               containerPort: 8233
