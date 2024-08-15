@@ -18,11 +18,17 @@ resource "hcloud_floating_ip" "api" {
   labels        = merge(var.tags, { type = "infra" })
 }
 
-# resource "hcloud_floating_ip_assignment" "api" {
-#   count          = local.lb_enable ? 0 : 1
-#   floating_ip_id = hcloud_floating_ip.api[0].id
-#   server_id      = one(hcloud_server.controlplane).id
-# }
+resource "hcloud_floating_ip_assignment" "api" {
+  count          = local.lb_enable && length(local.controlplanes) > 0 ? 0 : 1
+  floating_ip_id = hcloud_floating_ip.api[0].id
+  server_id      = hcloud_server.controlplane[keys(local.controlplanes)[0]].id
+
+  lifecycle {
+    ignore_changes = [
+      server_id,
+    ]
+  }
+}
 
 resource "hcloud_load_balancer" "api" {
   count              = local.lb_enable ? 1 : 0

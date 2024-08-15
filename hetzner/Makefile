@@ -76,8 +76,11 @@ system-static:
 	helm template --namespace=kube-system -f deployments/hcloud-ccm.yaml \
 		hcloud-cloud-controller-manager hcloud/hcloud-cloud-controller-manager > deployments/hcloud-cloud-controller-manager-result.yaml
 
-	# helm template --namespace=kube-system -f deployments/hcloud-autoscaler.yaml cluster-autoscaler-hcloud \
-	# 	autoscaler/cluster-autoscaler > deployments/hcloud-autoscaler-result.yaml
+	helm template --namespace=kube-system -f deployments/hcloud-autoscaler.yaml cluster-autoscaler-hcloud \
+		autoscaler/cluster-autoscaler > deployments/hcloud-autoscaler-result.yaml
+
+	helm template --namespace=kube-system -f deployments/hcloud-csi.yaml hcloud-csi \
+		hcloud/hcloud-csi > deployments/hcloud-csi-result.yaml
 
 system:
 	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.15.7 -f deployments/cilium.yaml \
@@ -95,7 +98,12 @@ system:
 		talos-cloud-controller-manager \
 		oci://ghcr.io/siderolabs/charts/talos-cloud-controller-manager
 
+	base64 -i _cfgs/worker-as.yaml > _cfgs/worker-as.yaml.base64
+	kubectl --kubeconfig=kubeconfig -n kube-system create secret generic hcloud-init --from-file=worker=_cfgs/worker-as.yaml.base64
+
 deploy-csi:
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | hexdump -e '"%00x"' > hcloud-csi-secret.secret
 	kubectl --kubeconfig=kubeconfig create secret generic hcloud-csi-secret --from-file=encryptionPassphrase=hcloud-csi-secret.secret
 	rm -f hcloud-csi-secret.secret
+
+	kubectl --kubeconfig=kubeconfig apply -f deployments/hcloud-csi-result.yaml

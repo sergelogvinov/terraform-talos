@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-hcloud"
     app.kubernetes.io/name: "hetzner-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.29.3"
+    helm.sh/chart: "cluster-autoscaler-9.37.0"
   name: cluster-autoscaler-hcloud
   namespace: kube-system
 spec:
@@ -26,7 +26,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-hcloud"
     app.kubernetes.io/name: "hetzner-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.29.3"
+    helm.sh/chart: "cluster-autoscaler-9.37.0"
   name: cluster-autoscaler-hcloud
   namespace: kube-system
 automountServiceAccountToken: true
@@ -39,7 +39,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-hcloud"
     app.kubernetes.io/name: "hetzner-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.29.3"
+    helm.sh/chart: "cluster-autoscaler-9.37.0"
   name: cluster-autoscaler-hcloud
 rules:
   - apiGroups:
@@ -78,6 +78,8 @@ rules:
     verbs:
     - watch
     - list
+    - create
+    - delete
     - get
     - update
   - apiGroups:
@@ -156,6 +158,7 @@ rules:
     verbs:
       - list
       - watch
+      - get
   - apiGroups:
     - coordination.k8s.io
     resources:
@@ -180,7 +183,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-hcloud"
     app.kubernetes.io/name: "hetzner-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.29.3"
+    helm.sh/chart: "cluster-autoscaler-9.37.0"
   name: cluster-autoscaler-hcloud
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -199,7 +202,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-hcloud"
     app.kubernetes.io/name: "hetzner-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.29.3"
+    helm.sh/chart: "cluster-autoscaler-9.37.0"
   name: cluster-autoscaler-hcloud
   namespace: kube-system
 rules:
@@ -228,7 +231,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-hcloud"
     app.kubernetes.io/name: "hetzner-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.29.3"
+    helm.sh/chart: "cluster-autoscaler-9.37.0"
   name: cluster-autoscaler-hcloud
   namespace: kube-system
 roleRef:
@@ -248,7 +251,7 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-hcloud"
     app.kubernetes.io/name: "hetzner-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.29.3"
+    helm.sh/chart: "cluster-autoscaler-9.37.0"
   name: cluster-autoscaler-hcloud
   namespace: kube-system
 spec:
@@ -272,11 +275,12 @@ metadata:
     app.kubernetes.io/instance: "cluster-autoscaler-hcloud"
     app.kubernetes.io/name: "hetzner-cluster-autoscaler"
     app.kubernetes.io/managed-by: "Helm"
-    helm.sh/chart: "cluster-autoscaler-9.29.3"
+    helm.sh/chart: "cluster-autoscaler-9.37.0"
   name: cluster-autoscaler-hcloud
   namespace: kube-system
 spec:
   replicas: 1
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
       app.kubernetes.io/instance: "cluster-autoscaler-hcloud"
@@ -291,15 +295,13 @@ spec:
       dnsPolicy: "ClusterFirst"
       containers:
         - name: hetzner-cluster-autoscaler
-          image: "registry.k8s.io/autoscaling/cluster-autoscaler:v1.27.3"
+          image: "registry.k8s.io/autoscaling/cluster-autoscaler:v1.30.0"
           imagePullPolicy: "IfNotPresent"
           command:
             - ./cluster-autoscaler
             - --cloud-provider=hetzner
             - --namespace=kube-system
-            - --nodes=0:2:CPX31:NBG1:worker-nbg1
             - --nodes=0:2:CPX31:FSN1:worker-fsn1
-            - --nodes=0:2:CPX31:HEL1:worker-hel1
             - --logtostderr=true
             - --node-deletion-delay-timeout=10m0s
             - --regional=true
@@ -307,10 +309,18 @@ spec:
             - --stderrthreshold=info
             - --v=4
           env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
             - name: HCLOUD_CLOUD_INIT
               valueFrom:
                 secretKeyRef:
-                  name: hcloud
+                  name: hcloud-init
                   key: worker
             - name: HCLOUD_IMAGE
               valueFrom:

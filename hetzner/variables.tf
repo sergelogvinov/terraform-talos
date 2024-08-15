@@ -66,15 +66,15 @@ variable "controlplane" {
     },
     "nbg1" = {
       count = 0,
-      type  = "cpx11",
+      type  = "cax21",
     },
     "fsn1" = {
-      count = 0,
-      type  = "cpx11",
+      count = 1,
+      type  = "cax21",
     },
     "hel1" = {
       count = 0,
-      type  = "cax11",
+      type  = "cax21",
     }
   }
 }

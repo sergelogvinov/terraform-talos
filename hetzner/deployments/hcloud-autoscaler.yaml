@@ -1,20 +1,26 @@
 
 fullnameOverride: cluster-autoscaler-hcloud
-image:
-  tag: v1.27.3
+# image:
+#   tag: v1.27.3
 
 cloudProvider: hetzner
 
 autoscalingGroups:
-  - name: CPX31:NBG1:worker-nbg1
+  # - name: worker-nbg1
+  #   maxSize: 2
+  #   minSize: 0
+  #   instanceType: CPX31
+  #   region: FSN1
+  - name: worker-fsn1
     maxSize: 2
     minSize: 0
-  - name: CPX31:FSN1:worker-fsn1
-    maxSize: 2
-    minSize: 0
-  - name: CPX31:HEL1:worker-hel1
-    maxSize: 2
-    minSize: 0
+    instanceType: CPX31
+    region: FSN1
+  # - name: worker-hel1
+  #   maxSize: 2
+  #   minSize: 0
+  #   instanceType: CPX31
+  #   region: FSN1
 
 extraEnvSecrets:
   HCLOUD_TOKEN:
@@ -31,7 +37,7 @@ extraEnvSecrets:
     key: image
   HCLOUD_CLOUD_INIT:
     name: hcloud
-    key: worker
+    key: init
 
 containerSecurityContext:
   allowPrivilegeEscalation: false

@@ -116,8 +116,9 @@ cluster:
           token: ${base64encode(hcloud_token)}
           user: ${base64encode(robot_user)}
           password: ${base64encode(robot_password)}
-          image: ${base64encode(hcloud_image)}
           sshkey: ${base64encode(hcloud_sshkey)}
+          image: ${base64encode(hcloud_image)}
+          init: ${base64encode(hcloud_init)}
   externalCloudProvider:
     enabled: true
     manifests:

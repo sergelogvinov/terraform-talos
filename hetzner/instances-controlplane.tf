@@ -74,6 +74,13 @@ resource "local_sensitive_file" "controlplane" {
       hcloud_token   = var.hcloud_token
       hcloud_image   = data.hcloud_image.talos["amd64"].id
       hcloud_sshkey  = hcloud_ssh_key.infra.id
+      hcloud_init = base64encode(templatefile("${path.module}/templates/worker.yaml.tpl",
+        merge(local.kubernetes, try(var.instances["all"], {}), {
+          lbv4        = local.ipv4_vip
+          nodeSubnets = var.vpc_main_cidr
+          labels      = "${local.worker_labels},hcloud/node-group=worker-as"
+        })
+      ))
       robot_user     = var.robot_user
       robot_password = var.robot_password
     })
