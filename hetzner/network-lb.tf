@@ -19,9 +19,9 @@ resource "hcloud_floating_ip" "api" {
 }
 
 resource "hcloud_floating_ip_assignment" "api" {
-  count          = local.lb_enable && length(local.controlplanes) > 0 ? 0 : 1
+  count          = local.lb_enable ? 0 : (length(local.controlplanes) > 0 ? 1 : 0)
   floating_ip_id = hcloud_floating_ip.api[0].id
-  server_id      = hcloud_server.controlplane[keys(local.controlplanes)[0]].id
+  server_id      = length(local.controlplanes) > 0 ? hcloud_server.controlplane[keys(local.controlplanes)[0]].id : 0
 
   lifecycle {
     ignore_changes = [

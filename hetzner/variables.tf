@@ -69,7 +69,7 @@ variable "controlplane" {
       type  = "cax21",
     },
     "fsn1" = {
-      count = 1,
+      count = 0,
       type  = "cax21",
     },
     "hel1" = {
