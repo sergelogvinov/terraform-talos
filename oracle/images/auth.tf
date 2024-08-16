@@ -8,5 +8,5 @@ provider "oci" {
   user_ocid        = var.user_ocid
   fingerprint      = var.fingerprint
   private_key_path = var.key_file
-  region           = var.region
+  region           = local.region
 }
