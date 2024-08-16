@@ -84,7 +84,7 @@ variable "instances" {
   type        = map(any)
   default = {
     "all" = {
-      version = "v1.30.2"
+      version = "v1.30.3"
     },
     "nbg1" = {
       web_count    = 0,

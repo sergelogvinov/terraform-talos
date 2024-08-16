@@ -37,6 +37,7 @@ resource "hcloud_server" "controlplane" {
     alias_ips  = each.key == keys(local.controlplanes)[0] ? [local.ipv4_vip] : []
   }
 
+  shutdown_before_deletion = true
   lifecycle {
     ignore_changes = [
       network,

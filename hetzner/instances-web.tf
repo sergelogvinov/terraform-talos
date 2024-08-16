@@ -46,6 +46,7 @@ resource "hcloud_server" "web" {
     ipv6_enabled = true
   }
 
+  shutdown_before_deletion = true
   lifecycle {
     ignore_changes = [
       image,
