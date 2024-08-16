@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test
+  namespace: kube-system
+  labels:
+    app: alpine
+spec:
+  podManagementPolicy: Parallel  # default is OrderedReady
+  serviceName: test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alpine
+    spec:
+      terminationGracePeriodSeconds: 3
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+      # nodeSelector:
+      #   node-pool: web
+        # kubernetes.io/hostname: kube-21
+        # topology.kubernetes.io/zone: hvm-1
+      # affinity:
+      #   nodeAffinity:
+      #     preferredDuringSchedulingIgnoredDuringExecution:
+      #     - preference:
+      #         matchExpressions:
+      #         - key: kubernetes.io/hostname
+      #           operator: In
+      #           values:
+      #           - controlplane-41
+      #       weight: 100
+      containers:
+        - name: alpine
+          image: alpine
+          command: ["sleep","1d"]
+          securityContext:
+            privileged: true
+            seccompProfile:
+              type: RuntimeDefault
+            # capabilities:
+            #   drop: ["ALL"]
+          # volumeMounts:
+          #   - name: storage
+          #     mountPath: /mnt
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: alpine
+  # volumeClaimTemplates:
+  #   - metadata:
+  #       name: storage
+  #     spec:
+  #       accessModes: ["ReadWriteOnce"]
+  #       resources:
+  #         requests:
+  #           storage: 5Gi
+  #       storageClassName: proxmox

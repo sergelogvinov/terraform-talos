@@ -40,6 +40,7 @@ create-templates:
 	@sops --encrypt -i terraform.tfvars.sops.json
 	@yq eval .ca _cfgs/tfstate.vars | base64 --decode > _cfgs/ca.crt
 	@sops --encrypt --input-type=yaml --output-type=yaml _cfgs/talosconfig > _cfgs/talosconfig.sops.yaml
+	@sops --encrypt --input-type=yaml --output-type=yaml _cfgs/controlplane.yaml > _cfgs/controlplane.sops.yaml
 	@git add -f _cfgs/talosconfig.sops.yaml _cfgs/ca.crt terraform.tfvars.sops.json
 
 bootstrap: ## Bootstrap controlplane

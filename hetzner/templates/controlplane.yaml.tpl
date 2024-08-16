@@ -93,8 +93,9 @@ cluster:
   controllerManager:
     image: registry.k8s.io/kube-controller-manager:${version}
     extraArgs:
+        controllers: "*,tokencleaner,-node-ipam-controller"
         node-cidr-mask-size-ipv4: "24"
-        node-cidr-mask-size-ipv6: "112"
+        node-cidr-mask-size-ipv6: "80"
   scheduler:
     image: registry.k8s.io/kube-scheduler:${version}
   etcd:

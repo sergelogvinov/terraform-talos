@@ -34,6 +34,7 @@ resource "hcloud_server" "controlplane" {
   network {
     network_id = hcloud_network.main.id
     ip         = each.value.ip
+    alias_ips  = each.key == keys(local.controlplanes)[0] ? [local.ipv4_vip] : []
   }
 
   lifecycle {
@@ -48,7 +49,7 @@ resource "hcloud_server" "controlplane" {
 }
 
 resource "hcloud_load_balancer_target" "api" {
-  count            = local.lb_enable ? lookup(var.controlplane, "count", 0) : 0
+  count            = local.lb_enable ? length(local.controlplanes) : 0
   type             = "server"
   load_balancer_id = hcloud_load_balancer.api[0].id
   server_id        = hcloud_server.controlplane[count.index].id

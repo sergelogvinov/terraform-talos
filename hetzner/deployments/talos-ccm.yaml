@@ -14,13 +14,13 @@ logVerbosityLevel: 4
 
 enabledControllers:
   - cloud-node
-  # - node-ipam-controller
+  - node-ipam-controller
 
-# extraArgs:
-#   - --allocate-node-cidrs
-#   - --cidr-allocator-type=CloudAllocator
-#   - --node-cidr-mask-size-ipv4=24
-#   - --node-cidr-mask-size-ipv6=80
+extraArgs:
+  - --allocate-node-cidrs
+  - --cidr-allocator-type=CloudAllocator
+  - --node-cidr-mask-size-ipv4=24
+  - --node-cidr-mask-size-ipv6=80
 
 tolerations:
   - effect: NoSchedule

@@ -1,0 +1,80 @@
+---
+
+k8sServiceHost: "api.cluster.local"
+k8sServicePort: "6443"
+
+operator:
+  enabled: true
+  rollOutPods: true
+  replicas: 1
+  prometheus:
+    enabled: false
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  tolerations:
+    - operator: Exists
+      effect: NoSchedule
+
+identityAllocationMode: crd
+kubeProxyReplacement: strict
+enableK8sEndpointSlice: true
+localRedirectPolicy: true
+
+tunnel: "vxlan"
+autoDirectNodeRoutes: false
+devices: [eth+]
+
+healthChecking: true
+
+cni:
+  install: true
+
+ipam:
+  mode: "kubernetes"
+k8s:
+  requireIPv4PodCIDR: true
+  requireIPv6PodCIDR: true
+
+enableIPv6Masquerade: false
+enableIPv4Masquerade: true
+
+bpf:
+  masquerade: true
+ipv4:
+  enabled: true
+ipv6:
+  enabled: true
+hostServices:
+  enabled: true
+hostPort:
+  enabled: true
+nodePort:
+  enabled: true
+externalIPs:
+  enabled: true
+hostFirewall:
+  enabled: true
+ingressController:
+  enabled: false
+
+securityContext:
+  privileged: true
+
+hubble:
+  enabled: false
+
+prometheus:
+  enabled: true
+
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+
+resources:
+  limits:
+    cpu: 2
+    memory: 2Gi
+  requests:
+    cpu: 100m
+    memory: 128Mi

@@ -33,6 +33,16 @@ Where:
 * master-X - talos control plane nodes
 * store-X - debian bare metal worker servers
 
+Pod with IPv6
+
+```sh
+# kubectl exec -ti cilium-dddgc -- bash
+root@controlplane-fsn1-1:/home/cilium# cilium node list
+Name                  IPv4 Address   Endpoint CIDR   IPv6 Address            Endpoint CIDR             Source
+controlplane-fsn1-1   172.16.0.12    10.32.0.0/24    2a01:4f8:c17:9967::1    2a01:4f8:c17:9967::/80    local
+web-fsn1-1            172.16.0.50    10.32.2.0/24    2a01:4f8:c012:5795::1   2a01:4f8:c012:5795::/80   custom-resource
+```
+
 ## Prepare the base image
 
 Use packer (system_os/hetzner) to upload image.
