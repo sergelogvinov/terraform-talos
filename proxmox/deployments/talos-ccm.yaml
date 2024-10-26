@@ -1,7 +1,8 @@
 
 image:
-  repository: ghcr.io/sergelogvinov/talos-cloud-controller-manager
-  tag: nodeipam
+  # repository: ghcr.io/sergelogvinov/talos-cloud-controller-manager
+  pullPolicy: Always
+  tag: edge
 
 service:
   containerPort: 50258
@@ -14,6 +15,7 @@ logVerbosityLevel: 4
 
 enabledControllers:
   - cloud-node
+  - node-csr-approval
   - node-ipam-controller
 
 extraArgs:
