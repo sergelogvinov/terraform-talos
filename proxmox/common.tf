@@ -41,7 +41,7 @@ resource "proxmox_virtual_environment_vm" "template" {
 
   tablet_device = false
 
-  machine = "pc"
+  machine = "q35"
   cpu {
     architecture = "x86_64"
     cores        = 1

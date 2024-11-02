@@ -108,7 +108,7 @@ resource "proxmox_virtual_environment_vm" "worker" {
   dynamic "numa" {
     for_each = { for idx, numa in module.worker_affinity[each.value.zone].arch[each.value.inx].numa : idx => {
       device = "numa${index(keys(module.worker_affinity[each.value.zone].arch[each.value.inx].numa), idx)}"
-      cpus   = "${idx * (each.value.cpu / length(module.worker_affinity[each.value.zone].arch[each.value.inx].numa))}-${(idx + 1) * (each.value.cpu / length(module.worker_affinity[each.value.zone].arch[each.value.inx].numa)) - 1}"
+      cpus   = "${index(keys(module.worker_affinity[each.value.zone].arch[each.value.inx].numa), idx) * (each.value.cpu / length(module.worker_affinity[each.value.zone].arch[each.value.inx].numa))}-${(index(keys(module.worker_affinity[each.value.zone].arch[each.value.inx].numa), idx) + 1) * (each.value.cpu / length(module.worker_affinity[each.value.zone].arch[each.value.inx].numa)) - 1}"
       mem    = each.value.mem / length(module.worker_affinity[each.value.zone].arch[each.value.inx].numa)
     } }
     content {

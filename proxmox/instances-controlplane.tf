@@ -57,7 +57,7 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
   vm_id       = each.value.id
   description = "Talos controlplane at ${var.region}"
 
-  machine = "pc"
+  machine = "q35"
   cpu {
     architecture = "x86_64"
     cores        = each.value.cpu
