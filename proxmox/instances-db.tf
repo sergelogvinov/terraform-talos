@@ -6,20 +6,11 @@ locals {
   dbs = { for k in flatten([
     for zone in local.zones : [
       for inx in range(lookup(try(var.instances[zone], {}), "db_count", 0)) : {
+        inx : inx
         id : lookup(try(var.instances[zone], {}), "db_id", 9000) + inx
         name : "${local.db_prefix}-${format("%02d", index(local.zones, zone))}${format("%x", 10 + inx)}"
         zone : zone
         cpu : lookup(try(var.instances[zone], {}), "db_cpu", 1)
-        cpus : lookup(try(var.instances[zone], {}), "db_affinity", "") != "" ? lookup(var.instances[zone], "db_affinity") : join(",", slice(
-          flatten(local.cpus[zone]),
-          2 * data.proxmox_virtual_environment_node.node[zone].cpu_count - (inx + 1) * lookup(try(var.instances[zone], {}), "db_cpu", 1),
-          2 * data.proxmox_virtual_environment_node.node[zone].cpu_count - inx * lookup(try(var.instances[zone], {}), "db_cpu", 1)
-        ))
-        numas : [0]
-        # range(
-        #   length(local.cpu_numa[zone]) - (inx + 1) * lookup(try(var.instances[zone], {}), "db_numas", 1),
-        #   length(local.cpu_numa[zone]) - inx * lookup(try(var.instances[zone], {}), "db_numas", 1)
-        # )
         mem : lookup(try(var.instances[zone], {}), "db_mem", 2048)
 
         hvv4 = cidrhost(local.subnets[zone], 0)
@@ -32,6 +23,19 @@ locals {
       }
     ]
   ]) : k.name => k }
+}
+
+module "db_affinity" {
+  for_each = { for zone in local.zones : zone => {
+    zone : zone
+    vms : lookup(try(var.instances[zone], {}), "db_count", 0)
+  } if lookup(try(var.instances[zone], {}), "db_count", 0) > 0 }
+
+  source       = "./cpuaffinity"
+  cpu_affinity = var.nodes[each.value.zone].cpu
+  vms          = each.value.vms
+  cpus         = lookup(try(var.instances[each.value.zone], {}), "db_cpu", 1)
+  # shift        = length(var.nodes[each.value.zone].cpu) - 1
 }
 
 resource "proxmox_virtual_environment_file" "db_machineconfig" {
@@ -92,7 +96,7 @@ resource "proxmox_virtual_environment_vm" "db" {
   cpu {
     architecture = "x86_64"
     cores        = each.value.cpu
-    affinity     = each.value.cpus
+    affinity     = join(",", module.db_affinity[each.value.zone].arch[each.value.inx].cpus)
     sockets      = 1
     numa         = true
     type         = "host"
@@ -103,10 +107,10 @@ resource "proxmox_virtual_environment_vm" "db" {
     # keep_hugepages = true
   }
   dynamic "numa" {
-    for_each = { for idx, numa in each.value.numas : numa => {
-      device = "numa${idx}"
-      cpus   = "${idx * (each.value.cpu / length(each.value.numas))}-${(idx + 1) * (each.value.cpu / length(each.value.numas)) - 1}"
-      mem    = each.value.mem / length(each.value.numas)
+    for_each = { for idx, numa in module.db_affinity[each.value.zone].arch[each.value.inx].numa : idx => {
+      device = "numa${index(keys(module.db_affinity[each.value.zone].arch[each.value.inx].numa), idx)}"
+      cpus   = "${idx * (each.value.cpu / length(module.db_affinity[each.value.zone].arch[each.value.inx].numa))}-${(idx + 1) * (each.value.cpu / length(module.db_affinity[each.value.zone].arch[each.value.inx].numa)) - 1}"
+      mem    = each.value.mem / length(module.db_affinity[each.value.zone].arch[each.value.inx].numa)
     } }
     content {
       device    = numa.value.device

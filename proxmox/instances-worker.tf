@@ -6,16 +6,11 @@ locals {
   workers = { for k in flatten([
     for zone in local.zones : [
       for inx in range(lookup(try(var.instances[zone], {}), "worker_count", 0)) : {
+        inx : inx
         id : lookup(try(var.instances[zone], {}), "worker_id", 9000) + inx
         name : "${local.worker_prefix}-${format("%02d", index(local.zones, zone))}${format("%x", 10 + inx)}"
         zone : zone
-        node_name : zone
         cpu : lookup(try(var.instances[zone], {}), "worker_cpu", 1)
-        cpus : join(",", slice(
-          flatten(local.cpus[zone]),
-          (inx + 2) * lookup(try(var.instances[zone], {}), "worker_cpu", 1), (inx + 3) * lookup(try(var.instances[zone], {}), "worker_cpu", 1)
-        ))
-        numas : [0] # [2 + inx]
         mem : lookup(try(var.instances[zone], {}), "worker_mem", 2048)
 
         hvv4 = cidrhost(local.subnets[zone], 0)
@@ -30,9 +25,21 @@ locals {
   ]) : k.name => k }
 }
 
+module "worker_affinity" {
+  for_each = { for zone in local.zones : zone => {
+    zone : zone
+    vms : lookup(try(var.instances[zone], {}), "worker_count", 0)
+  } if lookup(try(var.instances[zone], {}), "worker_count", 0) > 0 }
+
+  source       = "./cpuaffinity"
+  cpu_affinity = var.nodes[each.value.zone].cpu
+  vms          = each.value.vms
+  cpus         = lookup(try(var.instances[each.value.zone], {}), "worker_cpu", 1)
+}
+
 resource "proxmox_virtual_environment_file" "worker_machineconfig" {
   for_each     = local.workers
-  node_name    = each.value.node_name
+  node_name    = each.value.zone
   content_type = "snippets"
   datastore_id = "local"
 
@@ -88,7 +95,7 @@ resource "proxmox_virtual_environment_vm" "worker" {
   cpu {
     architecture = "x86_64"
     cores        = each.value.cpu
-    affinity     = each.value.cpus
+    affinity     = join(",", module.worker_affinity[each.value.zone].arch[each.value.inx].cpus)
     sockets      = 1
     numa         = true
     type         = "host"
@@ -99,10 +106,10 @@ resource "proxmox_virtual_environment_vm" "worker" {
     # keep_hugepages = true
   }
   dynamic "numa" {
-    for_each = { for idx, numa in each.value.numas : numa => {
-      device = "numa${idx}"
-      cpus   = "0-${each.value.cpu - 1}"
-      mem    = each.value.mem
+    for_each = { for idx, numa in module.worker_affinity[each.value.zone].arch[each.value.inx].numa : idx => {
+      device = "numa${index(keys(module.worker_affinity[each.value.zone].arch[each.value.inx].numa), idx)}"
+      cpus   = "${idx * (each.value.cpu / length(module.worker_affinity[each.value.zone].arch[each.value.inx].numa))}-${(idx + 1) * (each.value.cpu / length(module.worker_affinity[each.value.zone].arch[each.value.inx].numa)) - 1}"
+      mem    = each.value.mem / length(module.worker_affinity[each.value.zone].arch[each.value.inx].numa)
     } }
     content {
       device    = numa.value.device

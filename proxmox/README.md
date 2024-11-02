@@ -101,13 +101,13 @@ vpc_main_cidr = "172.16.0.0/24"
 # We will create one control-plane node on the Proxmox node `node1` (count = 1)
 controlplane = {
   "node1" = {
-    id    = 500
+    id    = 500,
     count = 1,
     cpu   = 2,
     mem   = 6144,
   },
   "node2" = {
-    id    = 520
+    id    = 520,
     count = 0,
     cpu   = 2,
     mem   = 6144,
@@ -117,21 +117,23 @@ controlplane = {
 # One web and worker node:
 instances = {
   "node1" = {
-    web_id       = 1000
+    enabled      = true,
+    web_id       = 1000,
     web_count    = 1,
     web_cpu      = 2,
     web_mem      = 4096,
-    worker_id    = 1050
+    worker_id    = 1050,
     worker_count = 1,
     worker_cpu   = 2,
     worker_mem   = 4096,
   },
   "node2" = {
-    web_id       = 2000
+    enabled      = true,
+    web_id       = 2000,
     web_count    = 0,
     web_cpu      = 2,
     web_mem      = 4096,
-    worker_id    = 2050
+    worker_id    = 2050,
     worker_count = 0,
     worker_cpu   = 2,
     worker_mem   = 4096,
@@ -159,9 +161,14 @@ Receive `kubeconfig` file
 make kubeconfig
 ```
 
+Test the cluster
+
 ```shell
+export KUBECONFIG=kubeconfig
+
 kubectl get nodes -o wide
 kubectl get pods -o wide -A
+kubectl get csistoragecapacities -ocustom-columns=CLASS:.storageClassName,AVAIL:.capacity,ZONE:.nodeTopology.matchLabels -A
 ```
 
 Resault:
