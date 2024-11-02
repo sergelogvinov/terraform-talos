@@ -80,8 +80,8 @@ system:
 		proxmox-cloud-controller-manager oci://ghcr.io/sergelogvinov/charts/proxmox-cloud-controller-manager
 
 	#
-	# File vars/secrets.proxmox.yaml should be created manually
+	# File vars/secrets.proxmox.yaml was created by terraform
 	#
 	kubectl --kubeconfig=kubeconfig apply -f vars/proxmox-ns.yaml
-	# helm --kubeconfig=kubeconfig secrets upgrade -i --namespace=csi-proxmox -f vars/proxmox-csi.yaml -f vars/secrets.proxmox.yaml \
-	# 	proxmox-csi-plugin oci://ghcr.io/sergelogvinov/charts/proxmox-csi-plugin
+	helm --kubeconfig=kubeconfig secrets upgrade -i --namespace=csi-proxmox -f vars/proxmox-csi.yaml -f vars/secrets.proxmox.yaml \
+		proxmox-csi-plugin oci://ghcr.io/sergelogvinov/charts/proxmox-csi-plugin

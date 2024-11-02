@@ -84,7 +84,7 @@ resource "proxmox_virtual_environment_vm" "worker" {
     up_delay = 15
   }
 
-  machine = "pc"
+  machine = "q35"
   cpu {
     architecture = "x86_64"
     cores        = each.value.cpu

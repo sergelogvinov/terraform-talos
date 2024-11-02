@@ -105,7 +105,7 @@ resource "proxmox_virtual_environment_vm" "web" {
     up_delay = 5
   }
 
-  machine = "pc"
+  machine = "q35"
   cpu {
     architecture = "x86_64"
     cores        = each.value.cpu

@@ -204,14 +204,30 @@ resource "local_sensitive_file" "controlplane" {
         "clusters" : [{
           "url" : "https://${each.value.hvv4}:8006/api2/json",
           "insecure" : true,
-          "token_id" : split("=", local.proxmox_token)[0],
-          "token_secret" : split("=", local.proxmox_token)[1],
+          "token_id" : split("=", local.proxmox_token_ccm)[0],
+          "token_secret" : split("=", local.proxmox_token_ccm)[1],
           "region" : var.region,
         }]
       })
     })
   )
   filename        = "_cfgs/${each.value.name}.yaml"
+  file_permission = "0600"
+}
+
+resource "local_sensitive_file" "csi" {
+  content = yamlencode({
+    "config" : {
+      "clusters" : [{
+        "url" : "https://${var.proxmox_host}:8006/api2/json",
+        "insecure" : true,
+        "token_id" : split("=", local.proxmox_token_csi)[0],
+        "token_secret" : split("=", local.proxmox_token_csi)[1],
+        "region" : var.region,
+      }]
+    }
+  })
+  filename        = "vars/secrets.proxmox.yaml"
   file_permission = "0600"
 }
 

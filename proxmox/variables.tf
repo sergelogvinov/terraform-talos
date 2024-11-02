@@ -43,7 +43,8 @@ data "terraform_remote_state" "init" {
 locals {
   kubernetes = jsondecode(data.sops_file.tfvars.raw)["kubernetes"]
 
-  proxmox_token = data.terraform_remote_state.init.outputs.ccm
+  proxmox_token_ccm = data.terraform_remote_state.init.outputs.ccm
+  proxmox_token_csi = data.terraform_remote_state.init.outputs.csi
 }
 
 variable "nodes" {
