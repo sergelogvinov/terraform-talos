@@ -18,7 +18,7 @@ init: ## Initialize terraform
 create-age: ## Create age key
 	age-keygen -o age.key.txt
 
-create-config: ## Genereate talos configs
+create-config: ## Generete talos configs
 	terraform apply -auto-approve -target=local_file.worker_patch
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false ${CLUSTERNAME} https://${ENDPOINT}:6443
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
@@ -43,6 +43,9 @@ create-templates:
 	@sops --encrypt --input-type=yaml --output-type=yaml _cfgs/controlplane.yaml > _cfgs/controlplane.sops.yaml
 	@git add -f _cfgs/talosconfig.sops.yaml _cfgs/ca.crt terraform.tfvars.sops.json
 
+create-cluster: ## Create cluster
+	terraform apply
+
 bootstrap: ## Bootstrap controlplane
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 	talosctl --talosconfig _cfgs/talosconfig --nodes ${CPFIRST} bootstrap
@@ -61,10 +64,8 @@ nodes: ## Show kubernetes nodes
 	@kubectl get nodes -owide --sort-by '{.metadata.name}' --label-columns topology.kubernetes.io/region,topology.kubernetes.io/zone,node.kubernetes.io/instance-type
 
 system:
-	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.15.6 -f deployments/cilium.yaml \
+	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.16.3 -f deployments/cilium.yaml \
 		cilium cilium/cilium
-
-	kubectl --kubeconfig=kubeconfig -n kube-system delete svc cilium-agent
 
 	kubectl --kubeconfig=kubeconfig apply -f ../_deployments/vars/coredns-local.yaml
 
@@ -72,7 +73,6 @@ system:
 		metrics-server metrics-server/metrics-server
 
 	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system -f deployments/talos-ccm.yaml \
-		--set useDaemonSet=true \
 		talos-cloud-controller-manager \
 		oci://ghcr.io/siderolabs/charts/talos-cloud-controller-manager
 
@@ -83,5 +83,5 @@ system:
 	# File vars/secrets.proxmox.yaml should be created manually
 	#
 	kubectl --kubeconfig=kubeconfig apply -f vars/proxmox-ns.yaml
-	helm --kubeconfig=kubeconfig secrets upgrade -i --namespace=csi-proxmox -f vars/proxmox-csi.yaml -f vars/secrets.proxmox.yaml \
-		proxmox-csi-plugin oci://ghcr.io/sergelogvinov/charts/proxmox-csi-plugin
+	# helm --kubeconfig=kubeconfig secrets upgrade -i --namespace=csi-proxmox -f vars/proxmox-csi.yaml -f vars/secrets.proxmox.yaml \
+	# 	proxmox-csi-plugin oci://ghcr.io/sergelogvinov/charts/proxmox-csi-plugin

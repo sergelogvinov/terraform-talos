@@ -215,7 +215,7 @@ resource "proxmox_virtual_environment_vm" "web" {
 }
 
 resource "proxmox_virtual_environment_firewall_options" "web" {
-  for_each  = local.webs
+  for_each  = lookup(var.security_groups, "web", "") == "" ? {} : local.webs
   node_name = each.value.zone
   vm_id     = each.value.id
   enabled   = true
@@ -234,13 +234,13 @@ resource "proxmox_virtual_environment_firewall_options" "web" {
 }
 
 resource "proxmox_virtual_environment_firewall_rules" "web" {
-  for_each  = { for k, v in local.webs : k => v if lookup(try(var.instances[v.zone], {}), "web_sg", "") != "" }
+  for_each  = lookup(var.security_groups, "web", "") == "" ? {} : local.webs
   node_name = each.value.zone
   vm_id     = each.value.id
 
   rule {
     enabled        = true
-    security_group = lookup(var.instances[each.value.zone], "web_sg")
+    security_group = var.security_groups["web"]
   }
 
   depends_on = [proxmox_virtual_environment_vm.web, proxmox_virtual_environment_firewall_options.web]

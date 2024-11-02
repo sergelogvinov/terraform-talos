@@ -7,13 +7,13 @@ Local utilities
 * terraform
 * talosctl
 * kubectl
+* sops
 * yq
 
 ## Kubernetes addons
 
-* [cilium](https://github.com/cilium/cilium) 1.12.4
-* [metrics-server](https://github.com/kubernetes-sigs/metrics-server) 0.5.0
-* [rancher.io/local-path](https://github.com/rancher/local-path-provisioner) 0.0.19
+* [cilium](https://github.com/cilium/cilium) 1.16.3
+* [metrics-server](https://github.com/kubernetes-sigs/metrics-server) 0.7.2
 * [Talos CCM](https://github.com/siderolabs/talos-cloud-controller-manager) edge, controller: `cloud-node`.
 Talos CCM labels the nodes, and approve node server certificate signing request.
 * [Proxmox CCM](https://github.com/sergelogvinov/proxmox-cloud-controller-manager) edge, controller: `cloud-node-lifecycle`.
@@ -35,11 +35,11 @@ All deployments use nodeSelector, controllers runs on control-plane, all other o
 First we need to upload the talos OS image to the Proxmox host machine.
 If you do not have shared storage, you need to upload image to each machine.
 
-Folow this link [README](images/README.md) to make it.
+Follow this link [README](images/README.md) to make it.
 
 ## Init
 
-Create Proxmox role and account.
+Create Proxmox role and accounts.
 This credentials will use by Proxmox CCM and CSI.
 
 ```shell
@@ -48,21 +48,13 @@ terraform init -upgrade
 terraform apply
 ```
 
-Terraform is not capable of creating account tokens, so you should create them through the web portal instead.
-Or use this command:
-
-```shell
-# On the proxmox server.
-pveum user token add kubernetes@pve ccm -privsep 0
-```
-
 ## Bootstrap cluster
 
 Terraform will create the Talos machine config and upload it to the Proxmox server, but only for worker nodes.
 It will also create a metadata file, which is a very important file that contains information such as region, zone, and providerID.
 This metadata is used by the Talos CCM to label the nodes and it also required by the Proxmox CCM/CSI.
 
-Contol-plane machine config uploads by command `talosctl apply-config`, because I do not want to store all kubernetes secrets in proxmox server.
+Control-plane machine config uploads by command `talosctl apply-config`, because I do not want to store all kubernetes secrets in proxmox server.
 Terraform shows you command to launch.
 
 VM config looks like:
@@ -102,11 +94,7 @@ machine:
 First we need to define our cluster:
 
 ```hcl
-proxmox_domain   = "example.com"
 proxmox_host     = "node1.example.com"
-proxmox_nodename = "node1"
-proxmox_storage  = "data"
-proxmox_image    = "talos"
 
 vpc_main_cidr = "172.16.0.0/24"
 
@@ -160,13 +148,18 @@ make init create-config create-templates
 Launch the control-plane node
 
 ```shell
-make create-controlplane
+make create-cluster
 # wait ~2 minutes
-make create-controlplane-bootstrap
+make bootstrap
 ```
 
 Receive `kubeconfig` file
 
 ```shell
-make create-kubeconfig
+make kubeconfig
+```
+
+```shell
+kubectl get nodes -o wide
+kubectl get pods -o wide -A
 ```

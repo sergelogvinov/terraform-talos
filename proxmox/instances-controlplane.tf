@@ -154,7 +154,7 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
 }
 
 resource "proxmox_virtual_environment_firewall_options" "controlplane" {
-  for_each  = local.controlplanes
+  for_each  = lookup(var.security_groups, "controlplane", "") == "" ? {} : local.controlplanes
   node_name = each.value.zone
   vm_id     = each.value.id
   enabled   = true
@@ -164,16 +164,16 @@ resource "proxmox_virtual_environment_firewall_options" "controlplane" {
   log_level_in  = "nolog"
   log_level_out = "nolog"
   macfilter     = false
-  ndp           = false
+  ndp           = true
   input_policy  = "DROP"
   output_policy = "ACCEPT"
-  radv          = true
+  radv          = false
 
   depends_on = [proxmox_virtual_environment_vm.controlplane]
 }
 
 resource "proxmox_virtual_environment_firewall_rules" "controlplane" {
-  for_each  = local.controlplanes
+  for_each  = lookup(var.security_groups, "controlplane", "") == "" ? {} : local.controlplanes
   node_name = each.value.zone
   vm_id     = each.value.id
 

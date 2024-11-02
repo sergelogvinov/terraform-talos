@@ -194,7 +194,7 @@ resource "proxmox_virtual_environment_vm" "worker" {
 }
 
 resource "proxmox_virtual_environment_firewall_options" "worker" {
-  for_each  = local.workers
+  for_each  = lookup(var.security_groups, "worker", "") == "" ? {} : local.workers
   node_name = each.value.node_name
   vm_id     = each.value.id
   enabled   = true
@@ -213,13 +213,13 @@ resource "proxmox_virtual_environment_firewall_options" "worker" {
 }
 
 resource "proxmox_virtual_environment_firewall_rules" "worker" {
-  for_each  = { for k, v in local.workers : k => v if lookup(try(var.instances[v.zone], {}), "worker_sg", "") != "" }
+  for_each  = lookup(var.security_groups, "worker", "") == "" ? {} : local.workers
   node_name = each.value.node_name
   vm_id     = each.value.id
 
   rule {
     enabled        = true
-    security_group = lookup(var.instances[each.value.zone], "worker_sg")
+    security_group = var.security_groups["worker"]
   }
 
   depends_on = [proxmox_virtual_environment_vm.worker, proxmox_virtual_environment_firewall_options.worker]

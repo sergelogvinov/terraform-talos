@@ -16,11 +16,14 @@ operator:
       effect: NoSchedule
 
 identityAllocationMode: crd
-kubeProxyReplacement: strict
+kubeProxyReplacement: true
 enableK8sEndpointSlice: true
 localRedirectPolicy: true
+l7Proxy: false
 
-tunnel: "vxlan"
+# endpointRoutes:
+#   enabled: true
+# routingMode: "native"
 autoDirectNodeRoutes: false
 devices: [eth+]
 
@@ -56,6 +59,10 @@ hostFirewall:
   enabled: true
 ingressController:
   enabled: false
+envoy:
+  enabled: false
+  prometheus:
+    enabled: false
 
 securityContext:
   privileged: true

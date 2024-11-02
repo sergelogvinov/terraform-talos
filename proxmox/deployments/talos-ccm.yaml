@@ -24,9 +24,12 @@ extraArgs:
   - --node-cidr-mask-size-ipv4=24
   - --node-cidr-mask-size-ipv6=80
 
-# tolerations:
-#   - effect: NoSchedule
-#     operator: Exists
+daemonSet:
+  enabled: true
+
+tolerations:
+  - effect: NoSchedule
+    operator: Exists
 
 transformations:
   - name: web

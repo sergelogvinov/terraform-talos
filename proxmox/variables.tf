@@ -1,20 +1,8 @@
 
 variable "proxmox_host" {
-  description = "Proxmox host"
+  description = "Proxmox API host"
   type        = string
   default     = "192.168.1.1"
-}
-
-variable "proxmox_domain" {
-  description = "Proxmox domain name"
-  type        = string
-  default     = "proxmox.local"
-}
-
-variable "proxmox_image" {
-  description = "Proxmox source image name"
-  type        = string
-  default     = "talos"
 }
 
 variable "region" {
@@ -38,7 +26,7 @@ variable "vpc_main_cidr" {
 variable "release" {
   type        = string
   description = "The version of the Talos image"
-  default     = "1.7.6"
+  default     = "1.8.2"
 }
 
 data "sops_file" "tfvars" {
@@ -97,7 +85,7 @@ variable "instances" {
   type        = map(any)
   default = {
     "all" = {
-      version = "v1.31.0"
+      version = "v1.31.2"
     },
     "hvm-1" = {
       enabled         = false,
@@ -107,20 +95,17 @@ variable "instances" {
       web_mem         = 27648,
       web_template    = "worker-sriov.yaml.tpl"
       web_labels      = ""
-      web_sg          = "kubernetes"
       worker_id       = 11030,
       worker_count    = 0,
       worker_cpu      = 8,
       worker_mem      = 28672,
       worker_template = "worker-sriov.yaml.tpl"
-      worker_sg       = "kubernetes"
       db_id           = 11030
       db_count        = 0,
       db_cpu          = 8,
       db_mem          = 28672,
       db_template     = "worker-sriov.yaml.tpl"
       db_labels       = ""
-      db_sg           = "kubernetes"
     },
     "hvm-2" = {
       enabled         = false,
@@ -130,20 +115,17 @@ variable "instances" {
       web_mem         = 27648,
       web_template    = "worker-sriov.yaml.tpl"
       web_labels      = ""
-      web_sg          = "kubernetes"
       worker_id       = 12030,
       worker_count    = 0,
       worker_cpu      = 8,
       worker_mem      = 28672,
       worker_template = "worker-sriov.yaml.tpl"
-      worker_sg       = "kubernetes"
       db_id           = 12040
       db_count        = 0,
       db_cpu          = 8,
       db_mem          = 28672,
       db_template     = "worker-sriov.yaml.tpl"
       db_labels       = ""
-      db_sg           = "kubernetes"
     },
   }
 }
@@ -152,9 +134,9 @@ variable "security_groups" {
   description = "Map of security groups"
   type        = map(any)
   default = {
-    "controlplane" = "kubernetes"
-    "web"          = "kubernetes"
-    "worker"       = "kubernetes"
-    "db"           = "kubernetes"
+    # "controlplane" = "kubernetes"
+    # "web"          = "kubernetes"
+    # "worker"       = "kubernetes"
+    # "db"           = "kubernetes"
   }
 }

@@ -198,7 +198,7 @@ resource "proxmox_virtual_environment_vm" "db" {
 }
 
 resource "proxmox_virtual_environment_firewall_options" "db" {
-  for_each  = local.dbs
+  for_each  = lookup(var.security_groups, "db", "") == "" ? {} : local.dbs
   node_name = each.value.zone
   vm_id     = each.value.id
   enabled   = true
@@ -217,13 +217,13 @@ resource "proxmox_virtual_environment_firewall_options" "db" {
 }
 
 resource "proxmox_virtual_environment_firewall_rules" "db" {
-  for_each  = { for k, v in local.dbs : k => v if lookup(try(var.instances[v.zone], {}), "db_sg", "") != "" }
+  for_each  = lookup(var.security_groups, "db", "") == "" ? {} : local.dbs
   node_name = each.value.zone
   vm_id     = each.value.id
 
   rule {
     enabled        = true
-    security_group = lookup(var.instances[each.value.zone], "db_sg")
+    security_group = var.security_groups["db"]
   }
 
   depends_on = [proxmox_virtual_environment_vm.db, proxmox_virtual_environment_firewall_options.db]
