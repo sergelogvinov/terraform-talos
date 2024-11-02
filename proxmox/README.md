@@ -163,3 +163,17 @@ make kubeconfig
 kubectl get nodes -o wide
 kubectl get pods -o wide -A
 ```
+
+Resault:
+
+```shell
+# make nodes
+NAME               STATUS   ROLES           AGE     VERSION   INTERNAL-IP    EXTERNAL-IP                 OS-IMAGE         KERNEL-VERSION   CONTAINER-RUNTIME         REGION     ZONE    INSTANCE-TYPE
+controlplane-01a   Ready    control-plane   113m    v1.31.2   172.16.0.142   2a01:xxx:xxx:3064:1::2d02   Talos (v1.8.2)   6.6.58-talos     containerd://2.0.0-rc.6   region-1   rnd-1   4VCPU-6GB
+web-01a            Ready    web             110m    v1.31.2   172.16.0.129   2a01:xxx:xxx:3064:2::2c0c   Talos (v1.8.2)   6.6.58-talos     containerd://2.0.0-rc.6   region-1   rnd-1   2VCPU-2GB
+web-01b            Ready    web             4m54s   v1.31.2   172.16.0.130   2a01:xxx:xxx:3064:2::2c0d   Talos (v1.8.2)   6.6.58-talos     containerd://2.0.0-rc.6   region-1   rnd-1   2VCPU-2GB
+web-02a            Ready    web             4m54s   v1.31.2   172.16.0.145   2a01:xxx:xxx:30ac:3::2ff4   Talos (v1.8.2)   6.6.58-talos     containerd://2.0.0-rc.6   region-1   rnd-2   2VCPU-2GB
+web-02b            Ready    web             4m54s   v1.31.2   172.16.0.146   2a01:xxx:xxx:30ac:3::2ff5   Talos (v1.8.2)   6.6.58-talos     containerd://2.0.0-rc.6   region-1   rnd-2   2VCPU-2GB
+worker-01a         Ready    worker          4m54s   v1.31.2   172.16.0.135   2a01:xxx:xxx:3064:2::2c96   Talos (v1.8.2)   6.6.58-talos     containerd://2.0.0-rc.6   region-1   rnd-1   2VCPU-2GB
+worker-02a         Ready    worker          32s     v1.31.2   172.16.0.151   2a01:xxx:xxx:30ac:3::307e   Talos (v1.8.2)   6.6.58-talos     containerd://2.0.0-rc.6   region-1   rnd-2   2VCPU-2GB
+```
