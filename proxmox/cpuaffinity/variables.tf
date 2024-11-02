@@ -29,7 +29,7 @@ locals {
     flatten([flatten([for r in range(length(v) / 2) : [v[r], v[r + length(v) / 2]]])])
   ]
 
-  shift = var.shift * length(local.cpus[0])
+  shift = var.shift * length(try(local.cpus[0], []))
 
   vm_arch = { for k in flatten([
     for inx in range(var.vms) : {

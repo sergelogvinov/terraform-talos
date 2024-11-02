@@ -32,7 +32,7 @@ module "web_affinity" {
   } if lookup(try(var.instances[zone], {}), "web_count", 0) > 0 }
 
   source       = "./cpuaffinity"
-  cpu_affinity = var.nodes[each.value.zone].cpu
+  cpu_affinity = length(lookup(try(var.nodes[each.value.zone], {}), "cpu", [])) > 0 ? var.nodes[each.value.zone].cpu : ["0-${2 * data.proxmox_virtual_environment_node.node[each.value.zone].cpu_count * data.proxmox_virtual_environment_node.node[each.value.zone].cpu_sockets - 1}"]
   vms          = each.value.vms
   cpus         = lookup(try(var.instances[each.value.zone], {}), "web_cpu", 1)
 }
@@ -117,7 +117,7 @@ resource "proxmox_virtual_environment_vm" "web" {
   cpu {
     architecture = "x86_64"
     cores        = each.value.cpu
-    affinity     = join(",", module.web_affinity[each.value.zone].arch[each.value.inx].cpus)
+    affinity     = length(lookup(try(var.nodes[each.value.zone], {}), "cpu", [])) > 0 ? join(",", module.web_affinity[each.value.zone].arch[each.value.inx].cpus) : null
     sockets      = 1
     numa         = true
     type         = "host"
@@ -132,7 +132,7 @@ resource "proxmox_virtual_environment_vm" "web" {
       device = "numa${index(keys(module.web_affinity[each.value.zone].arch[each.value.inx].numa), idx)}"
       cpus   = "${index(keys(module.web_affinity[each.value.zone].arch[each.value.inx].numa), idx) * (each.value.cpu / length(module.web_affinity[each.value.zone].arch[each.value.inx].numa))}-${(index(keys(module.web_affinity[each.value.zone].arch[each.value.inx].numa), idx) + 1) * (each.value.cpu / length(module.web_affinity[each.value.zone].arch[each.value.inx].numa)) - 1}"
       mem    = each.value.mem / length(module.web_affinity[each.value.zone].arch[each.value.inx].numa)
-    } }
+    } if length(lookup(try(var.nodes[each.value.zone], {}), "cpu", [])) > 0 }
     content {
       device    = numa.value.device
       cpus      = numa.value.cpus

@@ -1,16 +1,4 @@
 
-locals {
-  cpu_numa = {
-    for k, v in var.nodes : k => [for i in lookup(v, "cpu", "") :
-      flatten([for r in split(",", i) : (strcontains(r, "-") ? range(split("-", r)[0], split("-", r)[1] + 1, 1) : [r])])
-    ]
-  }
-
-  cpus = { for k, v in local.cpu_numa : k =>
-    flatten([for numa in v : flatten([for r in range(length(numa) / 2) : [numa[r], numa[r + length(numa) / 2]]])])
-  }
-}
-
 data "proxmox_virtual_environment_node" "node" {
   for_each  = { for inx, zone in local.zones : zone => inx if lookup(try(var.instances[zone], {}), "enabled", false) }
   node_name = each.key

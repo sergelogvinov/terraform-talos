@@ -1,6 +1,6 @@
 # Proxmox
 
-It was tested on Proxmox version 7.4-3
+It was tested on Proxmox version 8.2
 
 Local utilities
 
@@ -94,9 +94,27 @@ machine:
 First we need to define our cluster:
 
 ```hcl
-proxmox_host     = "node1.example.com"
+# Proxmox API host
+proxmox_host = "node1.example.com"
 
-vpc_main_cidr = "172.16.0.0/24"
+# Local proxmox subnets
+vpc_main_cidr = ["172.16.0.0/24", "fd60:172:16::/64"]
+
+# Node configuration
+nodes = {
+  "node1" = {
+    storage = "data",
+    ip4 = "1.1.0.1"
+    ip6 = "2001:1:2:1::/64",
+    gw6 = "2001:1:2:1::64",
+  },
+  "node2" = {
+    storage = "data",
+    ip4 = "1.1.0.2"
+    ip6 = "2001:1:2:2::/64",
+    gw6 = "2001:1:2:2::64",
+  },
+}
 
 # We will create one control-plane node on the Proxmox node `node1` (count = 1)
 controlplane = {

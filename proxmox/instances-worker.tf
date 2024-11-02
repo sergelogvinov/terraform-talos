@@ -32,7 +32,7 @@ module "worker_affinity" {
   } if lookup(try(var.instances[zone], {}), "worker_count", 0) > 0 }
 
   source       = "./cpuaffinity"
-  cpu_affinity = var.nodes[each.value.zone].cpu
+  cpu_affinity = length(lookup(try(var.nodes[each.value.zone], {}), "cpu", [])) > 0 ? var.nodes[each.value.zone].cpu : ["0-${2 * data.proxmox_virtual_environment_node.node[each.value.zone].cpu_count * data.proxmox_virtual_environment_node.node[each.value.zone].cpu_sockets - 1}"]
   vms          = each.value.vms
   cpus         = lookup(try(var.instances[each.value.zone], {}), "worker_cpu", 1)
 }
@@ -95,7 +95,7 @@ resource "proxmox_virtual_environment_vm" "worker" {
   cpu {
     architecture = "x86_64"
     cores        = each.value.cpu
-    affinity     = join(",", module.worker_affinity[each.value.zone].arch[each.value.inx].cpus)
+    affinity     = length(lookup(try(var.nodes[each.value.zone], {}), "cpu", [])) > 0 ? join(",", module.worker_affinity[each.value.zone].arch[each.value.inx].cpus) : null
     sockets      = 1
     numa         = true
     type         = "host"
