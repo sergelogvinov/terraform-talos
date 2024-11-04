@@ -30,7 +30,7 @@ locals {
 variable "release" {
   description = "The image name"
   type        = string
-  default     = "1.6.7"
+  default     = "1.8.2"
 }
 
 variable "arch" {

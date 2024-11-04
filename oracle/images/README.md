@@ -5,6 +5,12 @@ About image_metadata.json https://www.oracle.com/docs/tech/oracle-private-cloud-
 
 ```hcl
 # Body of terraform.tfvars
+compartment_ocid = "ocid1.compartment.oc1.."
+tenancy_ocid     = "ocid1.tenancy.oc1.."
+
+user_ocid   = "ocid1.user.oc1..aaaaaaaaxxxxxx"
+fingerprint = "ee:7f:67:00:e7:19:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx"
+key_file    = "~/.oci/oci_api_key.pem"
 ```
 
 ```shell
