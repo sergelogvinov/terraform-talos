@@ -1,8 +1,3 @@
-
-image:
-  repository: rancher/local-path-provisioner
-  tag: v0.0.26
-
 storageClass:
   create: true
   defaultClass: true
@@ -12,9 +7,6 @@ nodePathMap:
   - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
     paths:
       - /var/data
-
-configmap:
-  name: local-path-config
 
 securityContext:
   allowPrivilegeEscalation: false
@@ -33,6 +25,12 @@ resources:
   requests:
     cpu: 50m
     memory: 32Mi
+
+helperPod:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
 
 nodeSelector:
   node-role.kubernetes.io/control-plane: ""

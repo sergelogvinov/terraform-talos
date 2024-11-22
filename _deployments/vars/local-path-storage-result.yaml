@@ -7,9 +7,9 @@ metadata:
   namespace: local-path-storage
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.25
+    helm.sh/chart: local-path-provisioner-0.0.30
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.25"
+    app.kubernetes.io/version: "v0.0.30"
     app.kubernetes.io/managed-by: Helm
 imagePullSecrets:
 ---
@@ -21,9 +21,9 @@ metadata:
   namespace: local-path-storage
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.25
+    helm.sh/chart: local-path-provisioner-0.0.30
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.25"
+    app.kubernetes.io/version: "v0.0.30"
     app.kubernetes.io/managed-by: Helm
 data:
   config.json: |-
@@ -50,6 +50,7 @@ data:
     kind: Pod
     metadata:
       name: helper-pod
+      namespace: local-path-storage
     spec:
       priorityClassName: system-node-critical
       tolerations:
@@ -60,6 +61,10 @@ data:
         - name: helper-pod
           image: busybox:latest
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
 ---
 # Source: local-path-provisioner/templates/storageclass.yaml
 apiVersion: storage.k8s.io/v1
@@ -68,9 +73,9 @@ metadata:
   name: local-path
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.25
+    helm.sh/chart: local-path-provisioner-0.0.30
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.25"
+    app.kubernetes.io/version: "v0.0.30"
     app.kubernetes.io/managed-by: Helm
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
@@ -87,9 +92,9 @@ metadata:
   name: local-path-provisioner
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.25
+    helm.sh/chart: local-path-provisioner-0.0.30
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.25"
+    app.kubernetes.io/version: "v0.0.30"
     app.kubernetes.io/managed-by: Helm
 rules:
   - apiGroups: [""]
@@ -112,9 +117,9 @@ metadata:
   name: local-path-provisioner
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.25
+    helm.sh/chart: local-path-provisioner-0.0.30
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.25"
+    app.kubernetes.io/version: "v0.0.30"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -133,9 +138,9 @@ metadata:
   namespace: local-path-storage
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.25
+    helm.sh/chart: local-path-provisioner-0.0.30
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.25"
+    app.kubernetes.io/version: "v0.0.30"
     app.kubernetes.io/managed-by: Helm
 rules:
   - apiGroups: [""]
@@ -150,9 +155,9 @@ metadata:
   namespace: local-path-storage
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.25
+    helm.sh/chart: local-path-provisioner-0.0.30
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.25"
+    app.kubernetes.io/version: "v0.0.30"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -171,9 +176,9 @@ metadata:
   namespace: local-path-storage
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.25
+    helm.sh/chart: local-path-provisioner-0.0.30
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.25"
+    app.kubernetes.io/version: "v0.0.30"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -185,7 +190,10 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: local-path-provisioner
+        helm.sh/chart: local-path-provisioner-0.0.30
         app.kubernetes.io/instance: local-path-provisioner
+        app.kubernetes.io/version: "v0.0.30"
+        app.kubernetes.io/managed-by: Helm
     spec:
       serviceAccountName: local-path-provisioner
       securityContext:
@@ -202,7 +210,7 @@ spec:
             runAsUser: 65534
             seccompProfile:
               type: RuntimeDefault
-          image: "rancher/local-path-provisioner:v0.0.26"
+          image: "rancher/local-path-provisioner:v0.0.30"
           imagePullPolicy: IfNotPresent
           command:
             - local-path-provisioner
@@ -224,6 +232,8 @@ spec:
           env:
             - name: POD_NAMESPACE
               value: local-path-storage
+            - name: CONFIG_MOUNT_PATH
+              value: /etc/config/
           resources:
             limits:
               cpu: 50m
