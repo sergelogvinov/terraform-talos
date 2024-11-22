@@ -23,3 +23,5 @@ create-deployments: ## create templates
 
 	helm template --namespace=ingress-nginx --version=4.11.1 -f vars/ingress.yaml ingress-nginx \
 		ingress-nginx/ingress-nginx > vars/ingress-result.yaml
+
+	kube kustomize flux > vars/flux-result.yaml
