@@ -159,6 +159,14 @@ instances = {
 }
 ```
 
+Create the age key (optional)
+This key will be used to encrypt the secrets, check the .sops.yaml file.
+
+```shell
+make create-age
+export SOPS_AGE_KEY_FILE=age.key.txt
+```
+
 Create all configs
 
 ```shell
@@ -169,7 +177,9 @@ Launch the control-plane node
 
 ```shell
 make create-cluster
-# wait ~2 minutes
+# wait ~30 seconds, full cli command will be showns on terraform output
+talosctl apply-config --insecure --nodes ${IP} --config-patch @_cfgs/controlplane-01a.yaml --file _cfgs/controlplane.yaml
+# wait ~10 seconds
 make bootstrap
 ```
 
@@ -177,6 +187,10 @@ Receive `kubeconfig` file
 
 ```shell
 make kubeconfig
+```
+
+```shell
+make system system-base
 ```
 
 Test the cluster

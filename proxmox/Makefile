@@ -69,12 +69,16 @@ system:
 
 	kubectl --kubeconfig=kubeconfig apply -f ../_deployments/vars/coredns-local.yaml
 
-	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system -f ../_deployments/vars/metrics-server.yaml \
-		metrics-server metrics-server/metrics-server
-
 	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system -f deployments/talos-ccm.yaml \
 		talos-cloud-controller-manager \
 		oci://ghcr.io/siderolabs/charts/talos-cloud-controller-manager
+
+system-flux:
+	kubectl --kubeconfig=kubeconfig apply -f ../_deployments/vars/flux-result.yaml
+
+system-base:
+	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system -f ../_deployments/vars/metrics-server.yaml \
+		metrics-server metrics-server/metrics-server
 
 	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system -f vars/proxmox-ccm.yaml \
 		proxmox-cloud-controller-manager oci://ghcr.io/sergelogvinov/charts/proxmox-cloud-controller-manager
