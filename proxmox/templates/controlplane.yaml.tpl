@@ -46,8 +46,11 @@ machine:
       enabled: true
       allowedRoles:
         - os:reader
+        - os:admin
+        - os:etcd:backup
       allowedKubernetesNamespaces:
         - kube-system
+        - operator-talos
 cluster:
   adminKubeconfig:
     certLifetime: 48h0m0s

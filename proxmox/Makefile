@@ -64,7 +64,7 @@ nodes: ## Show kubernetes nodes
 	@kubectl get nodes -owide --sort-by '{.metadata.name}' --label-columns topology.kubernetes.io/region,topology.kubernetes.io/zone,node.kubernetes.io/instance-type
 
 system:
-	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.16.3 -f deployments/cilium.yaml \
+	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.16.4 -f deployments/cilium.yaml \
 		cilium cilium/cilium
 
 	kubectl --kubeconfig=kubeconfig apply -f ../_deployments/vars/coredns-local.yaml
