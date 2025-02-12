@@ -19,6 +19,11 @@ output "public_tf_key_file" {
   value       = var.public_tf_key_file
 }
 
+output "fingerprint" {
+  description = "fingerprint"
+  value       = oci_identity_api_key.terraform.fingerprint
+}
+
 output "tags" {
   description = "tags"
   value       = [for tag, value in var.tags : "${oci_identity_tag_namespace.kubernetes.name}.${tag}"]
