@@ -14,7 +14,7 @@ output "private_tf_key_file" {
   value       = var.private_tf_key_file
 }
 
-output "private_api_key_file" {
+output "public_tf_key_file" {
   description = "public_tf_key_file"
   value       = var.public_tf_key_file
 }
