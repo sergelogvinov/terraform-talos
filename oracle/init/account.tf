@@ -41,13 +41,13 @@ resource "oci_identity_user_capabilities_management" "terraform" {
 
 resource "null_resource" "terraform_key" {
   provisioner "local-exec" {
-    command = "openssl genrsa -out ~/.oci/oci_${var.project}_terraform.pem 2048 && openssl rsa -pubout -in ~/.oci/oci_${var.project}_terraform.pem -out ~/.oci/oci_${var.project}_terraform_public.pem"
+    command = "openssl genrsa -out ${var.private_tf_key_file} 2048 && openssl rsa -pubout -in ${var.private_tf_key_file} -out ${var.public_tf_key_file}
   }
 }
 
 resource "oci_identity_api_key" "terraform" {
   user_id   = oci_identity_user.terraform.id
-  key_value = file(pathexpand("~/.oci/oci_${var.project}_terraform_public.pem"))
+  key_value = file(pathexpand(var.public_tf_key_file))
 
   depends_on = [null_resource.terraform_key]
 }
