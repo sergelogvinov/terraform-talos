@@ -41,7 +41,7 @@ resource "oci_identity_user_capabilities_management" "terraform" {
 
 resource "null_resource" "terraform_key" {
   provisioner "local-exec" {
-    command = "openssl genrsa -out ${var.private_tf_key_file} 2048 && openssl rsa -pubout -in ${var.private_tf_key_file} -out ${var.public_tf_key_file}
+    command = "openssl genpkey -algorithm RSA -out ${var.private_tf_key_file} -pkeyopt rsa_keygen_bits:4096 -pkeyopt rsa_keygen_pubexp:65537 && openssl pkey -pubout -in ${var.private_tf_key_file} -out ${var.public_tf_key_file}"
   }
 }
 
