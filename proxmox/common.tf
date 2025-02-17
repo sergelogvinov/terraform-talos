@@ -18,6 +18,24 @@ resource "proxmox_virtual_environment_download_file" "talos" {
   url                     = "https://factory.talos.dev/image/14e9b0100f05654bedf19b92313cdc224cbff52879193d24f3741f1da4a3cbb1/v${var.release}/nocloud-amd64.raw.xz"
 }
 
+resource "proxmox_virtual_environment_file" "machineconfig" {
+  for_each     = { for inx, zone in local.zones : zone => inx if lookup(try(var.instances[zone], {}), "enabled", false) }
+  node_name    = each.key
+  content_type = "snippets"
+  datastore_id = "local"
+
+  source_raw {
+    data = templatefile("${path.module}/templates/common.yaml.tpl",
+      merge(local.kubernetes, try(var.instances["all"], {}), {
+        labels      = "node-pool=common,karpenter.sh/nodepool=default"
+        nodeSubnets = [var.vpc_main_cidr[0], var.vpc_main_cidr[1]]
+        lbv4        = local.lbv4
+        kernelArgs  = []
+    }))
+    file_name = "common.yaml"
+  }
+}
+
 resource "proxmox_virtual_environment_vm" "template" {
   for_each    = { for inx, zone in local.zones : zone => inx if lookup(try(var.instances[zone], {}), "enabled", false) }
   name        = "talos"
@@ -50,8 +68,38 @@ resource "proxmox_virtual_environment_vm" "template" {
     file_format  = "raw"
   }
 
+  network_device {
+    bridge   = "vmbr0"
+    mtu      = 1500
+    firewall = true
+  }
+  network_device {
+    bridge   = "vmbr1"
+    mtu      = 1400
+    firewall = false
+  }
+
   operating_system {
     type = "l26"
+  }
+
+  initialization {
+    dns {
+      servers = ["1.1.1.1", "2001:4860:4860::8888"]
+    }
+    ip_config {
+      ipv6 {
+        address = "auto"
+      }
+    }
+    ip_config {
+      ipv4 {
+        address = "dhcp"
+      }
+    }
+
+    datastore_id      = "local"
+    user_data_file_id = proxmox_virtual_environment_file.machineconfig[each.key].id
   }
 
   serial_device {}

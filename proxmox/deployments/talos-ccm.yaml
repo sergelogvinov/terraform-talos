@@ -1,4 +1,3 @@
-
 image:
   # repository: ghcr.io/sergelogvinov/talos-cloud-controller-manager
   pullPolicy: Always
@@ -59,3 +58,14 @@ transformations:
               - ^db-.+$
     labels:
       node-role.kubernetes.io/db: ""
+
+  - name: nocloud
+    nodeSelector:
+      - matchExpressions:
+          - key: platform
+            operator: In
+            values:
+              - nocloud
+    platformMetadata:
+      InstanceType: "{{ coalesce .InstanceType .SKUNumber }}"
+      ProviderID: '{{ if .SerialNumber }}proxmox://region-1/{{ getValue .SerialNumber "i" }}{{ else }}{{ .ProviderID }}{{ end }}'
