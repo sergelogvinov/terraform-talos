@@ -62,7 +62,7 @@ resource "proxmox_virtual_environment_file" "worker_machineconfig" {
 
 resource "proxmox_virtual_environment_file" "worker_metadata" {
   for_each     = local.workers
-  node_name    = each.value.node_name
+  node_name    = each.value.zone
   content_type = "snippets"
   datastore_id = "local"
 
@@ -82,7 +82,7 @@ resource "proxmox_virtual_environment_file" "worker_metadata" {
 resource "proxmox_virtual_environment_vm" "worker" {
   for_each    = local.workers
   name        = each.value.name
-  node_name   = each.value.node_name
+  node_name   = each.value.zone
   vm_id       = each.value.id
   description = "Talos worker node"
 
@@ -202,7 +202,7 @@ resource "proxmox_virtual_environment_vm" "worker" {
 
 resource "proxmox_virtual_environment_firewall_options" "worker" {
   for_each  = lookup(var.security_groups, "worker", "") == "" ? {} : local.workers
-  node_name = each.value.node_name
+  node_name = each.value.zone
   vm_id     = each.value.id
   enabled   = true
 
@@ -221,7 +221,7 @@ resource "proxmox_virtual_environment_firewall_options" "worker" {
 
 resource "proxmox_virtual_environment_firewall_rules" "worker" {
   for_each  = lookup(var.security_groups, "worker", "") == "" ? {} : local.workers
-  node_name = each.value.node_name
+  node_name = each.value.zone
   vm_id     = each.value.id
 
   rule {
