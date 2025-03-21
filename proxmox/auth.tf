@@ -3,9 +3,9 @@ provider "proxmox" {
   endpoint = "https://${var.proxmox_host}:8006/"
   insecure = true
 
-  # api_token = data.sops_file.envs.data["PROXMOX_VE_API_TOKEN"]
-  username = "root@pam"
-  password = data.sops_file.envs.data["PROXMOX_VE_PASSWORD"]
+  api_token = data.sops_file.envs.data["PROXMOX_VE_API_TOKEN"]
+  # username = "root@pam"
+  # password = data.sops_file.envs.data["PROXMOX_VE_PASSWORD"]
 
   ssh {
     username = "root"

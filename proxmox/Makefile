@@ -63,6 +63,12 @@ kubeconfig: ## Download kubeconfig
 nodes: ## Show kubernetes nodes
 	@kubectl get nodes -owide --sort-by '{.metadata.name}' --label-columns topology.kubernetes.io/region,topology.kubernetes.io/zone,node.kubernetes.io/instance-type
 
+helm-install-deps:
+	helm repo add cilium https://helm.cilium.io/
+	helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+	helm plugin list | grep -q diff || helm plugin install https://github.com/databus23/helm-diff
+	helm plugin list | grep -q secrets || helm plugin install https://github.com/jkroepke/helm-secrets
+
 system:
 	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.16.4 -f deployments/cilium.yaml \
 		cilium cilium/cilium

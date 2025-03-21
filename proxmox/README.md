@@ -43,9 +43,19 @@ Create Proxmox role and accounts.
 This credentials will use by Proxmox CCM and CSI.
 
 ```shell
+# On the proxmox host node
+pveum user add terraform@pve
+pveum role add Terraform -privs "Datastore.Allocate Datastore.AllocateSpace Datastore.AllocateTemplate Datastore.Audit Permissions.Modify Pool.Allocate Realm.AllocateUser SDN.Use Sys.Audit Sys.Console Sys.Modify User.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
+pveum aclmod / -user terraform@pve -role Terraform
+pveum user token add terraform@pve provider --privsep=0
+```
+Use the shown api key when you are asked to on `terraform apply` and later in the `.env.yaml`.
+
+```shell
 cd init
 terraform init -upgrade
-terraform apply
+terraform apply --var 'proxmox_host=192.168.178.XX' --var 'proxmox_token_id=terraform@pve!provider'
+cd ..
 ```
 
 ## Bootstrap cluster
@@ -94,6 +104,7 @@ machine:
 First we need to define our cluster:
 
 ```hcl
+# ~/terraform-talos/proxmox/terraform.tfvars
 # Proxmox API host
 proxmox_host = "node1.example.com"
 
@@ -167,6 +178,22 @@ make create-age
 export SOPS_AGE_KEY_FILE=age.key.txt
 ```
 
+Adjust the `.sops.yaml` file to use your newly generated public key from `age.key.txt`.
+
+```shell
+# created: 2025-03-19T15:50:15+01:00
+# public key: age1ngvggfld4elq68926uczkes9rcqfjhnqn0tr6l8avyp4h46qzucqvx3sdf
+AGE-SECRET-KEY-<your-secret>
+```
+
+Create the `.env.yaml` and encrypt it with sops.
+```shell
+cat > .env.yaml <<EOF
+PROXMOX_VE_API_TOKEN: "terraform@pve!provider=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+EOF
+sops --encrypt -i .env.yaml
+```
+
 Create all configs
 
 ```shell
@@ -187,6 +214,11 @@ Receive `kubeconfig` file
 
 ```shell
 make kubeconfig
+```
+
+Install all needed dependencies and plugins for helm
+```shell
+make helm-install-deps
 ```
 
 ```shell
