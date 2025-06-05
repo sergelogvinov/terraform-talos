@@ -9,9 +9,19 @@ output "user_ocid" {
   value       = oci_identity_user.terraform.id
 }
 
-output "key_file" {
-  description = "key_file"
-  value       = "~/.oci/oci_${var.project}_terraform.pem"
+output "private_tf_key_file" {
+  description = "private_tf_key_file"
+  value       = var.private_tf_key_file
+}
+
+output "public_tf_key_file" {
+  description = "public_tf_key_file"
+  value       = var.public_tf_key_file
+}
+
+output "fingerprint" {
+  description = "fingerprint"
+  value       = oci_identity_api_key.terraform.fingerprint
 }
 
 output "tags" {
