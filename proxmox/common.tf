@@ -64,7 +64,7 @@ resource "proxmox_virtual_environment_vm" "template" {
     ssd          = true
     iothread     = true
     cache        = "none"
-    size         = 2
+    size         = 3
     file_format  = "raw"
   }
 
