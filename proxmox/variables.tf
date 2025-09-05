@@ -26,7 +26,7 @@ variable "vpc_main_cidr" {
 variable "release" {
   type        = string
   description = "The version of the Talos image"
-  default     = "1.10.3"
+  default     = "1.10.7"
 }
 
 data "sops_file" "tfvars" {
