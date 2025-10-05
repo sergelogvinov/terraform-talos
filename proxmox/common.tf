@@ -44,6 +44,7 @@ resource "proxmox_virtual_environment_vm" "template" {
   on_boot     = false
   template    = true
   description = "Talos ${var.release} template"
+  tags        = ["talos"]
 
   tablet_device = false
 
@@ -59,7 +60,7 @@ resource "proxmox_virtual_environment_vm" "template" {
   scsi_hardware = "virtio-scsi-single"
   disk {
     file_id      = proxmox_virtual_environment_download_file.talos[each.key].id
-    datastore_id = "local"
+    datastore_id = "system"
     interface    = "scsi0"
     ssd          = true
     iothread     = true
@@ -89,16 +90,21 @@ resource "proxmox_virtual_environment_vm" "template" {
     }
     ip_config {
       ipv6 {
-        address = "auto"
+        address = lookup(try(var.nodes[each.key], {}), "ip6", "fe80::/64")
+        gateway = lookup(try(var.nodes[each.key], {}), "gw6", "fe80::1")
       }
     }
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = var.vpc_main_cidr[0]
+        gateway = cidrhost(local.subnets[each.key], 0)
+      }
+      ipv6 {
+        address = var.vpc_main_cidr[1]
       }
     }
 
-    datastore_id      = "local"
+    datastore_id      = "system"
     user_data_file_id = proxmox_virtual_environment_file.machineconfig[each.key].id
   }
 
