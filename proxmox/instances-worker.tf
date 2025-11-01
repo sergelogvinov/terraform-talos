@@ -80,11 +80,12 @@ resource "proxmox_virtual_environment_file" "worker_metadata" {
 }
 
 resource "proxmox_virtual_environment_vm" "worker" {
-  for_each    = local.workers
-  name        = each.value.name
-  node_name   = each.value.zone
-  vm_id       = each.value.id
-  description = "Talos worker node"
+  for_each            = local.workers
+  name                = each.value.name
+  node_name           = each.value.zone
+  vm_id               = each.value.id
+  reboot_after_update = true
+  description         = "Talos worker node"
 
   startup {
     order    = 7

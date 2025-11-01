@@ -65,18 +65,16 @@ resource "proxmox_virtual_environment_vm" "template" {
     ssd          = true
     iothread     = true
     cache        = "none"
-    size         = 3
+    size         = 5
     file_format  = "raw"
   }
 
   network_device {
     bridge   = "vmbr0"
-    mtu      = 1500
     firewall = true
   }
   network_device {
     bridge   = "vmbr1"
-    mtu      = 1400
     firewall = false
   }
 

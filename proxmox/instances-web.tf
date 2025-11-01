@@ -102,11 +102,12 @@ resource "proxmox_virtual_environment_file" "web_metadata" {
 # }
 
 resource "proxmox_virtual_environment_vm" "web" {
-  for_each    = local.webs
-  name        = each.value.name
-  node_name   = each.value.zone
-  vm_id       = each.value.id
-  description = "Talos web node"
+  for_each            = local.webs
+  name                = each.value.name
+  node_name           = each.value.zone
+  vm_id               = each.value.id
+  reboot_after_update = false
+  description         = "Talos web node"
 
   startup {
     order    = 3

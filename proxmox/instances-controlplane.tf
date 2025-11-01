@@ -51,11 +51,12 @@ resource "proxmox_virtual_environment_file" "controlplane_metadata" {
 }
 
 resource "proxmox_virtual_environment_vm" "controlplane" {
-  for_each    = local.controlplanes
-  name        = each.value.name
-  node_name   = each.value.zone
-  vm_id       = each.value.id
-  description = "Talos controlplane at ${var.region}"
+  for_each            = local.controlplanes
+  name                = each.value.name
+  node_name           = each.value.zone
+  vm_id               = each.value.id
+  reboot_after_update = false
+  description         = "Talos controlplane at ${var.region}"
 
   machine = "q35"
   cpu {

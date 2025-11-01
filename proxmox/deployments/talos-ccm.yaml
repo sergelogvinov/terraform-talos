@@ -69,3 +69,6 @@ transformations:
     platformMetadata:
       InstanceType: "{{ coalesce .InstanceType .SKUNumber }}"
       ProviderID: '{{ if .SerialNumber }}proxmox://region-1/{{ getValue .SerialNumber "i" }}{{ else }}{{ .ProviderID }}{{ end }}'
+    labels:
+      topology.proxmox.sinextra.dev/node: "{{ .Zone }}"
+      topology.proxmox.sinextra.dev/region: "{{ .Region }}"

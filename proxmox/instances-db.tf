@@ -81,11 +81,12 @@ resource "proxmox_virtual_environment_file" "db_metadata" {
 }
 
 resource "proxmox_virtual_environment_vm" "db" {
-  for_each    = local.dbs
-  name        = each.value.name
-  node_name   = each.value.zone
-  vm_id       = each.value.id
-  description = "Talos database node"
+  for_each            = local.dbs
+  name                = each.value.name
+  node_name           = each.value.zone
+  vm_id               = each.value.id
+  reboot_after_update = false
+  description         = "Talos database node"
 
   startup {
     order    = 5
