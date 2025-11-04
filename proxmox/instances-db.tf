@@ -156,7 +156,7 @@ resource "proxmox_virtual_environment_vm" "db" {
       }
     }
 
-    datastore_id      = "local"
+    datastore_id      = lookup(try(var.nodes[each.value.zone], {}), "storage", "local")
     meta_data_file_id = proxmox_virtual_environment_file.db_metadata[each.key].id
     user_data_file_id = proxmox_virtual_environment_file.db_machineconfig[each.key].id
   }
