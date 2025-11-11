@@ -135,6 +135,9 @@ resource "proxmox_virtual_environment_vm" "worker" {
     vm_id = proxmox_virtual_environment_vm.template[each.value.zone].id
   }
 
+  smbios {
+    serial = "h=${each.value.name};i=${each.value.id}"
+  }
   initialization {
     dns {
       servers = [each.value.gwv4, "2001:4860:4860::8888"]

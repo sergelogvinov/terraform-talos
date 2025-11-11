@@ -157,6 +157,9 @@ resource "proxmox_virtual_environment_vm" "web" {
     vm_id = proxmox_virtual_environment_vm.template[each.value.zone].id
   }
 
+  smbios {
+    serial = "h=${each.value.name};i=${each.value.id}"
+  }
   initialization {
     dns {
       servers = [each.value.gwv4, "2001:4860:4860::8888"]
@@ -212,6 +215,7 @@ resource "proxmox_virtual_environment_vm" "web" {
       ipv4_addresses,
       ipv6_addresses,
       network_interface_names,
+      smbios,
       initialization,
       disk,
       # memory,

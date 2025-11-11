@@ -84,6 +84,9 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
     vm_id = proxmox_virtual_environment_vm.template[each.value.zone].id
   }
 
+  smbios {
+    serial = "h=${each.value.name};i=${each.value.id}"
+  }
   initialization {
     dns {
       servers = ["1.1.1.1", "2001:4860:4860::8888", each.value.hvv4]
