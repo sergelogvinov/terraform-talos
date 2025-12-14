@@ -63,6 +63,11 @@ machine:
     rbac: true
     stableHostname: true
     apidCheckExtKeyUsage: true
+    kubePrism:
+      enabled: true
+      port: 7445
+    hostDNS:
+      enabled: false
 cluster:
   id: ${clusterID}
   secret: ${clusterSecret}
