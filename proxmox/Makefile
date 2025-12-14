@@ -2,7 +2,9 @@
 CLUSTERNAME:="talos-k8s-proxmox"
 CPFIRST := ${shell terraform output -raw controlplane_firstnode 2>/dev/null}
 ENDPOINT := ${shell terraform output -raw controlplane_endpoint 2>/dev/null}
-ifneq (,$(findstring Warning,${ENDPOINT}))
+ifeq ($(ENDPOINT),)
+ENDPOINT := api.cluster.local
+else ifneq (,$(findstring Warning,${ENDPOINT}))
 ENDPOINT := api.cluster.local
 endif
 
@@ -18,7 +20,7 @@ init: ## Initialize terraform
 create-age: ## Create age key
 	age-keygen -o age.key.txt
 
-create-config: ## Generete talos configs
+create-config: ## Generate talos configs
 	terraform apply -auto-approve -target=local_file.worker_patch
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false ${CLUSTERNAME} https://${ENDPOINT}:6443
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
@@ -42,6 +44,8 @@ create-templates:
 	@sops --encrypt --input-type=yaml --output-type=yaml _cfgs/talosconfig > _cfgs/talosconfig.sops.yaml
 	@sops --encrypt --input-type=yaml --output-type=yaml _cfgs/controlplane.yaml > _cfgs/controlplane.sops.yaml
 	@git add -f _cfgs/talosconfig.sops.yaml _cfgs/ca.crt terraform.tfvars.sops.json
+	@echo "---" >> _cfgs/controlplane.yaml
+	@cat templates/disk.yaml >> _cfgs/controlplane.yaml
 
 create-cluster: ## Create cluster
 	terraform apply
@@ -70,7 +74,7 @@ helm-install-deps:
 	helm plugin list | grep -q secrets || helm plugin install https://github.com/jkroepke/helm-secrets
 
 system:
-	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.16.4 -f deployments/cilium.yaml \
+	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.17.10 -f deployments/cilium.yaml \
 		cilium cilium/cilium
 
 	kubectl --kubeconfig=kubeconfig apply -f ../_deployments/vars/coredns-local.yaml

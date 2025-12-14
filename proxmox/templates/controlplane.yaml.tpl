@@ -1,3 +1,4 @@
+version: v1alpha1
 machine:
   kubelet:
     image: ghcr.io/siderolabs/kubelet:${version}
@@ -24,24 +25,10 @@ machine:
   sysctls:
     net.core.somaxconn: 65535
     net.core.netdev_max_backlog: 4096
-  systemDiskEncryption:
-    state:
-      provider: luks2
-      options:
-        - no_read_workqueue
-        - no_write_workqueue
-      keys:
-        - nodeID: {}
-          slot: 0
-    ephemeral:
-      provider: luks2
-      options:
-        - no_read_workqueue
-        - no_write_workqueue
-      keys:
-        - nodeID: {}
-          slot: 0
   features:
+    hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: false
     kubernetesTalosAPIAccess:
       enabled: true
       allowedRoles:

@@ -46,7 +46,7 @@ Having a single Kubernetes control plane that spans multiple cloud providers can
 | [Hetzner](hetzner)     | 1.7.6  | CCM,CSI,Autoscaler | many regions, one network zone | &cross; | &check; | &check; |
 | [Openstack](openstack) | 1.3.4  | CCM,CSI            | many regions, many zones | &check; | &check; | &check; |
 | [Oracle](oracle)       | 1.3.4  | CCM,CSI,Autoscaler | one region, many zones | &check; | &check; | |
-| [Proxmox](proxmox)     | 1.8.2  | CCM,CSI            | one region, mny zones | &check; | &check; | &check; |
+| [Proxmox](proxmox)     | 1.11.5 | CCM,CSI            | one region, mny zones | &check; | &check; | &check; |
 | [Scaleway](scaleway)   | 1.7.6  | CCM,CSI            | one region | &check; | &check; | &check; |
 
 ## Known issues

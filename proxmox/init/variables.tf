@@ -8,9 +8,17 @@ variable "proxmox_host" {
 variable "proxmox_token_id" {
   description = "Proxmox token id"
   type        = string
+  default     = ""
 }
 
 variable "proxmox_token_secret" {
   description = "Proxmox token secret"
   type        = string
+  default     = ""
+}
+
+variable "proxmox_password" {
+  description = "Proxmox password"
+  type        = string
+  default     = ""
 }
