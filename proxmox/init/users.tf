@@ -16,6 +16,11 @@ resource "proxmox_virtual_environment_user" "kubernetes" {
     propagate = true
     role_id   = proxmox_virtual_environment_role.csi.role_id
   }
+  acl {
+    path      = "/"
+    propagate = true
+    role_id   = proxmox_virtual_environment_role.karpenter.role_id
+  }
 
   comment = "Kubernetes"
   # password = random_password.kubernetes.result
@@ -34,6 +39,12 @@ resource "proxmox_virtual_environment_user_token" "csi" {
   user_id    = proxmox_virtual_environment_user.kubernetes.user_id
 }
 
+resource "proxmox_virtual_environment_user_token" "karpenter" {
+  comment    = "karpenter"
+  token_name = "karpenter"
+  user_id    = proxmox_virtual_environment_user.kubernetes.user_id
+}
+
 resource "proxmox_virtual_environment_acl" "ccm" {
   token_id = proxmox_virtual_environment_user_token.ccm.id
   role_id  = proxmox_virtual_environment_role.ccm.role_id
@@ -45,6 +56,14 @@ resource "proxmox_virtual_environment_acl" "ccm" {
 resource "proxmox_virtual_environment_acl" "csi" {
   token_id = proxmox_virtual_environment_user_token.csi.id
   role_id  = proxmox_virtual_environment_role.csi.role_id
+
+  path      = "/"
+  propagate = true
+}
+
+resource "proxmox_virtual_environment_acl" "karpenter" {
+  token_id = proxmox_virtual_environment_user_token.karpenter.id
+  role_id  = proxmox_virtual_environment_role.karpenter.role_id
 
   path      = "/"
   propagate = true
