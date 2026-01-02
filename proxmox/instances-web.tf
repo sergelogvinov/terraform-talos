@@ -31,7 +31,8 @@ module "web_affinity" {
     vms : lookup(try(var.instances[zone], {}), "web_count", 0)
   } if lookup(try(var.instances[zone], {}), "web_count", 0) > 0 }
 
-  source       = "./cpuaffinity"
+  source = "github.com/sergelogvinov/terraform-proxmox-cpuaffinity"
+
   cpu_affinity = length(lookup(try(var.nodes[each.value.zone], {}), "cpu", [])) > 0 ? var.nodes[each.value.zone].cpu : ["0-${2 * data.proxmox_virtual_environment_node.node[each.value.zone].cpu_count * data.proxmox_virtual_environment_node.node[each.value.zone].cpu_sockets - 1}"]
   vms          = each.value.vms
   cpus         = lookup(try(var.instances[each.value.zone], {}), "web_cpu", 1)
