@@ -1,0 +1,68 @@
+version: v1alpha1
+machine:
+  kubelet:
+    extraConfig:
+      serverTLSBootstrap: true
+  network:
+    kubespan:
+      filters:
+        endpoints:
+          - 0.0.0.0/0
+          - ::/0
+          - '!172.16.0.0/12'
+          - '!fd00::/8'
+  sysctls:
+    net.core.somaxconn: 65535
+    net.core.netdev_max_backlog: 4096
+  features:
+    hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: false
+cluster:
+  adminKubeconfig:
+    certLifetime: 48h0m0s
+  network:
+    cni:
+      name: none
+    podSubnets:
+      - 10.32.0.0/12
+      - fd00:10:32::/64
+    serviceSubnets:
+      - 10.200.0.0/22
+      - fd40:10:200::/108
+  proxy:
+    disabled: true
+  apiServer:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+  controllerManager:
+    extraArgs:
+        controllers: "*,tokencleaner,-node-ipam-controller"
+        node-cidr-mask-size-ipv4: "24"
+        node-cidr-mask-size-ipv6: "80"
+  etcd:
+    extraArgs:
+      election-timeout: "5000"
+      heartbeat-interval: "1000"
+  externalCloudProvider:
+    enabled: true
+---
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: STATE
+encryption:
+  provider: luks2
+  keys:
+    - nodeID: {}
+      slot: 0
+---
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+encryption:
+  provider: luks2
+  keys:
+    - nodeID: {}
+      slot: 0

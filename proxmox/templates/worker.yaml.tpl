@@ -11,9 +11,9 @@ machine:
     defaultRuntimeSeccompProfileEnabled: true
     extraArgs:
       cloud-provider: external
-      rotate-server-certificates: true
       node-labels: ${labels}
     extraConfig:
+      serverTLSBootstrap: true
       imageGCHighThresholdPercent: 70
       imageGCLowThresholdPercent: 50
       shutdownGracePeriod: 60s

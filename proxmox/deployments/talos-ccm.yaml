@@ -58,6 +58,15 @@ transformations:
               - ^db-.+$
     labels:
       node-role.kubernetes.io/db: ""
+  - name: default
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^default-.+$
+    labels:
+      node-role.kubernetes.io/default: ""
 
   - name: nocloud
     nodeSelector:
@@ -69,6 +78,3 @@ transformations:
     platformMetadata:
       InstanceType: "{{ coalesce .InstanceType .SKUNumber }}"
       ProviderID: '{{ if .SerialNumber }}proxmox://region-1/{{ getValue .SerialNumber "i" }}{{ else }}{{ .ProviderID }}{{ end }}'
-    labels:
-      topology.proxmox.sinextra.dev/node: "{{ .Zone }}"
-      topology.proxmox.sinextra.dev/region: "{{ .Region }}"

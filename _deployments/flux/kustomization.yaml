@@ -32,13 +32,27 @@ patches:
   - patch: |
       - op: add
         path: /spec/template/spec/containers/0/args/-
-        value: --concurrent=10
+        value: --concurrent=20
       - op: add
         path: /spec/template/spec/containers/0/args/-
         value: --requeue-dependency=5s
     target:
       kind: Deployment
       name: (kustomize-controller|helm-controller|source-controller)
+  - patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/args/0
+        value: --events-addr=http://notification-controller.flux-system.svc
+    target:
+      kind: Deployment
+      name: (kustomize-controller|helm-controller|source-controller)
+  - patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/args/6
+        value: --storage-adv-addr=source-controller.$(RUNTIME_NAMESPACE).svc
+    target:
+      kind: Deployment
+      name: source-controller
   - patch: |
       apiVersion: apps/v1
       kind: Deployment
@@ -52,6 +66,8 @@ patches:
                 resources:
                   limits:
                     memory: 2Gi
+                  requests:
+                    memory: 128Mi
     target:
       kind: Deployment
       name: (kustomize-controller|helm-controller|source-controller)
@@ -63,6 +79,8 @@ patches:
       spec:
         template:
           spec:
+            nodeSelector:
+              node-role.kubernetes.io/control-plane: ""
             tolerations:
               - key: node-role.kubernetes.io/control-plane
                 effect: NoSchedule

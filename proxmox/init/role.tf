@@ -5,6 +5,7 @@ resource "proxmox_virtual_environment_role" "ccm" {
   privileges = [
     "Sys.Audit",
     "VM.Audit",
+    "VM.GuestAgent.Audit",
   ]
 }
 

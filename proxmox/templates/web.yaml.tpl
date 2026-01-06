@@ -11,8 +11,16 @@ machine:
     defaultRuntimeSeccompProfileEnabled: true
     extraArgs:
       cloud-provider: external
-      rotate-server-certificates: true
       node-labels: ${labels}
+    extraConfig:
+      serverTLSBootstrap: true
+      imageGCHighThresholdPercent: 70
+      imageGCLowThresholdPercent: 50
+      shutdownGracePeriod: 60s
+      topologyManagerPolicy: best-effort
+      topologyManagerScope: container
+      cpuManagerPolicy: static
+      allowedUnsafeSysctls: [net.core.somaxconn]
     clusterDNS:
       - 169.254.2.53
       - ${clusterDns}

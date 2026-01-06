@@ -11797,12 +11797,12 @@ spec:
     spec:
       containers:
       - args:
-        - --events-addr=http://notification-controller.flux-system.svc.cluster.local./
+        - --events-addr=http://notification-controller.flux-system.svc
         - --watch-all-namespaces
         - --log-level=info
         - --log-encoding=json
         - --enable-leader-election
-        - --concurrent=10
+        - --concurrent=20
         - --requeue-dependency=5s
         - --feature-gates=OOMWatch=true
         - --oom-watch-memory-threshold=95
@@ -11841,7 +11841,7 @@ spec:
             memory: 2Gi
           requests:
             cpu: 100m
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -11854,6 +11854,8 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: temp
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
       priorityClassName: system-cluster-critical
       securityContext:
         fsGroup: 1337
@@ -11894,12 +11896,12 @@ spec:
     spec:
       containers:
       - args:
-        - --events-addr=http://notification-controller.flux-system.svc.cluster.local./
+        - --events-addr=http://notification-controller.flux-system.svc
         - --watch-all-namespaces
         - --log-level=info
         - --log-encoding=json
         - --enable-leader-election
-        - --concurrent=10
+        - --concurrent=20
         - --requeue-dependency=5s
         - --concurrent=20
         env:
@@ -11936,7 +11938,7 @@ spec:
             memory: 2Gi
           requests:
             cpu: 100m
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -11949,6 +11951,8 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: temp
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
       priorityClassName: system-cluster-critical
       securityContext:
         fsGroup: 1337
@@ -12047,6 +12051,8 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: temp
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
       securityContext:
         fsGroup: 1337
       serviceAccountName: notification-controller
@@ -12088,14 +12094,14 @@ spec:
     spec:
       containers:
       - args:
-        - --events-addr=http://notification-controller.flux-system.svc.cluster.local./
+        - --events-addr=http://notification-controller.flux-system.svc
         - --watch-all-namespaces
         - --log-level=info
         - --log-encoding=json
         - --enable-leader-election
         - --storage-path=/data
-        - --storage-adv-addr=source-controller.$(RUNTIME_NAMESPACE).svc.cluster.local.
-        - --concurrent=10
+        - --storage-adv-addr=source-controller.$(RUNTIME_NAMESPACE).svc
+        - --concurrent=20
         - --requeue-dependency=5s
         - --helm-cache-max-size=10
         - --helm-cache-ttl=60m
@@ -12139,7 +12145,7 @@ spec:
             memory: 2Gi
           requests:
             cpu: 50m
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -12154,6 +12160,8 @@ spec:
           name: data
         - mountPath: /tmp
           name: tmp
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
       priorityClassName: system-cluster-critical
       securityContext:
         fsGroup: 1337

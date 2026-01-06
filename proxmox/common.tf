@@ -119,3 +119,11 @@ resource "proxmox_virtual_environment_vm" "template" {
     ]
   }
 }
+
+resource "local_sensitive_file" "talos_values" {
+  content = templatefile("${path.module}/templates/talos-values.yaml.tpl",
+    merge(local.kubernetes, try(var.instances["all"], {}))
+  )
+  filename        = "_cfgs/talos-values.yaml"
+  file_permission = "0600"
+}

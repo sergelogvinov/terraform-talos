@@ -10,7 +10,6 @@ machine:
     nodeIP:
       validSubnets: ${format("%#v",nodeSubnets)}
   network:
-    hostname: ${name}
     interfaces:
       - interface: eth1
         vip:
