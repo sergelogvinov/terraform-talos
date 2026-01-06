@@ -107,6 +107,7 @@ resource "proxmox_virtual_environment_vm" "web" {
   name                = each.value.name
   node_name           = each.value.zone
   vm_id               = each.value.id
+  pool_id             = proxmox_virtual_environment_pool.pool.pool_id
   reboot_after_update = false
   description         = "Talos web node"
 

@@ -10,3 +10,4 @@ stringData:
   clusterSecret: ${clusterSecret}
   clusterEndpoint: https://${apiDomain}:6443
   clusterName: ${clusterName}
+  kubeVersion: ${version}

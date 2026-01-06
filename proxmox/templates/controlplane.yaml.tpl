@@ -2,8 +2,6 @@ version: v1alpha1
 machine:
   kubelet:
     image: ghcr.io/siderolabs/kubelet:${version}
-    extraArgs:
-      rotate-server-certificates: true
     clusterDNS:
       - 169.254.2.53
       - ${cidrhost(split(",",serviceSubnets)[0], 10)}

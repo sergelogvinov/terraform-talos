@@ -41,6 +41,7 @@ resource "proxmox_virtual_environment_vm" "template" {
   name        = "talos"
   node_name   = each.key
   vm_id       = each.value + 1000
+  pool_id     = proxmox_virtual_environment_pool.pool.pool_id
   on_boot     = false
   template    = true
   description = "Talos ${var.release} template"
