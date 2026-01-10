@@ -19,6 +19,8 @@ resource "proxmox_virtual_environment_role" "csi" {
     "Datastore.Allocate",
     "Datastore.AllocateSpace",
     "Datastore.Audit",
+    # Zfs replication needs additional privileges
+    "VM.Allocate", "VM.Clone", "VM.Config.CPU", "VM.Config.HWType", "VM.Config.Memory", "VM.Config.Options", "VM.Migrate", "VM.Replicate", "VM.PowerMgmt",
   ]
 }
 

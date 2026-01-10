@@ -14,8 +14,10 @@ resource "proxmox_virtual_environment_download_file" "talos" {
 
   # Hash: 376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba customization: {}
   # Hash: 14e9b0100f05654bedf19b92313cdc224cbff52879193d24f3741f1da4a3cbb1 customization: siderolabs/binfmt-misc
+  # Hash: ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515 customization: siderolabs/qemu-guest-agent
   decompression_algorithm = "zst"
   url                     = "https://factory.talos.dev/image/14e9b0100f05654bedf19b92313cdc224cbff52879193d24f3741f1da4a3cbb1/v${var.release}/nocloud-amd64.raw.xz"
+  # url = "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/v${var.release}/nocloud-amd64-secureboot.raw.xz"
 }
 
 resource "proxmox_virtual_environment_file" "machineconfig" {
@@ -47,7 +49,15 @@ resource "proxmox_virtual_environment_vm" "template" {
   description = "Talos ${var.release} template"
   tags        = ["talos"]
 
-  tablet_device = false
+  bios = "ovmf"
+  efi_disk {
+    datastore_id = "system"
+    type         = "4m"
+  }
+  tpm_state {
+    datastore_id = "system"
+    version      = "v2.0"
+  }
 
   machine = "q35"
   cpu {
@@ -107,6 +117,7 @@ resource "proxmox_virtual_environment_vm" "template" {
     user_data_file_id = proxmox_virtual_environment_file.machineconfig[each.key].id
   }
 
+  tablet_device = false
   serial_device {}
   vga {
     type = "serial0"
