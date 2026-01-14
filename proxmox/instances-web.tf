@@ -156,7 +156,7 @@ resource "proxmox_virtual_environment_vm" "web" {
     file_format  = "raw"
   }
   clone {
-    vm_id = proxmox_virtual_environment_vm.template[each.value.zone].id
+    vm_id = module.template[each.value.zone].id
   }
 
   smbios {

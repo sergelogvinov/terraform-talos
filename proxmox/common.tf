@@ -4,22 +4,6 @@ data "proxmox_virtual_environment_node" "node" {
   node_name = each.key
 }
 
-resource "proxmox_virtual_environment_download_file" "talos" {
-  for_each     = { for inx, zone in local.zones : zone => inx if lookup(try(var.instances[zone], {}), "enabled", false) }
-  node_name    = each.key
-  content_type = "iso"
-  datastore_id = "local"
-  file_name    = "talos.raw.xz.img"
-  overwrite    = false
-
-  # Hash: 376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba customization: {}
-  # Hash: 14e9b0100f05654bedf19b92313cdc224cbff52879193d24f3741f1da4a3cbb1 customization: siderolabs/binfmt-misc
-  # Hash: ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515 customization: siderolabs/qemu-guest-agent
-  decompression_algorithm = "zst"
-  url                     = "https://factory.talos.dev/image/14e9b0100f05654bedf19b92313cdc224cbff52879193d24f3741f1da4a3cbb1/v${var.release}/nocloud-amd64.raw.xz"
-  # url = "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/v${var.release}/nocloud-amd64-secureboot.raw.xz"
-}
-
 resource "proxmox_virtual_environment_file" "machineconfig" {
   for_each     = { for inx, zone in local.zones : zone => inx if lookup(try(var.instances[zone], {}), "enabled", false) }
   node_name    = each.key
@@ -38,104 +22,40 @@ resource "proxmox_virtual_environment_file" "machineconfig" {
   }
 }
 
-resource "proxmox_virtual_environment_vm" "template" {
-  for_each    = { for inx, zone in local.zones : zone => inx if lookup(try(var.instances[zone], {}), "enabled", false) }
-  name        = "talos"
-  node_name   = each.key
-  vm_id       = each.value + 1000
-  pool_id     = proxmox_virtual_environment_pool.pool.pool_id
-  on_boot     = false
-  template    = true
-  description = "Talos ${var.release} template"
-  tags        = ["talos"]
-
-  bios = "ovmf"
-  efi_disk {
-    datastore_id = "system"
-    type         = "4m"
-  }
-  tpm_state {
-    datastore_id = "system"
-    version      = "v2.0"
-  }
-
-  machine = "q35"
-  cpu {
-    architecture = "x86_64"
-    cores        = 1
-    sockets      = 1
-    numa         = true
-    type         = "host"
-  }
-
-  scsi_hardware = "virtio-scsi-single"
-  disk {
-    file_id      = proxmox_virtual_environment_download_file.talos[each.key].id
-    datastore_id = "system"
-    interface    = "scsi0"
-    ssd          = true
-    iothread     = true
-    cache        = "none"
-    size         = 5
-    file_format  = "raw"
-  }
-
-  network_device {
-    bridge   = "vmbr0"
-    firewall = true
-  }
-  network_device {
-    bridge   = "vmbr1"
-    firewall = false
-  }
-
-  operating_system {
-    type = "l26"
-  }
-
-  initialization {
-    dns {
-      servers = ["1.1.1.1", "2001:4860:4860::8888"]
-    }
-    ip_config {
-      ipv6 {
-        address = lookup(try(var.nodes[each.key], {}), "ip6", "fe80::/64")
-        gateway = lookup(try(var.nodes[each.key], {}), "gw6", "fe80::1")
-      }
-    }
-    ip_config {
-      ipv4 {
-        address = var.vpc_main_cidr[0]
-        gateway = cidrhost(local.subnets[each.key], 0)
-      }
-      ipv6 {
-        address = var.vpc_main_cidr[1]
-      }
-    }
-
-    datastore_id      = "system"
-    user_data_file_id = proxmox_virtual_environment_file.machineconfig[each.key].id
-  }
-
-  tablet_device = false
-  serial_device {}
-  vga {
-    type = "serial0"
-  }
-
-  lifecycle {
-    ignore_changes = [
-      ipv4_addresses,
-      ipv6_addresses,
-      network_interface_names,
-    ]
-  }
-}
-
 resource "local_sensitive_file" "talos_values" {
   content = templatefile("${path.module}/templates/talos-values.yaml.tpl",
     merge(local.kubernetes, try(var.instances["all"], {}))
   )
   filename        = "_cfgs/talos-values.yaml"
   file_permission = "0600"
+}
+
+# resource "proxmox_virtual_environment_vm" "template" {
+#   initialization {
+#     user_data_file_id = proxmox_virtual_environment_file.machineconfig[each.key].id
+#   }
+# }
+
+module "template" {
+  for_each = { for inx, zone in local.zones : zone => inx if lookup(try(var.instances[zone], {}), "enabled-test", false) }
+
+  # source   = "../../../sergelogvinov/terraform-proxmox-template-talos"
+  source             = "github.com/sergelogvinov/terraform-proxmox-template-talos"
+  node               = each.key
+  template_id        = each.value + 1000
+  template_datastore = "system"
+
+  template_network_dns = ["1.1.1.1", "2001:4860:4860::8888"]
+  template_network = {
+    "vmbr0" = {
+      firewall = true
+      ip6      = lookup(try(var.nodes[each.key], {}), "ip6", "fe80::/64")
+      gw6      = lookup(try(var.nodes[each.key], {}), "gw6", "fe80::1")
+    }
+    "vmbr1" = {
+      ip6 = var.vpc_main_cidr[1]
+      ip4 = var.vpc_main_cidr[0]
+      gw4 = cidrhost(local.subnets[each.key], 0)
+    }
+  }
 }

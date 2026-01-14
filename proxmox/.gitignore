@@ -10,3 +10,5 @@ terraform.tfvars.sops.json
 age.key.txt
 .env.yaml
 secrets.proxmox.yaml
+#
+/testing/
