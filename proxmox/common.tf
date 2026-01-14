@@ -30,16 +30,10 @@ resource "local_sensitive_file" "talos_values" {
   file_permission = "0600"
 }
 
-# resource "proxmox_virtual_environment_vm" "template" {
-#   initialization {
-#     user_data_file_id = proxmox_virtual_environment_file.machineconfig[each.key].id
-#   }
-# }
-
 module "template" {
-  for_each = { for inx, zone in local.zones : zone => inx if lookup(try(var.instances[zone], {}), "enabled-test", false) }
+  for_each = { for inx, zone in local.zones : zone => inx if lookup(try(var.instances[zone], {}), "enabled", false) }
 
-  # source   = "../../../sergelogvinov/terraform-proxmox-template-talos"
+  # source = "../../../sergelogvinov/terraform-proxmox-template-talos"
   source             = "github.com/sergelogvinov/terraform-proxmox-template-talos"
   node               = each.key
   template_id        = each.value + 1000
@@ -58,4 +52,11 @@ module "template" {
       gw4 = cidrhost(local.subnets[each.key], 0)
     }
   }
+  template_userdata = templatefile("${path.module}/templates/common.yaml.tpl",
+    merge(local.kubernetes, try(var.instances["all"], {}), {
+      labels      = "node-pool=common,karpenter.sh/nodepool=default"
+      nodeSubnets = [var.vpc_main_cidr[0], var.vpc_main_cidr[1]]
+      lbv4        = local.lbv4
+      kernelArgs  = []
+  }))
 }
