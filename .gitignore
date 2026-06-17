@@ -1,4 +1,5 @@
 /.vscode/
+/_docs/
 .DS_Store
 
 # Local .terraform directories

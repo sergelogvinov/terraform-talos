@@ -5,7 +5,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - github.com/fluxcd/flux2/manifests/install?ref=v2.7.5
+  - github.com/fluxcd/flux2/manifests/install?ref=v2.8.8
 patches:
   # Remove image automation and image reflector controllers
   - patch: |
@@ -45,7 +45,7 @@ patches:
         value: --events-addr=http://notification-controller.flux-system.svc
     target:
       kind: Deployment
-      name: (kustomize-controller|helm-controller|source-controller)
+      name: (kustomize-controller|helm-controller|source-controller|source-watcher)
   - patch: |
       - op: replace
         path: /spec/template/spec/containers/0/args/6
@@ -86,7 +86,7 @@ patches:
                 effect: NoSchedule
     target:
       kind: Deployment
-      name: (kustomize-controller|helm-controller|source-controller|notification-controller)
+      name: (kustomize-controller|helm-controller|source-controller|source-watcher|notification-controller)
   # Enable in-memory kustomize builds
   # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#enable-in-memory-kustomize-builds
   - patch: |

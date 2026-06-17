@@ -4,8 +4,8 @@ CLUSTERAPI := api.cluster.local
 
 ########################################################
 
-CPFIRST := ${shell terraform output -raw controlplane_firstnode 2>/dev/null}
-ENDPOINT := ${shell terraform output -raw controlplane_endpoint 2>/dev/null}
+CPFIRST := ${shell tofu output -raw controlplane_firstnode 2>/dev/null}
+ENDPOINT := ${shell tofu output -raw controlplane_endpoint 2>/dev/null}
 ifneq (,$(findstring Warning,${ENDPOINT}))
 ENDPOINT = $(CLUSTERAPI)
 endif
@@ -27,14 +27,14 @@ clean: ## Clean configs
 	rm -rf _cfgs
 
 .PHONY: init
-init: ## Initialize terraform
-	terraform init -upgrade
+init: ## Initialize tofu
+	tofu init -upgrade
 
 create-age: ## Create age key
 	age-keygen -o age.key.txt
 
 create-config: clean ## Generate talos configs
-	terraform apply -auto-approve -target=local_file.worker_patch
+	tofu apply -auto-approve -target=local_file.worker_patch
 	talosctl gen config --output-dir _cfgs --with-docs=false --with-examples=false --config-patch-control-plane=@templates/controlplane.patch --config-patch-worker=@templates/worker.patch ${CLUSTERNAME} https://${ENDPOINT}:6443
 	talosctl --talosconfig _cfgs/talosconfig config endpoint ${ENDPOINT}
 
@@ -61,7 +61,7 @@ create-templates:
 	@git add -f _cfgs/talosconfig.sops.yaml _cfgs/ca.crt terraform.tfvars.sops.json
 
 create-cluster: ## Create cluster
-	terraform apply
+	tofu apply
 
 .PHONY: bootstrap
 bootstrap: ## Bootstrap controlplane
@@ -88,7 +88,7 @@ helm-install-deps:
 	helm plugin list | grep -q secrets || helm plugin install https://github.com/jkroepke/helm-secrets
 
 system:
-	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.18.7 -f deployments/cilium.yaml \
+	helm --kubeconfig=kubeconfig upgrade -i --namespace=kube-system --version=1.19.4 -f deployments/cilium.yaml \
 		cilium cilium/cilium
 
 	kubectl --kubeconfig=kubeconfig apply -f ../_deployments/vars/coredns-local.yaml
